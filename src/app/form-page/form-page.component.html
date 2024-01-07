@@ -18,13 +18,14 @@
         <div class="col-lg-5 offset-lg-7 p-sm-0">
           <div class="ufg-job-application-wrapper pt150">
             <div class="progress">
-              <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><span
-                  class="step-text"><span class="current-step"></span> de <span class="total-step"></span>
-                  completado</span>
+              <div class="progress-bar" [style.width]="progressWidth + '%'">
+                <span class="step-text">
+                  <span class="current-step">{{ currentStep }}</span> de <span class="total-step">{{ totalSteps }}</span> completado
+                </span>
               </div>
             </div>
             <form [formGroup]="myForm" (ngSubmit)="onSave()" class="job-application-form" autocomplete="off">
-              <div class="form-steps active">
+              <div class="form-steps" [class.active]="currentStep === 1">
                 <h3>Identificación del Consumidor Reclamante</h3>
                 <div class="row">
                   <div class="col-sm-6 p-sm-0">
@@ -161,10 +162,10 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn step-btn">Siguiente</button>
+                <button class="btn step-btn" (click)="nextStep()">Siguiente</button>
               </div>
-              <div class="form-steps">
-                <a href="/" class="prev"><i class="las la-arrow-left"></i>Paso anterior</a>
+              <div class="form-steps" [class.active]="currentStep === 2">
+                <a href="#" class="prev" (click)="prevStep()"><i class="las la-arrow-left"></i>Paso anterior</a>
                 <h3>Identificación del Bien Contratado</h3>
                 <div class="row">
                   <div class="col-sm-6 p-sm-0">
@@ -193,10 +194,10 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn step-btn">Siguiente</button>
+                <button class="btn step-btn" (click)="nextStep()">Siguiente</button>
               </div>
-              <div class="form-steps">
-                <a href="/" class="prev"><i class="las la-arrow-left"></i>Paso anterior</a>
+              <div class="form-steps" [class.active]="currentStep === 3">
+                <a href="#" class="prev" (click)="prevStep()"><i class="las la-arrow-left"></i>Paso anterior</a>
                 <h3>Detalle de Reclamación y Pedido del Consumidor</h3>
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">

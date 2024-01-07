@@ -13,7 +13,7 @@ import { FormPageComponent } from './form-page/form-page.component';
 @NgModule({
   declarations: [
     AppComponent,
-    FormPageComponent
+    FormPageComponent,
   ],
   imports: [
     AppRoutingModule,

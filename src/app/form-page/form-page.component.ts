@@ -9,6 +9,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class FormPageComponent {
 
   // Variables
+  progressWidth: number = 0;
+  currentStep: number = 1;
+  totalSteps: number = 3;
   isAdult: boolean = false;
   cType: boolean = false;
   sSend: boolean = false;
@@ -21,7 +24,39 @@ export class FormPageComponent {
   terms: string = '#';
   policy: string = '#';
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder) {
+    // Inicializar progress-bar
+    this.progressWidth = (1 / this.totalSteps) * 100;
+  }
+
+  // Progress-bar
+  nextStep() {
+    if (this.currentStep < this.totalSteps) {
+      this.currentStep++;
+      this.progressWidth = (this.currentStep / this.totalSteps) * 100;
+      this.updateStepsVisibility();
+    }
+  }
+
+  prevStep() {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+      this.progressWidth = (this.currentStep / this.totalSteps) * 100;
+      this.updateStepsVisibility();
+    }
+  }
+
+  private updateStepsVisibility() {
+    const steps = document.querySelectorAll('.form-steps');
+
+    steps.forEach((step, index) => {
+      if (index + 1 === this.currentStep) {
+        step.classList.add('active');
+      } else {
+        step.classList.remove('active');
+      }
+    });
+  }
 
   public myForm: FormGroup = this.fb.group({
     d_type: [1, [Validators.required]],
@@ -96,9 +131,12 @@ export class FormPageComponent {
       this.sSend = false;
     }, 3500);
 
-    // Setea los datos por defecto en el formulario.
-    this.myForm.reset({ d_type: '1', d_type_tutor: 1, g_type: 1, t_claim: 1 });
+    // Restablecer el formulario y volver al primer paso
+    this.myForm.reset({ d_type: '1', d_type_tutor: 1, t_consumption: 1, c_type: 1 });
     this.sSend = true;
+    this.currentStep = 1;
+    this.progressWidth = (1 / this.totalSteps) * 100;
+    this.updateStepsVisibility();
   }
 
   // Google Recaptcha V2
