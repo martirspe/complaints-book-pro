@@ -6,11 +6,18 @@
         <img src="assets/images/logo-dark.png" class="img-fluid logo-black" alt="logo">
       </a>
     </div>
-    <div class="ugf-content-block">
+    <div *ngIf="!flag" class="ugf-content-block">
       <div class="content-block">
         <h1>¿Qué es un reclamo?</h1>
         <p>Es la comunicación que puedes establecer con nosotros ante una posible insatisfacción o disconformidad con un
           producto o servicio prestado por el proveedor, con la finalidad de que éstos sean solucionados.</p>
+      </div>
+    </div>
+    <div *ngIf="flag" class="ugf-content-block">
+      <div class="content-block">
+        <h1>¿Qué es una queja?</h1>
+        <p>Es la comunicación que puedes establecer con nosotros ante una disconformidad relacionada a los productos o
+          servicios, con la finalidad de que éstos sean solucionados.</p>
       </div>
     </div>
     <div class="container">
@@ -20,70 +27,96 @@
             <div class="progress">
               <div class="progress-bar" [style.width]="progressWidth + '%'">
                 <span class="step-text">
-                  <span class="current-step">{{ currentStep }}</span> de <span class="total-step">{{ totalSteps }}</span> completado
+                  <span class="current-step">{{ currentStep }}</span> de <span class="total-step">{{ totalSteps
+                    }}</span> completado
                 </span>
               </div>
             </div>
-            <form [formGroup]="myForm" (ngSubmit)="onSave()" class="job-application-form" autocomplete="off">
+            <form [formGroup]="claimForm" class="job-application-form" autocomplete="off">
               <div class="form-steps" [class.active]="currentStep === 1">
                 <h3>Identificación del Consumidor Reclamante</h3>
                 <div class="row">
                   <div class="col-sm-6 p-sm-0">
-                    <div class="form-group country-select">
-                      <div class="select-input choose-country">
+                    <div class="form-group">
+                      <div class="select-input">
                         <span></span>
-                        <select formControlName="d_type" id="d_type" class="form-control">
-                          <option value="1">DNI</option>
-                          <option value="2">Libreta Militar</option>
-                          <option value="3">Carnet Extranjeria</option>
-                          <option value="4">Partida de Nacimiento</option>
-                          <option value="5">Boleta</option>
-                          <option value="6">Carnet de Identidad</option>
-                          <option value="7">Otro</option>
+                        <select formControlName="document_type_id" id="document_type_id" class="form-control"
+                          [class.is-invalid]="isValidField('document_type_id')">
+                          <option value="">Elija tipo de documento</option>
+                          <option *ngFor="let type of documentTypes" [value]="type.id">
+                            {{type.name}}
+                          </option>
                         </select>
+                        <div class="invalid-feedback">
+                          <div class="error-message">{{ getFieldError('document_type_id') }}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
-                      <input type="text" class="form-control" formControlName="d_number" id="d_number" required>
-                      <label for="n_document">No. documento</label>
+                      <input type="text" class="form-control" formControlName="document_number" id="document_number"
+                        [class.is-invalid]="isValidField('document_number')" required>
+                      <label for="document_number">No. documento</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('document_number') }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
-                      <input type="text" class="form-control" formControlName="name" id="name" required>
-                      <label for="name">Nombres</label>
+                      <input type="text" class="form-control" formControlName="first_name" id="first_name"
+                        [class.is-invalid]="isValidField('first_name')" required>
+                      <label for="first_name">Nombres</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('first_name') }}</span>
+                      </div>
                     </div>
                   </div>
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
-                      <input type="text" class="form-control" formControlName="lastname" id="lastname" required>
-                      <label for="lastname">Apellidos</label>
+                      <input type="text" class="form-control" formControlName="last_name" id="last_name"
+                        [class.is-invalid]="isValidField('last_name')" required>
+                      <label for="last_name">Apellidos</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('last_name') }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
-                      <input type="text" class="form-control" formControlName="celphone" id="celphone" required>
+                      <input type="text" class="form-control" formControlName="celphone" id="celphone"
+                        [class.is-invalid]="isValidField('celphone')" required>
                       <label for="celphone">Celular</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('celphone') }}</span>
+                      </div>
                     </div>
                   </div>
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
-                      <input type="email" class="form-control" formControlName="email" id="email" required>
+                      <input type="email" class="form-control" formControlName="email" id="email"
+                        [class.is-invalid]="isValidField('email')" required>
                       <label for="email">Correo electrónico</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('email') }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
-                      <input type="text" class="form-control" formControlName="address" id="address" required>
+                      <input type="text" class="form-control" formControlName="address" id="address"
+                        [class.is-invalid]="isValidField('address')" required>
                       <label for="address">Dirección actual</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('address') }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -93,7 +126,7 @@
                       <span class="lebel-text">¿Es menor de edad?</span>
                       <div class="custom-radio">
                         <input (click)="isYounger(true)" type="radio" name="younger" class="custom-control-input"
-                          id="simenor" required>
+                          id="simenor">
                         <label class="custom-control-label" for="simenor">Si</label>
                       </div>
                       <div class="custom-radio">
@@ -104,44 +137,56 @@
                     </div>
                   </div>
                 </div>
-                <div *ngIf="isAdult" class="adult">
+                <div *ngIf="isYouger" class="adult">
                   <div class="row">
                     <div class="col-sm-6 p-sm-0">
-                      <div class="form-group country-select">
-                        <div class="select-input choose-country">
+                      <div class="form-group">
+                        <div class="select-input">
                           <span></span>
-                          <select formControlName="d_type_tutor" id="d_type_tutor" class="form-control">
-                            <option value="1">DNI</option>
-                            <option value="2">Libreta Militar</option>
-                            <option value="3">Carnet Extranjeria</option>
-                            <option value="4">Partida de Nacimiento</option>
-                            <option value="5">Boleta</option>
-                            <option value="6">Carnet de Identidad</option>
-                            <option value="7">Otro</option>
+                          <select formControlName="document_type_tutor_id" id="document_type_tutor_id"
+                            class="form-control" [class.is-invalid]="isValidField('document_type_tutor_id')">
+                            <option value="">Elija tipo de documento</option>
+                            <option *ngFor="let type of documentTypes" [value]="type.id">
+                              {{type.name}}
+                            </option>
                           </select>
+                          <div class="invalid-feedback">
+                            <div class="error-message">{{ getFieldError('document_type_tutor_id') }}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
-                        <input type="text" class="form-control" formControlName="d_number_tutor" id="d_number_tutor"
+                        <input type="text" class="form-control" formControlName="document_number_tutor"
+                          id="document_number_tutor" [class.is-invalid]="isValidField('document_number_tutor')"
                           required>
-                        <label for="n_document">No. documento</label>
+                        <label for="document_number_tutor">No. documento</label>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('document_number_tutor') }}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
-                        <input type="text" class="form-control" formControlName="name_tutor" id="name_tutor" required>
-                        <label for="name">Nombres</label>
+                        <input type="text" class="form-control" formControlName="first_name_tutor" id="first_name_tutor"
+                          [class.is-invalid]="isValidField('first_name_tutor')" required>
+                        <label for="first_name_tutor">Nombres</label>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('first_name_tutor') }}</span>
+                        </div>
                       </div>
                     </div>
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
-                        <input type="text" class="form-control" formControlName="lastname_tutor" id="lastname_tutor"
-                          required>
-                        <label for="lastname">Apellidos</label>
+                        <input type="text" class="form-control" formControlName="last_name_tutor" id="last_name_tutor"
+                          [class.is-invalid]="isValidField('last_name_tutor')" required>
+                        <label for="last_name_tutor">Apellidos</label>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('last_name_tutor') }}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -149,15 +194,21 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="text" class="form-control" formControlName="celphone_tutor" id="celphone_tutor"
-                          required>
+                          [class.is-invalid]="isValidField('celphone_tutor')" required>
                         <label for="celphone_tutor">Celular</label>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('celphone_tutor') }}</span>
+                        </div>
                       </div>
                     </div>
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="email" class="form-control" formControlName="email_tutor" id="email_tutor"
-                          required>
+                          [class.is-invalid]="isValidField('email_tutor')" required>
                         <label for="email_tutor">Correo electrónico</label>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('email_tutor') }}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -168,29 +219,54 @@
                 <a href="#" class="prev" (click)="prevStep()"><i class="las la-arrow-left"></i>Paso anterior</a>
                 <h3>Identificación del Bien Contratado</h3>
                 <div class="row">
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group country-select">
-                      <div class="select-input choose-country">
+                  <div class="col-sm-12 p-sm-0">
+                    <div class="form-group">
+                      <div class="select-input">
                         <span></span>
-                        <select formControlName="t_consumption" id="t_consumption" class="form-control">
-                          <option value="1">Producto</option>
-                          <option value="2">Servicio</option>
+
+                        <select formControlName="consumption_type_id" id="consumption_type_id" class="form-control"
+                          [class.is-invalid]="isValidField('consumption_type_id')">
+                          <option value="">Elija tipo de consumo</option>
+                          <option *ngFor="let type of consumptionTypes" [value]="type.id">
+                            {{type.name}}
+                          </option>
                         </select>
+                        <div class="invalid-feedback">
+                          <div class="error-message">{{ getFieldError('consumption_type_id') }}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
-                      <input type="text" class="form-control" formControlName="r_amount" id="r_amount" required>
-                      <label for="r_amount">Monto reclamado</label>
+                      <input type="text" class="form-control" formControlName="order_number" id="order_number"
+                        [class.is-invalid]="isValidField('order_number')" required>
+                      <label for="order_number">Número de pedido</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('order_number') }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 p-sm-0">
+                    <div class="form-group">
+                      <input type="text" class="form-control" formControlName="claimed_amount" id="claimed_amount"
+                        [class.is-invalid]="isValidField('claimed_amount')" required>
+                      <label for="claimed_amount">Monto reclamado</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('claimed_amount') }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
-                      <textarea class="form-control" formControlName="description" id="description" required></textarea>
+                      <textarea class="form-control" formControlName="description" id="description"
+                        [class.is-invalid]="isValidField('description')" required></textarea>
                       <label for="description">Descripción</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('description') }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -201,16 +277,22 @@
                 <h3>Detalle de Reclamación y Pedido del Consumidor</h3>
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
-                    <div class="form-group country-select">
-                      <div class="select-input choose-country">
+                    <div class="form-group">
+                      <div class="select-input">
                         <span></span>
-                        <select (change)="claimType()" formControlName="c_type" id="c_type" class="form-control">
-                          <option value="1">Queja</option>
-                          <option value="2">Reclamo</option>
+                        <select formControlName="claim_type_id" id="claim_type_id" class="form-control"
+                          [class.is-invalid]="isValidField('claim_type_id')">
+                          <option value="">Seleccione tipo de reclamo</option>
+                          <option *ngFor="let type of claimTypes" [value]="type.id">
+                            {{type.name}}
+                          </option>
                         </select>
-                        <p class="mt-2" *ngIf="cType==true">Disconformidad no relacionada a los productos o
-                          servicios; o, malestar o descontento respecto a la atención al público.</p>
-                        <p class="mt-2" *ngIf="cType==false">Disconformidad relacionada a los productos o servicios.</p>
+
+                        <div class="invalid-feedback">
+                          <div class="error-message">{{ getFieldError('claim_type_id') }}</div>
+                        </div>
+
+                        <p class="mt-2">{{sDescription}}</p>
                       </div>
                     </div>
                   </div>
@@ -218,16 +300,24 @@
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
-                      <textarea class="form-control" formControlName="details" id="details" required></textarea>
-                      <label for="details">Detalles</label>
+                      <textarea class="form-control" formControlName="detail" id="detail"
+                      [class.is-invalid]="isValidField('detail')" required></textarea>
+                      <label for="detail">Detalles</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('detail') }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
-                      <textarea class="form-control" formControlName="request" id="request" required></textarea>
+                      <textarea class="form-control" formControlName="request" id="request"
+                      [class.is-invalid]="isValidField('request')" required></textarea>
                       <label for="request">Pedido (Explicar de forma concreta lo que solicita)</label>
+                      <div class="invalid-feedback">
+                        <span>{{ getFieldError('detail') }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -237,23 +327,12 @@
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
                       <div class="custom-file">
-                        <input type="file" class="custom-file-input form-control" formControlName="file"
-                          id="validatedCustomFile">
-                        <label class="custom-file-label" for="validatedCustomFile"><span class="file-return">Ningún
-                            archivo
-                            elegido</span></label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group check-group">
-                      <div class="custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" formControlName="terms" id="terms" required>
-                        <label class="custom-control-label" for="terms">Acepto los
-                          <a href="{{ terms }}">Términos y Condiciones</a> y
-                          <a href="{{ policy }}">Políticas de Privacidad.</a></label>
+                        <input type="file" class="custom-file-input form-control" formControlName="attachment"
+                          id="attachment" (change)="onFileSelected($event)">
+                        <label class="custom-file-label" for="attachment">
+                          <span class="file-return">{{ selectedFileName || 'Ningún archivo elegido' }}</span>
+                        </label>
+
                       </div>
                     </div>
                   </div>
@@ -261,13 +340,13 @@
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
-                      <label for="captcha" class="captcha">
+                      <label class="captcha" id="captcha">
                         <re-captcha formControlName="recaptcha"
                           (resolved)="addTokenLog('Reactive form mode resolved', $event)">
                         </re-captcha>
                       </label>
                     </div>
-                    <button [disabled]="myForm.invalid" type="submit" class="btn">Enviar Reclamo</button>
+                    <button [disabled]="claimForm.invalid" class="btn" (click)="onSave()">Enviar Reclamo</button>
                   </div>
                 </div>
               </div>
@@ -277,14 +356,15 @@
       </div>
     </div>
     <div class="footer">
-      <div class="social-links">
+      <!-- <div class="social-links">
         <a href="#"><i class="lab la-facebook-f"></i></a>
         <a href="#"><i class="lab la-twitter"></i></a>
         <a href="#"><i class="lab la-linkedin-in"></i></a>
         <a href="#"><i class="lab la-instagram"></i></a>
-      </div>
+      </div> -->
       <div class="copyright">
-        <p>Copyright © 2023 Sabertis. All Rights Reserved</p>
+        <p>{{companyName}} - RUC: {{companyRuc}} | Copyright © {{currentYear}} {{companyBrand}} | Todos los derechos
+          reservados.</p>
       </div>
     </div>
   </div>

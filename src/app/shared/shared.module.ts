@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from './navbar/navbar.component';
 
 // Variables de entorno
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 
 // Google Recaptcha V2
 import { RecaptchaModule, RecaptchaFormsModule, RECAPTCHA_SETTINGS, RecaptchaSettings } from 'ng-recaptcha';

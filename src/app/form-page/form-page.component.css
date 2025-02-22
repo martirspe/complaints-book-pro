@@ -100,7 +100,7 @@
 }
 
 .ugf-wrapper .logo {
-  width: 40%;
+  width: 180px;
   position: absolute;
   top: 50px;
   left: 50px;
@@ -132,7 +132,7 @@
 }
 
 .ugf-wrapper .ugf-content-block .content-block {
-  padding-left: 200px;
+  padding-left: 60px;
   padding-right: 60px;
 }
 
@@ -547,6 +547,10 @@
   border-right: 6px solid transparent;
 }
 
+.ufg-job-application-wrapper .job-application-form .form-group .select-input .error-message {
+  color: #dc3545;
+}
+
 .ufg-job-application-wrapper .job-application-form .form-group .select-input .form-control {
   padding-right: 0;
   padding-top: 0;
@@ -701,9 +705,6 @@
     width: 680px;
   }
 
-  .ugf-wrapper .ugf-content-block .content-block {
-    padding-left: 100px;
-  }
 }
 
 @media all and (max-width: 1199px) {
@@ -720,7 +721,7 @@
 
 @media all and (max-width: 991px) {
   .ugf-wrapper .logo {
-    width: 690px;
+    width: 180px;
     padding: 0;
     margin: 30px auto 0;
     position: static;
@@ -768,13 +769,14 @@
 
 @media all and (max-width: 575px) {
 
-  .ugf-wrapper .logo,
-  .ugf-wrapper .footer {
-    width: 100%;
+  .ugf-wrapper .logo {
+    width: 210px;
     padding: 0 15px;
   }
 
   .ugf-wrapper .footer {
+    width: auto;
+    text-align: center;
     display: block;
   }
 
