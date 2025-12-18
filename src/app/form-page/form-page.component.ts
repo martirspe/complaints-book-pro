@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { forkJoin, switchMap, catchError, throwError, of, finalize } from 'rxjs';
+import { forkJoin, switchMap, catchError, throwError, of, finalize, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ToastService } from '../shared/toast/toast.service';
 import { BrandingService } from '../services/branding.service';
 
@@ -28,9 +28,21 @@ export class FormPageComponent implements OnInit {
   // Variables para el formulario
   private readonly MIN_DESC_LENGTH = 100;
   private readonly MIN_DETAIL_LENGTH = 50;
-  private readonly DOC_LENGTH = 8;
   private readonly PHONE_LENGTH = 9;
   private readonly MIN_ADDRESS_LENGTH = 25;
+
+  // Hints dinámicos por tipo de documento
+  public docNumberHint = 'Ingresa tu número de documento';
+  public tutorDocNumberHint = 'Ingresa el número de documento del tutor';
+
+  // Reglas de validación por tipo de documento (debe coincidir exactamente con los nombres del seed)
+  private readonly DOCUMENT_RULES: Record<string, { min: number; max: number; pattern: RegExp; hint: string }> = {
+    'DNI': { min: 8, max: 8, pattern: /^[0-9]+$/, hint: 'DNI: exactamente 8 dígitos' },
+    'CARNET DE EXTRANJERIA': { min: 9, max: 12, pattern: /^[0-9]+$/, hint: 'Carnet de Extranjería: 9 a 12 dígitos' },
+    'PASAPORTE': { min: 6, max: 12, pattern: /^[A-Za-z0-9]+$/, hint: 'Pasaporte: 6 a 12 caracteres (letras y números)' },
+    'RUC': { min: 11, max: 11, pattern: /^[0-9]+$/, hint: 'RUC: exactamente 11 dígitos' },
+    'BREVETE': { min: 8, max: 8, pattern: /^[0-9]+$/, hint: 'Brevete: exactamente 8 dígitos' },
+  };
   public flag = false;
 
   // Descripción de los tipos de reclamo
@@ -128,9 +140,80 @@ export class FormPageComponent implements OnInit {
     return [];
   }
 
+  // Obtiene la regla de validación según el tipo de documento seleccionado
+  private getDocRuleByTypeControl(typeControlName: string, typeIdOverride?: number): { min: number; max: number; pattern: RegExp; hint: string } {
+    // Usar el typeId pasado directamente o leerlo del formulario
+    const typeId = typeIdOverride !== undefined ? typeIdOverride : this.claimForm.get(typeControlName)?.value;
+
+    if (!typeId) {
+      return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Selecciona primero un tipo de documento' };
+    }
+
+    // Convertir a número para asegurar comparación correcta (los IDs pueden venir como string del select)
+    const numericTypeId = Number(typeId);
+    const docType = this.documentTypes.find(t => Number(t.id) === numericTypeId);
+
+    if (!docType) {
+      return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Selecciona primero un tipo de documento' };
+    }
+
+    const typeName = docType.name.trim().toUpperCase();
+    const rule = this.DOCUMENT_RULES[typeName];
+
+    if (!rule) {
+      return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Número de documento' };
+    }
+
+    return rule;
+  }
+
+  private applyDocumentValidators(typeControlName: string, numberControlName: string, hintField: 'docNumberHint' | 'tutorDocNumberHint', isRequired: boolean, typeIdOverride?: number): void {
+    const rule = this.getDocRuleByTypeControl(typeControlName, typeIdOverride);
+    const control = this.claimForm.get(numberControlName);
+    if (!control) return;
+
+    // Construir validadores en orden correcto
+    const validators: any[] = [];
+    if (isRequired) validators.push(Validators.required);
+    validators.push(Validators.minLength(rule.min));
+    validators.push(Validators.maxLength(rule.max));
+    validators.push(Validators.pattern(rule.pattern));
+
+    control.setValidators(validators);
+    control.updateValueAndValidity({ emitEvent: false });
+
+    // Actualizar hints
+    if (hintField === 'docNumberHint') this.docNumberHint = rule.hint;
+    if (hintField === 'tutorDocNumberHint') this.tutorDocNumberHint = rule.hint;
+  }
+
   public isStepValid(step: number): boolean {
     const controls = this.getStepControls(step);
     return controls.every(name => this.claimForm.get(name)?.valid);
+  }
+
+  private setupDocumentTypeValidation(): void {
+    // Cuando cambia el tipo de documento del cliente
+    this.claimForm.get('document_type_id')?.valueChanges.subscribe((typeId) => {
+      if (!typeId) return;
+      // Revalidar el campo de número de documento inmediatamente, pasando el typeId directamente
+      this.applyDocumentValidators('document_type_id', 'document_number', 'docNumberHint', true, typeId);
+      // Limpiar campo y cachés al cambiar tipo
+      this.claimForm.get('document_number')?.reset('', { emitEvent: false });
+      this.lastCustomerDocLoaded = null;
+      this.customerAutoFilled = false;
+    });
+
+    // Cuando cambia el tipo de documento del tutor
+    this.claimForm.get('document_type_tutor_id')?.valueChanges.subscribe((typeId) => {
+      if (!this.isYouger || !typeId) return;
+      // Revalidar el campo de número de documento del tutor, pasando el typeId directamente
+      this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true, typeId);
+      // Limpiar campo y cachés al cambiar tipo
+      this.claimForm.get('document_number_tutor')?.reset('', { emitEvent: false });
+      this.lastTutorDocLoaded = null;
+      this.tutorAutoFilled = false;
+    });
   }
 
   // Valida en cadena si todos los pasos anteriores están completos
@@ -207,13 +290,13 @@ export class FormPageComponent implements OnInit {
     this.loadConsumptionTypes();
     this.loadClaimTypes();
     this.setupYoungerValidation();
+    // setupDocumentTypeValidation se llama en loadDocumentTypes después de cargar los tipos
     this.setupCustomerLookupByDocument();
     this.setupTutorLookupByDocument();
   }
 
   setupYoungerValidation(): void {
     this.claimForm.get('is_youger')?.valueChanges.subscribe((isYounger: boolean) => {
-      const docLen = this.DOC_LENGTH;
       const phoneLen = this.PHONE_LENGTH;
 
       const setValidators = (field: string, validators: any[]) => {
@@ -225,12 +308,8 @@ export class FormPageComponent implements OnInit {
 
       if (isYounger) {
         setValidators('document_type_tutor_id', [Validators.required]);
-        setValidators('document_number_tutor', [
-          Validators.required,
-          Validators.minLength(docLen),
-          Validators.maxLength(docLen),
-          Validators.pattern('[0-9]+')
-        ]);
+        // Validación dinámica según tipo de documento del tutor
+        this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true);
         setValidators('first_name_tutor', [Validators.required, Validators.pattern(this.namePattern)]);
         setValidators('last_name_tutor', [Validators.required, Validators.pattern(this.namePattern)]);
         setValidators('celphone_tutor', [
@@ -262,12 +341,7 @@ export class FormPageComponent implements OnInit {
 
   public claimForm: FormGroup = this.fb.group({
     document_type_id: ['', Validators.required],
-    document_number: ['', [
-      Validators.required,
-      Validators.minLength(this.DOC_LENGTH),
-      Validators.maxLength(this.DOC_LENGTH),
-      Validators.pattern('[0-9]+')
-    ]],
+    document_number: ['', [Validators.required]],
     first_name: ['', [Validators.required, Validators.pattern(this.namePattern)]],
     last_name: ['', [Validators.required, Validators.pattern(this.namePattern)]],
     celphone: ['', [
@@ -282,11 +356,7 @@ export class FormPageComponent implements OnInit {
 
     // Tutor fields
     document_type_tutor_id: [''],
-    document_number_tutor: ['', [
-      Validators.minLength(this.DOC_LENGTH),
-      Validators.maxLength(this.DOC_LENGTH),
-      Validators.pattern('[0-9]+')
-    ]],
+    document_number_tutor: ['', []],
     first_name_tutor: ['', Validators.pattern(this.namePattern)],
     last_name_tutor: ['', Validators.pattern(this.namePattern)],
     celphone_tutor: ['', [
@@ -313,6 +383,22 @@ export class FormPageComponent implements OnInit {
       .subscribe({
         next: (types) => {
           this.documentTypes = types;
+
+          // IMPORTANTE: Configurar suscripciones DESPUÉS de tener los tipos cargados
+          this.setupDocumentTypeValidation();
+
+          // Solo después de cargar los tipos, aplicar validadores iniciales si hay selección
+          const selectedTypeId = this.claimForm.get('document_type_id')?.value;
+          if (selectedTypeId) {
+            this.applyDocumentValidators('document_type_id', 'document_number', 'docNumberHint', true);
+          }
+          // Lo mismo para tutor
+          if (this.isYouger) {
+            const selectedTutorTypeId = this.claimForm.get('document_type_tutor_id')?.value;
+            if (selectedTutorTypeId) {
+              this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true);
+            }
+          }
         },
         error: (error) => {
           console.error('Error al cargar tipos de documento:', error);
@@ -394,14 +480,25 @@ export class FormPageComponent implements OnInit {
     if (!control?.errors) return '';
 
     const errors = control.errors;
+    const errorKey = Object.keys(errors)[0];
+
+    // Mensajes dinámicos para campos de documento según el tipo seleccionado
+    if (field === 'document_number' || field === 'document_number_tutor') {
+      const typeControlName = field === 'document_number' ? 'document_type_id' : 'document_type_tutor_id';
+      const rule = this.getDocRuleByTypeControl(typeControlName);
+
+      const docSpecificMessages: { [error: string]: string } = {
+        required: 'Este campo es obligatorio',
+        minlength: rule.hint,
+        maxlength: rule.hint,
+        pattern: rule.hint
+      };
+
+      return docSpecificMessages[errorKey] || 'Por favor verifica este campo';
+    }
 
     // Mensajes más específicos y humanizados por campo
     const fieldSpecificMessages: { [key: string]: { [error: string]: string } } = {
-      document_number: {
-        minlength: 'El número de documento debe tener exactamente 8 dígitos',
-        maxlength: 'El número de documento debe tener exactamente 8 dígitos',
-        pattern: 'Por favor ingresa solo números'
-      },
       celphone: {
         minlength: 'El número de celular debe tener 9 dígitos',
         maxlength: 'El número de celular debe tener 9 dígitos',
@@ -430,8 +527,6 @@ export class FormPageComponent implements OnInit {
         minlength: 'Por favor indica claramente qué solicitas (mínimo 100 caracteres)'
       }
     };
-
-    const errorKey = Object.keys(errors)[0];
 
     // Buscar mensaje específico para el campo
     if (fieldSpecificMessages[field]?.[errorKey]) {
@@ -506,7 +601,7 @@ export class FormPageComponent implements OnInit {
       // Preparar datos del cliente
       const customerData: ICustomer = {
         document_type_id: this.claimForm.get('document_type_id')?.value,
-        document_number: Number(this.claimForm.get('document_number')?.value),
+        document_number: String(this.claimForm.get('document_number')?.value || '').trim(),
         first_name: this.claimForm.get('first_name')?.value,
         last_name: this.claimForm.get('last_name')?.value,
         email: this.claimForm.get('email')?.value,
@@ -516,7 +611,7 @@ export class FormPageComponent implements OnInit {
       };
 
       // Buscar cliente por documento; si existe, usarlo. Si no, crearlo.
-      const customerObservable = this.claimsService.getCustomerByDocument(customerData.document_number).pipe(
+      const customerObservable = this.claimsService.getCustomerByDocument(customerData.document_number as string).pipe(
         // Si no existe (404), crear
         catchError((err) => {
           if (err?.status === 404) {
@@ -608,13 +703,22 @@ export class FormPageComponent implements OnInit {
   }
 
   private setupCustomerLookupByDocument(): void {
-    const control = this.claimForm.get('document_number');
-    control?.valueChanges.subscribe((val) => {
-      const v = String(val || '').trim();
-      if (this.lastCustomerDocLoaded && v === this.lastCustomerDocLoaded) return;
-      if (v.length === this.DOC_LENGTH && /^[0-9]+$/.test(v)) {
-        const docNumber = Number(v);
-        this.claimsService.getCustomerByDocument(docNumber).subscribe({
+    this.claimForm.get('document_number')?.valueChanges.pipe(
+      debounceTime(600), // Esperar 600ms después de que el usuario deje de escribir
+      distinctUntilChanged() // Solo emitir si el valor cambió
+    ).subscribe((docNumber) => {
+      const v = String(docNumber || '').trim();
+
+      // No hacer nada si está vacío o ya se cargó este documento
+      if (!v || (this.lastCustomerDocLoaded === v)) return;
+
+      // Validar que cumpla con el formato esperado
+      const rule = this.getDocRuleByTypeControl('document_type_id');
+      const isValidFormat = v.length >= rule.min && v.length <= rule.max && rule.pattern.test(v);
+
+      // Solo buscar si el formato es válido y es completamente numérico (para búsqueda en BD)
+      if (isValidFormat && /^[0-9]+$/.test(v)) {
+        this.claimsService.getCustomerByDocument(v).subscribe({
           next: (customer) => {
             this.populateCustomerForm(customer);
           },
@@ -639,18 +743,30 @@ export class FormPageComponent implements OnInit {
       is_youger: customer.is_younger ?? false,
     }, { emitEvent: false });
     this.isYouger = !!customer.is_younger;
-    this.lastCustomerDocLoaded = String(customer.document_number).padStart(this.DOC_LENGTH, '0');
+    this.lastCustomerDocLoaded = String(customer.document_number);
     this.customerAutoFilled = true;
     this.toast.showSuccess('✓ Cliente encontrado - Datos cargados automáticamente');
   }
 
   private setupTutorLookupByDocument(): void {
-    const control = this.claimForm.get('document_number_tutor');
-    control?.valueChanges.subscribe((val) => {
-      if (!this.isYouger) return; // Solo aplica si requiere tutor
-      const v = String(val || '').trim();
-      if (this.lastTutorDocLoaded && v === this.lastTutorDocLoaded) return;
-      if (v.length === this.DOC_LENGTH && /^[0-9]+$/.test(v)) {
+    this.claimForm.get('document_number_tutor')?.valueChanges.pipe(
+      debounceTime(600), // Esperar 600ms después de que el usuario deje de escribir
+      distinctUntilChanged() // Solo emitir si el valor cambió
+    ).subscribe((docNumber) => {
+      // Solo aplica si requiere tutor
+      if (!this.isYouger) return;
+
+      const v = String(docNumber || '').trim();
+
+      // No hacer nada si está vacío o ya se cargó este documento
+      if (!v || (this.lastTutorDocLoaded === v)) return;
+
+      // Validar que cumpla con el formato esperado
+      const rule = this.getDocRuleByTypeControl('document_type_tutor_id');
+      const isValidFormat = v.length >= rule.min && v.length <= rule.max && rule.pattern.test(v);
+
+      // Solo buscar si el formato es válido y es completamente numérico (para búsqueda en BD)
+      if (isValidFormat && /^[0-9]+$/.test(v)) {
         this.claimsService.getTutorByDocument(v).subscribe({
           next: (tutor) => {
             this.populateTutorForm(tutor as any);
@@ -668,13 +784,13 @@ export class FormPageComponent implements OnInit {
   private populateTutorForm(tutor: ITutor): void {
     this.claimForm.patchValue({
       document_type_tutor_id: (tutor as any).document_type_id,
-      document_number_tutor: String((tutor as any).document_number).padStart(this.DOC_LENGTH, '0'),
+      document_number_tutor: String((tutor as any).document_number),
       first_name_tutor: (tutor as any).first_name,
       last_name_tutor: (tutor as any).last_name,
       email_tutor: (tutor as any).email,
       celphone_tutor: (tutor as any).phone,
     }, { emitEvent: false });
-    this.lastTutorDocLoaded = String((tutor as any).document_number).padStart(this.DOC_LENGTH, '0');
+    this.lastTutorDocLoaded = String((tutor as any).document_number);
     this.tutorAutoFilled = true;
     this.toast.showSuccess('✓ Tutor encontrado - Datos cargados automáticamente');
   }

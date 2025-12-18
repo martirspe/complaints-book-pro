@@ -27,7 +27,7 @@ export class ClaimsService {
   }
 
   // Método para obtener un cliente por número de documento
-  getCustomerByDocument(documentNumber: number): Observable<ICustomer> {
+  getCustomerByDocument(documentNumber: string): Observable<ICustomer> {
     return this.http.get<ICustomer>(`${this.apiUrl}/customers/document/${documentNumber}`);
   }
 

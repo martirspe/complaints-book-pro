@@ -63,11 +63,10 @@
                     <div class="form-group">
                       <input type="tel" inputmode="numeric" class="form-control" formControlName="document_number"
                         id="document_number" [class.is-invalid]="isValidField('document_number')"
-                        [class.is-valid]="isFieldValid('document_number')" maxlength="8" required
-                        aria-describedby="doc-help">
+                        [class.is-valid]="isFieldValid('document_number')" required aria-describedby="doc-help">
                       <label for="document_number">No. documento</label>
                       <span class="autofill-badge" *ngIf="customerAutoFilled">✓ Encontrado</span>
-                      <small id="doc-help" class="form-text text-muted">Ingresa tu DNI de 8 dígitos</small>
+                      <small id="doc-help" class="form-text text-muted">{{ docNumberHint }}</small>
                       <div class="invalid-feedback">
                         <span>{{ getFieldError('document_number') }}</span>
                       </div>
@@ -179,10 +178,10 @@
                         <input type="tel" inputmode="numeric" class="form-control"
                           formControlName="document_number_tutor" id="document_number_tutor"
                           [class.is-invalid]="isValidField('document_number_tutor')"
-                          [class.is-valid]="isFieldValid('document_number_tutor')" maxlength="8" required>
+                          [class.is-valid]="isFieldValid('document_number_tutor')" required>
                         <label for="document_number_tutor">No. documento</label>
                         <span class="autofill-badge" *ngIf="tutorAutoFilled">✓ Encontrado</span>
-                        <small class="form-text text-muted">DNI del tutor legal</small>
+                        <small class="form-text text-muted">{{ tutorDocNumberHint }}</small>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('document_number_tutor') }}</span>
                         </div>
@@ -259,7 +258,7 @@
                   </div>
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
-                      <input type="number" class="form-control" formControlName="order_number" id="order_number"
+                      <input type="text" class="form-control" formControlName="order_number" id="order_number"
                         [class.is-invalid]="isValidField('order_number')"
                         [class.is-valid]="isFieldValid('order_number')" required>
                       <label for="order_number">Número de pedido</label>
