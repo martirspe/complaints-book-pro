@@ -7,5 +7,5 @@ export interface ICustomer {
   email: string;
   phone: string;
   address: string;
-  is_adult: boolean;
+  is_younger: boolean;
 }

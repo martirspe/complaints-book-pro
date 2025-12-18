@@ -121,6 +121,27 @@ body {
   color: #546274;
 }
 
+/* Branding variables (overridden dynamically by the app) */
+:root {
+  --brand-primary: #0d6efd;
+  --brand-accent: #6610f2;
+}
+
+/* Apply brand color to common UI elements */
+.btn,
+.step-btn {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.progress .progress-bar {
+  background-color: var(--brand-primary);
+}
+
+a.prev {
+  color: var(--brand-primary);
+}
+
 h1,
 h2,
 h3,

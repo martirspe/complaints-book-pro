@@ -26,9 +26,19 @@ export class ClaimsService {
     return this.http.post<ICustomer>(`${this.apiUrl}/customers`, customer);
   }
 
+  // Método para obtener un cliente por número de documento
+  getCustomerByDocument(documentNumber: number): Observable<ICustomer> {
+    return this.http.get<ICustomer>(`${this.apiUrl}/customers/document/${documentNumber}`);
+  }
+
   // Método para crear un tutor
   createTutor(tutor: ITutor): Observable<ITutor> {
     return this.http.post<ITutor>(`${this.apiUrl}/tutors`, tutor);
+  }
+
+  // Método para obtener un tutor por número de documento
+  getTutorByDocument(documentNumber: string): Observable<ITutor> {
+    return this.http.get<ITutor>(`${this.apiUrl}/tutors/document/${documentNumber}`);
   }
 
   // Método para crear un reclamo

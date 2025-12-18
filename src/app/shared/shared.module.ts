@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // Componentes
-import { NavbarComponent } from './navbar/navbar.component';
+import { ToastContainerComponent } from './toast/toast-container.component';
+import { ToastService } from './toast/toast.service';
 
 // Variables de entorno
 import { environment } from '../../environments/environment.prod';
@@ -15,7 +16,7 @@ const RECAPTCHA_V2_KEY = environment.RECAPTCHA_V2_KEY;
 
 @NgModule({
   declarations: [
-    NavbarComponent
+    ToastContainerComponent
   ],
   imports: [
     CommonModule,
@@ -23,12 +24,13 @@ const RECAPTCHA_V2_KEY = environment.RECAPTCHA_V2_KEY;
     RecaptchaModule
   ],
   exports: [
-    NavbarComponent,
     RecaptchaFormsModule,
-    RecaptchaModule
+    RecaptchaModule,
+    ToastContainerComponent
   ],
   providers: [
-    { provide: RECAPTCHA_SETTINGS, useValue: { siteKey: RECAPTCHA_V2_KEY } as RecaptchaSettings }
+    { provide: RECAPTCHA_SETTINGS, useValue: { siteKey: RECAPTCHA_V2_KEY } as RecaptchaSettings },
+    ToastService
   ]
 })
 export class SharedModule { }
