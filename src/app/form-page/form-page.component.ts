@@ -194,6 +194,10 @@ export class FormPageComponent implements OnInit {
       next: (branding) => {
         this.branding = branding;
         this.brandingService.applyTheme(branding);
+        // Actualizar título del documento con la marca
+        if (branding?.companyBrand) {
+          document.title = `${branding.companyBrand} | Libro de Reclamaciones`;
+        }
       },
       error: (error) => {
         console.error('Error al cargar branding:', error);
@@ -720,7 +724,7 @@ export class FormPageComponent implements OnInit {
     const formData = new FormData();
 
     // Normalizar y convertir claimData en FormData (solo campos de reclamo)
-    const numericKeys = ['customer_id','tutor_id','claim_type_id','consumption_type_id','order_number','claimed_amount'];
+    const numericKeys = ['customer_id', 'tutor_id', 'claim_type_id', 'consumption_type_id', 'order_number', 'claimed_amount'];
     const booleanKeys = ['resolved'];
     Object.keys(claimData).forEach(key => {
       const value = claimData[key];

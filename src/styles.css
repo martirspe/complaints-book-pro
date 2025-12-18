@@ -123,8 +123,8 @@ body {
 
 /* Branding variables (overridden dynamically by the app) */
 :root {
-  --brand-primary: #0d6efd;
-  --brand-accent: #6610f2;
+  --brand-primary: #01b681;
+  --brand-accent: #777777;
 }
 
 /* Apply brand color to common UI elements */
@@ -346,4 +346,14 @@ html {
   .right-content-sm {
     margin-top: 30px;
   }
+}
+
+body::-webkit-scrollbar {
+  width: 5px;
+}
+body::-webkit-scrollbar-track {
+  background-color: var(--brand-accent);
+}
+body::-webkit-scrollbar-thumb {
+  background-color: var(--brand-primary);
 }
