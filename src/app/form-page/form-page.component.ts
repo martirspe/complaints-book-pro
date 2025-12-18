@@ -472,7 +472,17 @@ export class FormPageComponent implements OnInit {
 
   isValidField(field: string): boolean | null {
     const control = this.claimForm.get(field);
-    return control?.errors && control.touched || null;
+    return !!(control?.valid && control?.touched) || null;
+  }
+
+  isFieldInvalid(field: string): boolean {
+    const control = this.claimForm.get(field);
+    return !!(control?.invalid && control?.touched);
+  }
+
+  public isFieldValid(field: string): boolean {
+    const control = this.claimForm.get(field);
+    return !!(control?.valid && control?.touched);
   }
 
   getFieldError(field: string): string {
@@ -543,12 +553,6 @@ export class FormPageComponent implements OnInit {
     };
 
     return errorMessages[errorKey] || 'Por favor verifica este campo';
-  }
-
-  // Método para validar si un campo es válido (para mostrar icono de éxito)
-  public isFieldValid(field: string): boolean {
-    const control = this.claimForm.get(field);
-    return !!(control?.valid && control?.touched);
   }
 
   onFileSelected(event: Event): void {

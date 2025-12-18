@@ -47,7 +47,8 @@
                       <div class="select-input">
                         <span></span>
                         <select formControlName="document_type_id" id="document_type_id" class="form-control"
-                          [class.is-invalid]="isValidField('document_type_id')">
+                          [class.is-invalid]="isFieldInvalid('document_type_id')"
+                          [class.is-valid]="isFieldValid('document_type_id')">
                           <option value="">Elija tipo de documento</option>
                           <option *ngFor="let type of documentTypes" [value]="type.id">
                             {{type.name}}
@@ -62,7 +63,7 @@
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
                       <input type="tel" inputmode="numeric" class="form-control" formControlName="document_number"
-                        id="document_number" [class.is-invalid]="isValidField('document_number')"
+                        id="document_number" [class.is-invalid]="isFieldInvalid('document_number')"
                         [class.is-valid]="isFieldValid('document_number')" required aria-describedby="doc-help">
                       <label for="document_number">No. documento</label>
                       <span class="autofill-badge" *ngIf="customerAutoFilled">✓ Encontrado</span>
@@ -77,7 +78,7 @@
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
                       <input type="text" class="form-control" formControlName="first_name" id="first_name"
-                        [class.is-invalid]="isValidField('first_name')" [class.is-valid]="isFieldValid('first_name')"
+                        [class.is-invalid]="isFieldInvalid('first_name')" [class.is-valid]="isFieldValid('first_name')"
                         required>
                       <label for="first_name">Nombres</label>
                       <div class="invalid-feedback">
@@ -88,7 +89,7 @@
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
                       <input type="text" class="form-control" formControlName="last_name" id="last_name"
-                        [class.is-invalid]="isValidField('last_name')" [class.is-valid]="isFieldValid('last_name')"
+                        [class.is-invalid]="isFieldInvalid('last_name')" [class.is-valid]="isFieldValid('last_name')"
                         required>
                       <label for="last_name">Apellidos</label>
                       <div class="invalid-feedback">
@@ -101,7 +102,7 @@
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
                       <input type="tel" inputmode="numeric" class="form-control" formControlName="celphone"
-                        id="celphone" [class.is-invalid]="isValidField('celphone')"
+                        id="celphone" [class.is-invalid]="isFieldInvalid('celphone')"
                         [class.is-valid]="isFieldValid('celphone')" maxlength="9" required>
                       <label for="celphone">Celular</label>
                       <small class="form-text text-muted">Número de 9 dígitos</small>
@@ -113,7 +114,7 @@
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
                       <input type="email" class="form-control" formControlName="email" id="email"
-                        [class.is-invalid]="isValidField('email')" [class.is-valid]="isFieldValid('email')" required>
+                        [class.is-invalid]="isFieldInvalid('email')" [class.is-valid]="isFieldValid('email')" required>
                       <label for="email">Correo electrónico</label>
                       <div class="invalid-feedback">
                         <span>{{ getFieldError('email') }}</span>
@@ -125,7 +126,7 @@
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
                       <input type="text" class="form-control" formControlName="address" id="address"
-                        [class.is-invalid]="isValidField('address')" [class.is-valid]="isFieldValid('address')"
+                        [class.is-invalid]="isFieldInvalid('address')" [class.is-valid]="isFieldValid('address')"
                         required>
                       <label for="address">Dirección actual</label>
                       <small class="form-text text-muted">Incluye calle, número, distrito y ciudad</small>
@@ -161,7 +162,8 @@
                         <div class="select-input">
                           <span></span>
                           <select formControlName="document_type_tutor_id" id="document_type_tutor_id"
-                            class="form-control" [class.is-invalid]="isValidField('document_type_tutor_id')">
+                            class="form-control" [class.is-invalid]="isFieldInvalid('document_type_tutor_id')"
+                            [class.is-valid]="isFieldValid('document_type_tutor_id')">
                             <option value="">Elija tipo de documento</option>
                             <option *ngFor="let type of documentTypes" [value]="type.id">
                               {{type.name}}
@@ -177,7 +179,7 @@
                       <div class="form-group">
                         <input type="tel" inputmode="numeric" class="form-control"
                           formControlName="document_number_tutor" id="document_number_tutor"
-                          [class.is-invalid]="isValidField('document_number_tutor')"
+                          [class.is-invalid]="isFieldInvalid('document_number_tutor')"
                           [class.is-valid]="isFieldValid('document_number_tutor')" required>
                         <label for="document_number_tutor">No. documento</label>
                         <span class="autofill-badge" *ngIf="tutorAutoFilled">✓ Encontrado</span>
@@ -192,7 +194,7 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="text" class="form-control" formControlName="first_name_tutor" id="first_name_tutor"
-                          [class.is-invalid]="isValidField('first_name_tutor')" required>
+                          [class.is-invalid]="isFieldInvalid('first_name_tutor')" required>
                         <label for="first_name_tutor">Nombres</label>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('first_name_tutor') }}</span>
@@ -202,7 +204,7 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="text" class="form-control" formControlName="last_name_tutor" id="last_name_tutor"
-                          [class.is-invalid]="isValidField('last_name_tutor')" required>
+                          [class.is-invalid]="isFieldInvalid('last_name_tutor')" required>
                         <label for="last_name_tutor">Apellidos</label>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('last_name_tutor') }}</span>
@@ -214,7 +216,7 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="text" class="form-control" formControlName="celphone_tutor" id="celphone_tutor"
-                          [class.is-invalid]="isValidField('celphone_tutor')" required>
+                          [class.is-invalid]="isFieldInvalid('celphone_tutor')" required>
                         <label for="celphone_tutor">Celular</label>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('celphone_tutor') }}</span>
@@ -224,7 +226,7 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="email" class="form-control" formControlName="email_tutor" id="email_tutor"
-                          [class.is-invalid]="isValidField('email_tutor')" required>
+                          [class.is-invalid]="isFieldInvalid('email_tutor')" required>
                         <label for="email_tutor">Correo electrónico</label>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('email_tutor') }}</span>
@@ -244,7 +246,8 @@
                         <span></span>
 
                         <select formControlName="consumption_type_id" id="consumption_type_id" class="form-control"
-                          [class.is-invalid]="isValidField('consumption_type_id')">
+                          [class.is-invalid]="isFieldInvalid('consumption_type_id')"
+                          [class.is-valid]="isFieldValid('consumption_type_id')">
                           <option value="">Elija tipo de consumo</option>
                           <option *ngFor="let type of consumptionTypes" [value]="type.id">
                             {{type.name}}
@@ -259,7 +262,7 @@
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
                       <input type="text" class="form-control" formControlName="order_number" id="order_number"
-                        [class.is-invalid]="isValidField('order_number')"
+                        [class.is-invalid]="isFieldInvalid('order_number')"
                         [class.is-valid]="isFieldValid('order_number')" required>
                       <label for="order_number">Número de pedido</label>
                       <small class="form-text text-muted">Número de orden o boleta</small>
@@ -271,7 +274,7 @@
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
                       <input type="number" step="0.01" class="form-control" formControlName="claimed_amount"
-                        id="claimed_amount" [class.is-invalid]="isValidField('claimed_amount')"
+                        id="claimed_amount" [class.is-invalid]="isFieldInvalid('claimed_amount')"
                         [class.is-valid]="isFieldValid('claimed_amount')" required>
                       <label for="claimed_amount">Monto reclamado (S/)</label>
                       <small class="form-text text-muted">Monto total del reclamo en soles</small>
@@ -285,7 +288,7 @@
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
                       <textarea class="form-control" formControlName="description" id="description"
-                        [class.is-invalid]="isValidField('description')" [class.is-valid]="isFieldValid('description')"
+                        [class.is-invalid]="isFieldInvalid('description')" [class.is-valid]="isFieldValid('description')"
                         rows="4" required></textarea>
                       <label for="description">Descripción del bien o servicio</label>
                       <small class="form-text text-muted">
@@ -308,7 +311,8 @@
                       <div class="select-input">
                         <span></span>
                         <select formControlName="claim_type_id" id="claim_type_id" class="form-control"
-                          [class.is-invalid]="isValidField('claim_type_id')">
+                          [class.is-invalid]="isFieldInvalid('claim_type_id')"
+                          [class.is-valid]="isFieldValid('claim_type_id')">
                           <option value="">Seleccione tipo de reclamo</option>
                           <option *ngFor="let type of claimTypes" [value]="type.id">
                             {{type.name}}
@@ -328,7 +332,7 @@
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
                       <textarea class="form-control" formControlName="detail" id="detail"
-                        [class.is-invalid]="isValidField('detail')" [class.is-valid]="isFieldValid('detail')" rows="4"
+                        [class.is-invalid]="isFieldInvalid('detail')" [class.is-valid]="isFieldValid('detail')" rows="4"
                         required></textarea>
                       <label for="detail">Detalle del reclamo</label>
                       <small class="form-text text-muted">
@@ -345,7 +349,7 @@
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
                       <textarea class="form-control" formControlName="request" id="request"
-                        [class.is-invalid]="isValidField('request')" [class.is-valid]="isFieldValid('request')" rows="4"
+                        [class.is-invalid]="isFieldInvalid('request')" [class.is-valid]="isFieldValid('request')" rows="4"
                         required></textarea>
                       <label for="request">Tu solicitud</label>
                       <small class="form-text text-muted">

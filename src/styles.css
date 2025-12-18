@@ -9,6 +9,31 @@
 * License URI: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 * Tags: html, template, Anfra, Covid19, Virtual Corona Test, Corona
 ======================================================================= */
+
+/* Branding variables (overridden dynamically by the app) */
+:root {
+  --brand-primary: #01b681;
+  --brand-accent: #2d2a26;
+  /* Default RGB fallbacks (overridden by JS) */
+  --brand-primary-rgb: 1, 182, 129;
+  --brand-accent-rgb: 45, 42, 38;
+  /* Design tokens */
+  --text-primary: #1c2437;
+  --text-secondary: #546274;
+  --text-muted: #97a2ae;
+  --bg-light: #f8f9fa;
+  --border-light: rgba(0, 0, 0, 0.12);
+  --border-subtle: #e1e7ee;
+  --panel-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --info-bg: #e7f3ff;
+  --danger: #dc3545;
+  --danger-hover: #c82333;
+  --danger-rgb: 220, 53, 69;
+  /* Bootstrap theme bridge */
+  --bs-primary: var(--brand-primary);
+  --bs-link-color: var(--brand-accent);
+}
+
 /*----------------------------------------------
 	1.0 General Style
 -----------------------------------------------*/
@@ -121,12 +146,6 @@ body {
   color: #546274;
 }
 
-/* Branding variables (overridden dynamically by the app) */
-:root {
-  --brand-primary: #01b681;
-  --brand-accent: #777777;
-}
-
 /* Apply brand color to common UI elements */
 .btn,
 .step-btn {
@@ -140,6 +159,16 @@ body {
 
 a.prev {
   color: var(--brand-primary);
+}
+
+/* Bootstrap overrides for hard-coded blue defaults */
+.form-check-input:checked {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+.form-check-input:focus {
+  border-color: rgba(var(--brand-primary-rgb), 0.5);
+  box-shadow: 0 0 0 0.25rem rgba(var(--brand-primary-rgb), 0.25);
 }
 
 h1,
@@ -277,7 +306,7 @@ button, .btn {
 -------------------------------------------*/
 /* Focus visible mejorado para navegación por teclado */
 *:focus-visible {
-  outline: 3px solid var(--brand-primary, #0d6efd);
+  outline: 3px solid var(--brand-primary);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -292,7 +321,7 @@ button, .btn {
   position: absolute;
   top: -40px;
   left: 0;
-  background: var(--brand-primary, #0d6efd);
+  background: var(--brand-primary);
   color: white;
   padding: 8px;
   text-decoration: none;
@@ -305,7 +334,7 @@ button, .btn {
 
 /* Asegurar contraste mínimo en textos */
 .text-muted {
-  color: #6c757d !important;
+  color: var(--text-muted) !important;
 }
 
 /* Mejorar área de clic en elementos interactivos (mínimo 44x44px) */
@@ -346,14 +375,4 @@ html {
   .right-content-sm {
     margin-top: 30px;
   }
-}
-
-body::-webkit-scrollbar {
-  width: 5px;
-}
-body::-webkit-scrollbar-track {
-  background-color: var(--brand-accent);
-}
-body::-webkit-scrollbar-thumb {
-  background-color: var(--brand-primary);
 }
