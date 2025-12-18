@@ -273,6 +273,68 @@ button, .btn {
 }
 
 /*------------------------------------------
+	Mejoras de Accesibilidad
+-------------------------------------------*/
+/* Focus visible mejorado para navegación por teclado */
+*:focus-visible {
+  outline: 3px solid var(--brand-primary, #0d6efd);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remover outline en clics del mouse pero mantenerlo en teclado */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip link para lectores de pantalla */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--brand-primary, #0d6efd);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Asegurar contraste mínimo en textos */
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Mejorar área de clic en elementos interactivos (mínimo 44x44px) */
+button,
+a,
+input[type="radio"],
+input[type="checkbox"],
+select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Reducir movimiento para usuarios con preferencias de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*------------------------------------------
 	Responsive
 -------------------------------------------*/
 @media (max-width: 991px) {

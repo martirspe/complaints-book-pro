@@ -40,12 +40,24 @@ export class FormPageComponent implements OnInit {
   public selectedFileName: string | null = null;
 
   // Variables progress bar
-  readonly totalSteps = 3;
+  readonly totalSteps = 4; // Ahora incluye paso de revisión
   public currentStep = 1;
   public progressWidth = (1 / this.totalSteps) * 100;
 
+  // Labels descriptivos para cada paso
+  public stepLabels = [
+    'Datos Personales',
+    'Tipo de Consumo',
+    'Detalles del Reclamo',
+    'Revisión Final'
+  ];
+
   // Obtener el año actual
   currentYear = new Date().getFullYear();
+
+  // Estados de autocompletado
+  public customerAutoFilled = false;
+  public tutorAutoFilled = false;
 
   // Arreglo de tipos de documentos
   documentTypes: IDocumentType[] = [];
@@ -67,6 +79,10 @@ export class FormPageComponent implements OnInit {
   private lastTutorDocLoaded: string | null = null;
 
   // Campos por paso para validación
+  public getCurrentStepLabel(): string {
+    return this.stepLabels[this.currentStep - 1] || '';
+  }
+
   private getStepControls(step: number): string[] {
     if (step === 1) {
       const base = [
@@ -102,9 +118,12 @@ export class FormPageComponent implements OnInit {
       return [
         'claim_type_id',
         'detail',
-        'request',
-        'recaptcha'
+        'request'
       ];
+    }
+    if (step === 4) {
+      // Paso de revisión: validar recaptcha
+      return ['recaptcha'];
     }
     return [];
   }
@@ -112,6 +131,32 @@ export class FormPageComponent implements OnInit {
   public isStepValid(step: number): boolean {
     const controls = this.getStepControls(step);
     return controls.every(name => this.claimForm.get(name)?.valid);
+  }
+
+  // Valida en cadena si todos los pasos anteriores están completos
+  private allStepsValidUpTo(step: number): boolean {
+    for (let i = 1; i < step; i++) {
+      if (!this.isStepValid(i)) return false;
+    }
+    return true;
+  }
+
+  // Determina si se puede navegar al paso solicitado
+  public canNavigateTo(step: number): boolean {
+    if (step <= this.currentStep) return true; // Siempre permitir ir hacia atrás
+    return this.allStepsValidUpTo(step); // Hacia adelante solo si los previos son válidos
+  }
+
+  // Maneja clics en el stepper para navegar entre pasos
+  public onStepClick(step: number): void {
+    if (step === this.currentStep) return;
+    if (!this.canNavigateTo(step)) {
+      this.toast.showWarning('Completa los pasos previos antes de avanzar');
+      return;
+    }
+    this.currentStep = step;
+    this.progressWidth = (this.currentStep / this.totalSteps) * 100;
+    this.updateStepsVisibility();
   }
 
   private markStepFieldsTouched(step: number): void {
@@ -346,27 +391,103 @@ export class FormPageComponent implements OnInit {
 
     const errors = control.errors;
 
-    const errorMessages = {
-      required: 'Este campo es obligatorio.',
-      minlength: `Se requiere ${errors['minlength']?.requiredLength} carácteres como mínimo.`,
-      maxlength: `Se requiere ${errors['maxlength']?.requiredLength} carácteres como máximo.`,
-      pattern: 'Este campo contiene carácteres no permitidos.',
-      email: 'No cumple con la estructura de un correo válido.'
+    // Mensajes más específicos y humanizados por campo
+    const fieldSpecificMessages: { [key: string]: { [error: string]: string } } = {
+      document_number: {
+        minlength: 'El número de documento debe tener exactamente 8 dígitos',
+        maxlength: 'El número de documento debe tener exactamente 8 dígitos',
+        pattern: 'Por favor ingresa solo números'
+      },
+      celphone: {
+        minlength: 'El número de celular debe tener 9 dígitos',
+        maxlength: 'El número de celular debe tener 9 dígitos',
+        pattern: 'Por favor ingresa solo números'
+      },
+      email: {
+        email: 'Por favor ingresa un correo electrónico válido (ejemplo: usuario@dominio.com)',
+        pattern: 'Por favor ingresa un correo electrónico válido'
+      },
+      first_name: {
+        pattern: 'El nombre solo puede contener letras y espacios'
+      },
+      last_name: {
+        pattern: 'Los apellidos solo pueden contener letras y espacios'
+      },
+      address: {
+        minlength: 'Por favor proporciona una dirección más completa (mínimo 25 caracteres)'
+      },
+      description: {
+        minlength: 'Por favor describe tu caso con más detalle (mínimo 100 caracteres)'
+      },
+      detail: {
+        minlength: 'Por favor explica el detalle de tu reclamo (mínimo 50 caracteres)'
+      },
+      request: {
+        minlength: 'Por favor indica claramente qué solicitas (mínimo 100 caracteres)'
+      }
     };
 
-    return errorMessages[Object.keys(errors)[0] as keyof typeof errorMessages] || 'Error de validación';
+    const errorKey = Object.keys(errors)[0];
+
+    // Buscar mensaje específico para el campo
+    if (fieldSpecificMessages[field]?.[errorKey]) {
+      return fieldSpecificMessages[field][errorKey];
+    }
+
+    // Mensajes genéricos mejorados
+    const errorMessages: { [key: string]: string } = {
+      required: 'Este campo es obligatorio',
+      minlength: `Debe tener al menos ${errors['minlength']?.requiredLength} caracteres`,
+      maxlength: `No puede exceder ${errors['maxlength']?.requiredLength} caracteres`,
+      pattern: 'El formato ingresado no es válido',
+      email: 'Por favor ingresa un correo electrónico válido'
+    };
+
+    return errorMessages[errorKey] || 'Por favor verifica este campo';
+  }
+
+  // Método para validar si un campo es válido (para mostrar icono de éxito)
+  public isFieldValid(field: string): boolean {
+    const control = this.claimForm.get(field);
+    return !!(control?.valid && control?.touched);
   }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input?.files?.[0]) {
       const file = input.files[0];
-      this.selectedFileName = file.name; // Actualiza el nombre del archivo seleccionado
-      this.claimForm.get('attachment')?.setValue(file); // Vincula el archivo al FormControl
+
+      // Validar tamaño (150KB = 153600 bytes)
+      const maxSize = 153600;
+      if (file.size > maxSize) {
+        this.toast.showWarning(`El archivo es muy grande. Tamaño máximo: 150KB`);
+        input.value = '';
+        return;
+      }
+
+      // Validar tipo
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        this.toast.showWarning('Solo se permiten archivos PDF, DOC o DOCX');
+        input.value = '';
+        return;
+      }
+
+      this.selectedFileName = file.name;
+      this.claimForm.get('attachment')?.setValue(file);
     } else {
       this.selectedFileName = null;
-      // Evitar que el input mantenga el valor (porque no se puede asignar un archivo manualmente)
       input.value = '';
+    }
+  }
+
+  // Método para remover archivo adjunto
+  removeAttachment(): void {
+    this.selectedFileName = null;
+    this.claimForm.get('attachment')?.setValue(null);
+    const fileInput = document.getElementById('attachment') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
     }
   }
 
@@ -515,7 +636,8 @@ export class FormPageComponent implements OnInit {
     }, { emitEvent: false });
     this.isYouger = !!customer.is_younger;
     this.lastCustomerDocLoaded = String(customer.document_number).padStart(this.DOC_LENGTH, '0');
-    this.toast.showInfo('Datos del cliente cargados');
+    this.customerAutoFilled = true;
+    this.toast.showSuccess('✓ Cliente encontrado - Datos cargados automáticamente');
   }
 
   private setupTutorLookupByDocument(): void {
@@ -549,7 +671,8 @@ export class FormPageComponent implements OnInit {
       celphone_tutor: (tutor as any).phone,
     }, { emitEvent: false });
     this.lastTutorDocLoaded = String((tutor as any).document_number).padStart(this.DOC_LENGTH, '0');
-    this.toast.showInfo('Datos del tutor cargados');
+    this.tutorAutoFilled = true;
+    this.toast.showSuccess('✓ Tutor encontrado - Datos cargados automáticamente');
   }
 
   private handleErrorToast(error: any, fallback: string) {
@@ -649,6 +772,8 @@ export class FormPageComponent implements OnInit {
     // Clear auto-fill trackers
     this.lastCustomerDocLoaded = null;
     this.lastTutorDocLoaded = null;
+    this.customerAutoFilled = false;
+    this.tutorAutoFilled = false;
 
     // Restore pristine/untouched state
     this.claimForm.markAsPristine();
