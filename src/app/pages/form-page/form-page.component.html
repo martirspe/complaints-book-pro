@@ -139,7 +139,7 @@
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group check-gender">
-                      <span class="lebel-text">¿El consumidor es menor de 18 años?</span>
+                      <span class="lebel-text">Soy menor de edad</span>
                       <div class="custom-radio">
                         <input (click)="isYounger(true)" type="radio" name="younger" class="custom-control-input"
                           id="simenor" aria-label="Sí, es menor de edad">
@@ -235,7 +235,8 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn step-btn" [disabled]="!isStepValid(1)" (click)="goNextIfValid(1)"><i class="las la-arrow-right"></i> Siguiente</button>
+                <button class="btn step-btn" [disabled]="!isStepValid(1)" (click)="goNextIfValid(1)"><i
+                    class="las la-arrow-right"></i> Siguiente</button>
               </div>
               <div class="form-steps" [class.active]="currentStep === 2">
                 <h3><i class="las la-shopping-cart"></i> Identificación del Bien Contratado</h3>
@@ -273,11 +274,29 @@
                   </div>
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
+                      <div class="select-input">
+                        <span></span>
+                        <select formControlName="currency_id" id="currency_id" class="form-control"
+                          [class.is-invalid]="isFieldInvalid('currency_id')"
+                          [class.is-valid]="isFieldValid('currency_id')" required>
+                          <option value="">Seleccione moneda</option>
+                          <option *ngFor="let currency of currencies" [value]="currency.id">
+                            {{ currency.symbol }} - {{ currency.name }}
+                          </option>
+                        </select>
+                        <div class="invalid-feedback">
+                          <div class="error-message">{{ getFieldError('currency_id') }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 p-sm-0">
+                    <div class="form-group">
                       <input type="number" step="0.01" class="form-control" formControlName="claimed_amount"
                         id="claimed_amount" [class.is-invalid]="isFieldInvalid('claimed_amount')"
                         [class.is-valid]="isFieldValid('claimed_amount')" required>
-                      <label for="claimed_amount">Monto reclamado (S/)</label>
-                      <small class="form-text text-muted">Monto total del reclamo en soles</small>
+                      <label for="claimed_amount">Monto reclamado</label>
+                      <small class="form-text text-muted">Monto total del reclamo</small>
                       <div class="invalid-feedback">
                         <span>{{ getFieldError('claimed_amount') }}</span>
                       </div>
@@ -288,8 +307,8 @@
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
                       <textarea class="form-control" formControlName="description" id="description"
-                        [class.is-invalid]="isFieldInvalid('description')" [class.is-valid]="isFieldValid('description')"
-                        rows="4" required></textarea>
+                        [class.is-invalid]="isFieldInvalid('description')"
+                        [class.is-valid]="isFieldValid('description')" rows="4" required></textarea>
                       <label for="description">Descripción del bien o servicio</label>
                       <small class="form-text text-muted">
                         Describe detalladamente el producto o servicio (mínimo 100 caracteres).
@@ -301,7 +320,8 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn step-btn" [disabled]="!isStepValid(2)" (click)="goNextIfValid(2)"><i class="las la-arrow-right"></i> Siguiente</button>
+                <button class="btn step-btn" [disabled]="!isStepValid(2)" (click)="goNextIfValid(2)"><i
+                    class="las la-arrow-right"></i> Siguiente</button>
               </div>
               <div class="form-steps" [class.active]="currentStep === 3">
                 <h3><i class="las la-comment-alt"></i> Detalle de Reclamación y Pedido del Consumidor</h3>
@@ -349,8 +369,8 @@
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
                       <textarea class="form-control" formControlName="request" id="request"
-                        [class.is-invalid]="isFieldInvalid('request')" [class.is-valid]="isFieldValid('request')" rows="4"
-                        required></textarea>
+                        [class.is-invalid]="isFieldInvalid('request')" [class.is-valid]="isFieldValid('request')"
+                        rows="4" required></textarea>
                       <label for="request">Tu solicitud</label>
                       <small class="form-text text-muted">
                         Indica claramente qué esperas como solución (mínimo 100 caracteres).
@@ -394,7 +414,8 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn step-btn" [disabled]="!isStepValid(3)" (click)="goNextIfValid(3)"><i class="las la-eye"></i> Revisar antes de enviar</button>
+                <button class="btn step-btn" [disabled]="!isStepValid(3)" (click)="goNextIfValid(3)"><i
+                    class="las la-eye"></i> Revisar antes de enviar</button>
               </div>
               <div class="form-steps review-step" [class.active]="currentStep === 4">
                 <h3><i class="las la-check-circle"></i> Revisión de tu Reclamo</h3>
@@ -450,7 +471,7 @@
                   </div>
                   <div class="review-item">
                     <span class="review-label">Monto:</span>
-                    <span class="review-value">S/ {{ claimForm.get('claimed_amount')?.value }}</span>
+                    <span class="review-value">{{ getCurrencySymbol() }} {{ claimForm.get('claimed_amount')?.value }}</span>
                   </div>
                   <div class="review-item">
                     <span class="review-label">Detalle:</span>

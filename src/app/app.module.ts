@@ -10,7 +10,7 @@ import { SharedModule } from './shared/shared.module';
 
 // Componentes
 import { AppComponent } from './app.component';
-import { FormPageComponent } from './form-page/form-page.component';
+import { FormPageComponent } from './pages/form-page/form-page.component';
 
 @NgModule({
   declarations: [

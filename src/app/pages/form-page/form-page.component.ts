@@ -1,19 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { forkJoin, switchMap, catchError, throwError, of, finalize, debounceTime, distinctUntilChanged } from 'rxjs';
-import { ToastService } from '../shared/toast/toast.service';
-import { BrandingService } from '../services/branding.service';
+import { ToastService } from '../../shared/toast/toast.service';
+import { BrandingService } from '../../services/branding.service';
 
 // Services
-import { ClaimsService } from '../services/claims.service';
+import { ClaimsService } from '../../services/claims.service';
 
 // Interfaces
-import { IClaimType } from '../interfaces/claim-type.interface';
-import { IDocumentType } from '../interfaces/document-type.interface';
-import { IConsumptionType } from '../interfaces/consumption-type.interface';
-import { ICustomer } from '../interfaces/customer.interface';
-import { ITutor } from '../interfaces/tutor.interface';
-import { IBranding } from '../interfaces/branding.interface';
+import { IClaimType } from '../../interfaces/claim-type.interface';
+import { IDocumentType } from '../../interfaces/document-type.interface';
+import { IConsumptionType } from '../../interfaces/consumption-type.interface';
+import { ICustomer } from '../../interfaces/customer.interface';
+import { ITutor } from '../../interfaces/tutor.interface';
+import { IBranding } from '../../interfaces/branding.interface';
+import { ICurrency } from '../../interfaces/currency.interface';
 
 @Component({
   selector: 'app-form-page',
@@ -80,6 +81,9 @@ export class FormPageComponent implements OnInit {
   // Arreglo de tipos de reclamo
   claimTypes: IClaimType[] = [];
 
+  // Arreglo de monedas
+  currencies: ICurrency[] = [];
+
   // Variables boleanas
   isYouger = false;
   sSend = false;
@@ -93,6 +97,12 @@ export class FormPageComponent implements OnInit {
   // Campos por paso para validación
   public getCurrentStepLabel(): string {
     return this.stepLabels[this.currentStep - 1] || '';
+  }
+
+  public getCurrencySymbol(): string {
+    const currencyId = this.claimForm.get('currency_id')?.value;
+    const currency = this.currencies.find(c => Number(c.id) === Number(currencyId));
+    return currency ? currency.symbol : '';
   }
 
   private getStepControls(step: number): string[] {
@@ -123,6 +133,7 @@ export class FormPageComponent implements OnInit {
         'consumption_type_id',
         'order_number',
         'claimed_amount',
+        'currency_id',
         'description'
       ];
     }
@@ -289,6 +300,7 @@ export class FormPageComponent implements OnInit {
     this.loadDocumentTypes();
     this.loadConsumptionTypes();
     this.loadClaimTypes();
+    this.loadCurrencies();
     this.setupYoungerValidation();
     // setupDocumentTypeValidation se llama en loadDocumentTypes después de cargar los tipos
     this.setupCustomerLookupByDocument();
@@ -370,6 +382,7 @@ export class FormPageComponent implements OnInit {
     claim_type_id: ['', Validators.required],
     order_number: ['', Validators.required],
     claimed_amount: ['', Validators.required],
+    currency_id: ['', Validators.required],
     description: ['', [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)]],
     consumption_type_id: ['', Validators.required],
     detail: ['', [Validators.required, Validators.minLength(this.MIN_DETAIL_LENGTH)]],
@@ -426,6 +439,18 @@ export class FormPageComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error al cargar tipos de reclamo:', error);
+        }
+      });
+  }
+
+  loadCurrencies() {
+    this.claimsService.getCurrencies()
+      .subscribe({
+        next: (currencies) => {
+          this.currencies = currencies;
+        },
+        error: (error) => {
+          console.error('Error al cargar monedas:', error);
         }
       });
   }
@@ -832,6 +857,7 @@ export class FormPageComponent implements OnInit {
       tutor_id: base.tutor_id,
       claim_type_id: fv.claim_type_id,
       consumption_type_id: fv.consumption_type_id,
+      currency_id: fv.currency_id,
       order_number: fv.order_number,
       claimed_amount: fv.claimed_amount,
       description: fv.description,
@@ -846,7 +872,7 @@ export class FormPageComponent implements OnInit {
     const formData = new FormData();
 
     // Normalizar y convertir claimData en FormData (solo campos de reclamo)
-    const numericKeys = ['customer_id', 'tutor_id', 'claim_type_id', 'consumption_type_id', 'order_number', 'claimed_amount'];
+    const numericKeys = ['customer_id', 'tutor_id', 'claim_type_id', 'consumption_type_id', 'currency_id', 'order_number', 'claimed_amount'];
     const booleanKeys = ['resolved'];
     Object.keys(claimData).forEach(key => {
       const value = claimData[key];

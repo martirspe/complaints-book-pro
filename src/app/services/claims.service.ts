@@ -66,4 +66,9 @@ export class ClaimsService {
     return this.http.get<IClaimType[]>(`${this.apiUrl}/claim_types`);
   }
 
+  // Método para obtener las monedas
+  getCurrencies(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/currencies`);
+  }
+
 }

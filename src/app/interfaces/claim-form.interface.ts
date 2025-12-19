@@ -15,6 +15,7 @@ export interface IClaimForm {
   email_tutor: string;
   claim_type_id: number;
   claimed_amount: number;
+  currency_id: number;
   description: string;
   consumption_type_id: number;
   detail: string;
