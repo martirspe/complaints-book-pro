@@ -17,6 +17,43 @@
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind via CDN (scoped by utility classes) -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#059669',
+            'primary-dark': '#047857',
+            'background-light': '#F9FAFB',
+            'background-dark': '#111827',
+            'card-light': '#FFFFFF',
+            'card-dark': '#1F2937',
+            'accent-light': '#FEF3F2',
+            'accent-dark': '#374151',
+            'text-main-light': '#111827',
+            'text-main-dark': '#F9FAFB',
+            'text-sub-light': '#6B7280',
+            'text-sub-dark': '#9CA3AF',
+          },
+          fontFamily: {
+            display: ['Inter', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+          borderRadius: {
+            DEFAULT: '0.5rem',
+            xl: '1rem',
+            '2xl': '1.5rem',
+          },
+        },
+      },
+    };
+  </script>
 
   <!-- Favicon -->
   <link rel="icon" href="">

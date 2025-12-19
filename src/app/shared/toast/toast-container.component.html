@@ -1,12 +1,16 @@
 <div class="toast-container">
-  <div *ngFor="let t of toasts" class="toast-item" [class.success]="t.type==='success'" [class.error]="t.type==='error'" [class.info]="t.type==='info'" [class.warning]="t.type==='warning'">
-    <div class="toast-icon">
-      <i class="{{ icon(t.type) }}"></i>
+  @for (t of toasts; track t) {
+    <div class="toast-item" [class.success]="t.type==='success'" [class.error]="t.type==='error'" [class.info]="t.type==='info'" [class.warning]="t.type==='warning'">
+      <div class="toast-icon">
+        <i class="{{ icon(t.type) }}"></i>
+      </div>
+      <div class="toast-content">
+        @if (t.title) {
+          <div class="toast-title">{{ t.title }}</div>
+        }
+        <div class="toast-message">{{ t.message }}</div>
+      </div>
+      <button class="toast-close" (click)="dismiss(t.id)" aria-label="Cerrar">×</button>
     </div>
-    <div class="toast-content">
-      <div class="toast-title" *ngIf="t.title">{{ t.title }}</div>
-      <div class="toast-message">{{ t.message }}</div>
-    </div>
-    <button class="toast-close" (click)="dismiss(t.id)" aria-label="Cerrar">×</button>
-  </div>
+  }
 </div>

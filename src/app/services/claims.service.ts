@@ -51,6 +51,11 @@ export class ClaimsService {
     return this.http.get<IClaim>(`${this.apiUrl}/claims/${id}`);
   }
 
+  // Método para obtener listado de reclamos
+  getClaims(): Observable<IClaim[]> {
+    return this.http.get<IClaim[]>(`${this.apiUrl}/claims`);
+  }
+
   // Método para obtener los tipos de documentos
   getDocumentTypes(): Observable<IDocumentType[]> {
     return this.http.get<IDocumentType[]>(`${this.apiUrl}/document_types`);

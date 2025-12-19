@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { RecaptchaModule, RecaptchaFormsModule } from 'ng-recaptcha';
 import { forkJoin, switchMap, catchError, throwError, of, finalize, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ToastService } from '../../shared/toast/toast.service';
 import { BrandingService } from '../../services/branding.service';
@@ -17,11 +19,12 @@ import { IBranding } from '../../interfaces/branding.interface';
 import { ICurrency } from '../../interfaces/currency.interface';
 
 @Component({
-  selector: 'app-form-page',
-  templateUrl: './form-page.component.html',
-  styleUrls: ['./form-page.component.css']
+  selector: 'app-form',
+  imports: [CommonModule, ReactiveFormsModule, RecaptchaModule, RecaptchaFormsModule],
+  templateUrl: './form.component.html',
+  styleUrls: ['./form.component.css']
 })
-export class FormPageComponent implements OnInit {
+export class FormComponent implements OnInit {
 
   // Branding dinámico
   public branding: IBranding | null = null;

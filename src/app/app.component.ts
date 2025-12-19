@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { BrandingService } from './services/branding.service';
+import { ToastContainerComponent } from './shared/toast/toast-container.component';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html'
+    selector: 'app-root',
+    imports: [RouterOutlet, ToastContainerComponent],
+    templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
   title = 'complaints-book-client';

@@ -6,20 +6,24 @@
         <img [src]="branding?.logoDarkUrl" class="img-fluid logo-black" alt="logo">
       </a>
     </div>
-    <div *ngIf="!flag" class="ugf-content-block">
+    @if (!flag) {
+    <div class="ugf-content-block">
       <div class="content-block">
         <h1>¿Qué es un reclamo?</h1>
         <p>Es la comunicación que puedes establecer con nosotros ante una posible insatisfacción o disconformidad con un
           producto o servicio prestado por el proveedor, con la finalidad de que éstos sean solucionados.</p>
       </div>
     </div>
-    <div *ngIf="flag" class="ugf-content-block">
+    }
+    @if (flag) {
+    <div class="ugf-content-block">
       <div class="content-block">
         <h1>¿Qué es una queja?</h1>
         <p>Es la comunicación que puedes establecer con nosotros ante una disconformidad relacionada a los productos o
           servicios, con la finalidad de que éstos sean solucionados.</p>
       </div>
     </div>
+    }
     <div class="container">
       <div class="row">
         <div class="col-lg-5 offset-lg-7 p-sm-0">
@@ -27,8 +31,8 @@
             <!-- Stepper descriptivo (clicable) -->
             <div class="stepper-container" aria-label="Progreso del formulario">
               <div class="stepper-steps">
-                <div class="step-item" *ngFor="let label of stepLabels; let i = index"
-                  [class.active]="currentStep === i + 1" [class.completed]="currentStep > i + 1"
+                @for (label of stepLabels; track label; let i = $index) {
+                <div class="step-item" [class.active]="currentStep === i + 1" [class.completed]="currentStep > i + 1"
                   [class.clickable]="canNavigateTo(i + 1)" [class.disabled]="!canNavigateTo(i + 1)"
                   [attr.tabindex]="canNavigateTo(i + 1) ? 0 : -1" (click)="onStepClick(i + 1)"
                   (keyup.enter)="onStepClick(i + 1)" [attr.aria-current]="currentStep === i + 1 ? 'step' : null"
@@ -36,6 +40,7 @@
                   <div class="step-number">{{ i + 1 }}</div>
                   <div class="step-label">{{ label }}</div>
                 </div>
+                }
               </div>
             </div>
             <form [formGroup]="claimForm" class="job-application-form" autocomplete="off">
@@ -50,9 +55,11 @@
                           [class.is-invalid]="isFieldInvalid('document_type_id')"
                           [class.is-valid]="isFieldValid('document_type_id')">
                           <option value="">Elija tipo de documento</option>
-                          <option *ngFor="let type of documentTypes" [value]="type.id">
+                          @for (type of documentTypes; track type) {
+                          <option [value]="type.id">
                             {{type.name}}
                           </option>
+                          }
                         </select>
                         <div class="invalid-feedback">
                           <div class="error-message">{{ getFieldError('document_type_id') }}</div>
@@ -66,7 +73,9 @@
                         id="document_number" [class.is-invalid]="isFieldInvalid('document_number')"
                         [class.is-valid]="isFieldValid('document_number')" required aria-describedby="doc-help">
                       <label for="document_number">No. documento</label>
-                      <span class="autofill-badge" *ngIf="customerAutoFilled">✓ Encontrado</span>
+                      @if (customerAutoFilled) {
+                      <span class="autofill-badge">✓ Encontrado</span>
+                      }
                       <small id="doc-help" class="form-text text-muted">{{ docNumberHint }}</small>
                       <div class="invalid-feedback">
                         <span>{{ getFieldError('document_number') }}</span>
@@ -154,7 +163,8 @@
                     </div>
                   </div>
                 </div>
-                <div *ngIf="isYouger" class="adult tutor-section">
+                @if (isYouger) {
+                <div class="adult tutor-section">
                   <h4 class="section-title"><i class="las la-shield-alt"></i> Datos del Tutor Legal</h4>
                   <div class="row">
                     <div class="col-sm-6 p-sm-0">
@@ -165,9 +175,11 @@
                             class="form-control" [class.is-invalid]="isFieldInvalid('document_type_tutor_id')"
                             [class.is-valid]="isFieldValid('document_type_tutor_id')">
                             <option value="">Elija tipo de documento</option>
-                            <option *ngFor="let type of documentTypes" [value]="type.id">
+                            @for (type of documentTypes; track type) {
+                            <option [value]="type.id">
                               {{type.name}}
                             </option>
+                            }
                           </select>
                           <div class="invalid-feedback">
                             <div class="error-message">{{ getFieldError('document_type_tutor_id') }}</div>
@@ -182,7 +194,9 @@
                           [class.is-invalid]="isFieldInvalid('document_number_tutor')"
                           [class.is-valid]="isFieldValid('document_number_tutor')" required>
                         <label for="document_number_tutor">No. documento</label>
-                        <span class="autofill-badge" *ngIf="tutorAutoFilled">✓ Encontrado</span>
+                        @if (tutorAutoFilled) {
+                        <span class="autofill-badge">✓ Encontrado</span>
+                        }
                         <small class="form-text text-muted">{{ tutorDocNumberHint }}</small>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('document_number_tutor') }}</span>
@@ -235,6 +249,7 @@
                     </div>
                   </div>
                 </div>
+                }
                 <button class="btn step-btn" [disabled]="!isStepValid(1)" (click)="goNextIfValid(1)"><i
                     class="las la-arrow-right"></i> Siguiente</button>
               </div>
@@ -250,9 +265,11 @@
                           [class.is-invalid]="isFieldInvalid('consumption_type_id')"
                           [class.is-valid]="isFieldValid('consumption_type_id')">
                           <option value="">Elija tipo de consumo</option>
-                          <option *ngFor="let type of consumptionTypes" [value]="type.id">
+                          @for (type of consumptionTypes; track type) {
+                          <option [value]="type.id">
                             {{type.name}}
                           </option>
+                          }
                         </select>
                         <div class="invalid-feedback">
                           <div class="error-message">{{ getFieldError('consumption_type_id') }}</div>
@@ -280,9 +297,11 @@
                           [class.is-invalid]="isFieldInvalid('currency_id')"
                           [class.is-valid]="isFieldValid('currency_id')" required>
                           <option value="">Seleccione moneda</option>
-                          <option *ngFor="let currency of currencies" [value]="currency.id">
+                          @for (currency of currencies; track currency) {
+                          <option [value]="currency.id">
                             {{ currency.symbol }} - {{ currency.name }}
                           </option>
+                          }
                         </select>
                         <div class="invalid-feedback">
                           <div class="error-message">{{ getFieldError('currency_id') }}</div>
@@ -334,9 +353,11 @@
                           [class.is-invalid]="isFieldInvalid('claim_type_id')"
                           [class.is-valid]="isFieldValid('claim_type_id')">
                           <option value="">Seleccione tipo de reclamo</option>
-                          <option *ngFor="let type of claimTypes" [value]="type.id">
+                          @for (type of claimTypes; track type) {
+                          <option [value]="type.id">
                             {{type.name}}
                           </option>
+                          }
                         </select>
 
                         <div class="invalid-feedback">
@@ -387,7 +408,8 @@
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
                       <div class="file-upload-wrapper">
-                        <div class="custom-file" *ngIf="!selectedFileName">
+                        @if (!selectedFileName) {
+                        <div class="custom-file">
                           <input type="file" class="custom-file-input form-control" formControlName="attachment"
                             id="attachment" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
                           <label class="custom-file-label" for="attachment">
@@ -397,7 +419,9 @@
                             </span>
                           </label>
                         </div>
-                        <div class="file-preview" *ngIf="selectedFileName">
+                        }
+                        @if (selectedFileName) {
+                        <div class="file-preview">
                           <div class="file-info">
                             <i class="las la-file-alt file-icon"></i>
                             <span class="file-name">{{ selectedFileName }}</span>
@@ -407,6 +431,7 @@
                             <i class="las la-trash"></i> Eliminar
                           </button>
                         </div>
+                        }
                       </div>
                       <small class="form-text text-muted">
                         Formatos: PDF, DOC, DOCX | Tamaño máximo: 150KB
@@ -446,7 +471,8 @@
                   </div>
                 </div>
 
-                <div class="review-section" *ngIf="isYouger">
+                @if (isYouger) {
+                <div class="review-section">
                   <h4 class="review-section-title">Datos del Tutor Legal</h4>
                   <div class="review-item">
                     <span class="review-label">Nombre completo:</span>
@@ -462,6 +488,7 @@
                     <span class="review-value">{{ claimForm.get('email_tutor')?.value }}</span>
                   </div>
                 </div>
+                }
 
                 <div class="review-section">
                   <h4 class="review-section-title">Detalles del Reclamo</h4>
@@ -471,7 +498,8 @@
                   </div>
                   <div class="review-item">
                     <span class="review-label">Monto:</span>
-                    <span class="review-value">{{ getCurrencySymbol() }} {{ claimForm.get('claimed_amount')?.value }}</span>
+                    <span class="review-value">{{ getCurrencySymbol() }} {{ claimForm.get('claimed_amount')?.value
+                      }}</span>
                   </div>
                   <div class="review-item">
                     <span class="review-label">Detalle:</span>
@@ -481,10 +509,12 @@
                     <span class="review-label">Solicitud:</span>
                     <span class="review-value">{{ claimForm.get('request')?.value }}</span>
                   </div>
-                  <div class="review-item" *ngIf="selectedFileName">
+                  @if (selectedFileName) {
+                  <div class="review-item">
                     <span class="review-label">Archivo adjunto:</span>
                     <span class="review-value"><i class="las la-file-alt"></i> {{ selectedFileName }}</span>
                   </div>
+                  }
                 </div>
 
                 <div class="row">
@@ -497,8 +527,12 @@
                       </label>
                     </div>
                     <button [disabled]="claimForm.invalid || isSubmitting" class="btn btn-submit" (click)="onSave()">
-                      <span *ngIf="!isSubmitting"><i class="las la-paper-plane"></i> Enviar Reclamo</span>
-                      <span *ngIf="isSubmitting"><span class="spinner-border spinner-sm"></span> Enviando...</span>
+                      @if (!isSubmitting) {
+                      <span><i class="las la-paper-plane"></i> Enviar Reclamo</span>
+                      }
+                      @if (isSubmitting) {
+                      <span><span class="spinner-border spinner-sm"></span> Enviando...</span>
+                      }
                     </button>
                   </div>
                 </div>
