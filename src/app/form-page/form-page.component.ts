@@ -234,7 +234,7 @@ export class FormPageComponent implements OnInit {
   public onStepClick(step: number): void {
     if (step === this.currentStep) return;
     if (!this.canNavigateTo(step)) {
-      this.toast.showWarning('Completa los pasos previos antes de avanzar');
+      this.toast.showWarning('Por favor completa los pasos anteriores primero');
       return;
     }
     this.currentStep = step;
@@ -252,7 +252,7 @@ export class FormPageComponent implements OnInit {
       this.nextStep();
     } else {
       this.markStepFieldsTouched(step);
-      this.toast.showWarning('Por favor corrige los campos pendientes antes de continuar');
+      this.toast.showWarning('Revisa los campos incompletos o incorrectos');
     }
   }
 
@@ -563,7 +563,7 @@ export class FormPageComponent implements OnInit {
       // Validar tamaño (150KB = 153600 bytes)
       const maxSize = 153600;
       if (file.size > maxSize) {
-        this.toast.showWarning(`El archivo es muy grande. Tamaño máximo: 150KB`);
+        this.toast.showWarning('El archivo es demasiado pesado. Máximo permitido: 150KB');
         input.value = '';
         return;
       }
@@ -571,7 +571,7 @@ export class FormPageComponent implements OnInit {
       // Validar tipo
       const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       if (!allowedTypes.includes(file.type)) {
-        this.toast.showWarning('Solo se permiten archivos PDF, DOC o DOCX');
+        this.toast.showWarning('Solo aceptamos archivos en formato PDF, DOC o DOCX');
         input.value = '';
         return;
       }
@@ -671,11 +671,11 @@ export class FormPageComponent implements OnInit {
           finalize(() => { this.isSubmitting = false; })
         ).subscribe({
           next: (response) => {
-            this.toast.showSuccess((response as any)?.message || 'Reclamo enviado con éxito');
+            this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
             this.resetForm();
           },
           error: (error) => {
-            this.handleErrorToast(error, 'Error al procesar el reclamo');
+            this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
             this.eSend = true;
           }
         });
@@ -690,17 +690,17 @@ export class FormPageComponent implements OnInit {
           finalize(() => { this.isSubmitting = false; })
         ).subscribe({
           next: (response) => {
-            this.toast.showSuccess((response as any)?.message || 'Reclamo enviado con éxito');
+            this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
             this.resetForm();
           },
           error: (error) => {
-            this.handleErrorToast(error, 'Error al procesar el reclamo');
+            this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
             this.eSend = true;
           }
         });
       }
     } catch (error) {
-      console.error('❌ Error en el procesamiento:', error);
+      console.error('Error en el procesamiento:', error);
       this.eSend = true;
       this.isSubmitting = false;
     }
@@ -728,7 +728,7 @@ export class FormPageComponent implements OnInit {
           },
           error: (err) => {
             if (err?.status !== 404) {
-              this.toast.showWarning('No se pudo cargar datos del cliente');
+              this.toast.showWarning('No pudimos cargar los datos del cliente');
             }
           }
         });
@@ -749,7 +749,8 @@ export class FormPageComponent implements OnInit {
     this.isYouger = !!customer.is_younger;
     this.lastCustomerDocLoaded = String(customer.document_number);
     this.customerAutoFilled = true;
-    this.toast.showSuccess('✓ Cliente encontrado - Datos cargados automáticamente');
+
+    this.toast.showSuccess('Cliente encontrado. Datos cargados automáticamente');
   }
 
   private setupTutorLookupByDocument(): void {
@@ -777,7 +778,7 @@ export class FormPageComponent implements OnInit {
           },
           error: (err) => {
             if (err?.status !== 404) {
-              this.toast.showWarning('No se pudo cargar datos del tutor');
+              this.toast.showWarning('No pudimos cargar los datos del tutor');
             }
           }
         });
@@ -787,16 +788,17 @@ export class FormPageComponent implements OnInit {
 
   private populateTutorForm(tutor: ITutor): void {
     this.claimForm.patchValue({
-      document_type_tutor_id: (tutor as any).document_type_id,
-      document_number_tutor: String((tutor as any).document_number),
-      first_name_tutor: (tutor as any).first_name,
-      last_name_tutor: (tutor as any).last_name,
-      email_tutor: (tutor as any).email,
-      celphone_tutor: (tutor as any).phone,
+      document_type_tutor_id: tutor.document_type_id,
+      document_number_tutor: String(tutor.document_number),
+      first_name_tutor: tutor.first_name,
+      last_name_tutor: tutor.last_name,
+      email_tutor: tutor.email,
+      celphone_tutor: tutor.phone,
     }, { emitEvent: false });
-    this.lastTutorDocLoaded = String((tutor as any).document_number);
+    this.lastTutorDocLoaded = String(tutor.document_number);
     this.tutorAutoFilled = true;
-    this.toast.showSuccess('✓ Tutor encontrado - Datos cargados automáticamente');
+
+    this.toast.showSuccess('Tutor encontrado. Datos cargados automáticamente');
   }
 
   private handleErrorToast(error: any, fallback: string) {

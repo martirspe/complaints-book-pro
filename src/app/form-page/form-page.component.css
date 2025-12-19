@@ -109,8 +109,8 @@
 }
 
 /* Label color for valid fields */
-input.is-valid + label,
-textarea.is-valid + label {
+input.is-valid+label,
+textarea.is-valid+label {
   color: var(--brand-primary) !important;
   font-weight: 600;
 }
@@ -124,10 +124,23 @@ textarea.is-valid + label {
 }
 
 /* Label color for invalid fields */
-input.is-invalid + label,
-textarea.is-invalid + label {
+input.is-invalid+label,
+textarea.is-invalid+label {
   color: #dc3545 !important;
   font-weight: 600;
+}
+
+/* Remove number input spinner controls */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+  display: none !important;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
 }
 
 /* Style selects (dropdowns) with validation - strong override */
@@ -168,6 +181,7 @@ select.form-control.is-invalid {
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -194,6 +208,7 @@ select.form-control.is-invalid {
     max-height: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     max-height: 1000px;
@@ -232,8 +247,44 @@ select.form-control.is-invalid {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Professional spinner for loading state */
+.spinner-border {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-bottom;
+  border: 0.25em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
+}
+
+.spinner-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
+  margin-right: 8px;
+}
+
+@keyframes spinner-border {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .file-info {
@@ -253,6 +304,30 @@ select.form-control.is-invalid {
   font-weight: 500;
   color: var(--text-primary);
   word-break: break-word;
+}
+
+/* Icon styling in headings */
+.form-steps h3 i {
+  margin-right: 10px;
+  color: var(--brand-primary);
+  font-size: 3rem;
+  vertical-align: middle;
+}
+
+.section-title i {
+  margin-right: 10px;
+  color: var(--brand-primary);
+  font-size: 2rem;
+}
+
+/* Button icons */
+.btn i {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.btn-submit i {
+  font-size: 1.4rem;
 }
 
 .btn-remove {
@@ -287,6 +362,19 @@ select.form-control.is-invalid {
   font-size: 2.4rem;
 }
 
+/* Centered captcha wrapper */
+.captcha-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 35px !important;
+}
+
+.captcha-wrapper .captcha {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 /* Paso de revisión */
 .review-step .review-intro {
   font-size: 1.5rem;
@@ -312,6 +400,7 @@ select.form-control.is-invalid {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -391,6 +480,7 @@ select.form-control.is-invalid {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
