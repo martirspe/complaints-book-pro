@@ -150,13 +150,13 @@
                     <div class="form-group check-gender">
                       <span class="lebel-text">Soy menor de edad</span>
                       <div class="custom-radio">
-                        <input (click)="isYounger(true)" type="radio" name="younger" class="custom-control-input"
-                          id="simenor" aria-label="Sí, es menor de edad">
+                        <input type="radio" name="younger" class="custom-control-input"
+                          id="simenor" formControlName="is_youger" [value]="true" aria-label="Sí, es menor de edad">
                         <label class="custom-control-label" for="simenor">Sí</label>
                       </div>
                       <div class="custom-radio">
-                        <input (click)="isYounger(false)" type="radio" name="younger" class="custom-control-input"
-                          id="nomenor" checked aria-label="No, es mayor de edad">
+                        <input type="radio" name="younger" class="custom-control-input"
+                          id="nomenor" formControlName="is_youger" [value]="false" aria-label="No, es mayor de edad">
                         <label class="custom-control-label" for="nomenor">No</label>
                       </div>
                       <small class="form-text text-muted">Si es menor, necesitaremos los datos del tutor legal</small>

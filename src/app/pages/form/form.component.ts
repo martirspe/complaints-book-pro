@@ -212,10 +212,27 @@ export class FormComponent implements OnInit {
       if (!typeId) return;
       // Revalidar el campo de número de documento inmediatamente, pasando el typeId directamente
       this.applyDocumentValidators('document_type_id', 'document_number', 'docNumberHint', true, typeId);
-      // Limpiar campo y cachés al cambiar tipo
-      this.claimForm.get('document_number')?.reset('', { emitEvent: false });
+      // Limpiar campos autocompletados y estado de tutor al cambiar tipo
+      this.claimForm.patchValue({
+        document_number: '',
+        first_name: '',
+        last_name: '',
+        email: '',
+        celphone: '',
+        address: '',
+        // Resetear tutor completo
+        is_youger: false,
+        document_type_tutor_id: '',
+        document_number_tutor: '',
+        first_name_tutor: '',
+        last_name_tutor: '',
+        email_tutor: '',
+        celphone_tutor: ''
+      }, { emitEvent: false });
+      this.isYouger = false;
       this.lastCustomerDocLoaded = null;
       this.customerAutoFilled = false;
+      this.tutorAutoFilled = false;
     });
 
     // Cuando cambia el tipo de documento del tutor
@@ -223,8 +240,14 @@ export class FormComponent implements OnInit {
       if (!this.isYouger || !typeId) return;
       // Revalidar el campo de número de documento del tutor, pasando el typeId directamente
       this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true, typeId);
-      // Limpiar campo y cachés al cambiar tipo
-      this.claimForm.get('document_number_tutor')?.reset('', { emitEvent: false });
+      // Limpiar campos autocompletados del tutor al cambiar tipo
+      this.claimForm.patchValue({
+        document_number_tutor: '',
+        first_name_tutor: '',
+        last_name_tutor: '',
+        email_tutor: '',
+        celphone_tutor: ''
+      }, { emitEvent: false });
       this.lastTutorDocLoaded = null;
       this.tutorAutoFilled = false;
     });
@@ -312,6 +335,9 @@ export class FormComponent implements OnInit {
 
   setupYoungerValidation(): void {
     this.claimForm.get('is_youger')?.valueChanges.subscribe((isYounger: boolean) => {
+      // Sincronizar la variable visual con el valor del FormControl
+      this.isYouger = isYounger;
+
       const phoneLen = this.PHONE_LENGTH;
 
       const setValidators = (field: string, validators: any[]) => {
@@ -494,8 +520,8 @@ export class FormComponent implements OnInit {
 
   isYounger(value: boolean): void {
     this.isYouger = value;
-    // Mantener sincronizado el FormControl para disparar validación/reactividad
-    this.claimForm.get('is_youger')?.setValue(value);
+    // Sincronizar el FormControl con el valor
+    this.claimForm.get('is_youger')?.setValue(value, { emitEvent: true });
   }
 
   isValidField(field: string): boolean | null {
