@@ -372,10 +372,8 @@ export class FormComponent implements OnInit {
           });
       }
 
-      // Sin requerir tutor, el formulario no debe quedar inválido por esos campos
-      this.claimForm.markAsPristine();
-      this.claimForm.markAsUntouched();
-      this.claimForm.updateValueAndValidity();
+      // Actualizar la validez del formulario sin perder el estado visual de los campos ya validados
+      this.claimForm.updateValueAndValidity({ onlySelf: true, emitEvent: false });
     });
   }
 

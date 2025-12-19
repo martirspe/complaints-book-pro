@@ -77,7 +77,7 @@
                         [class.is-valid]="isFieldValid('document_number')" required aria-describedby="doc-help">
                       <label for="document_number">No. documento</label>
                       @if (customerAutoFilled) {
-                      <span class="autofill-badge">✓ Encontrado</span>
+                      <span class="autofill-badge">Encontrado</span>
                       }
                       <small id="doc-help" class="form-text text-muted">{{ docNumberHint }}</small>
                       <div class="invalid-feedback">
@@ -198,7 +198,7 @@
                           [class.is-valid]="isFieldValid('document_number_tutor')" required>
                         <label for="document_number_tutor">No. documento</label>
                         @if (tutorAutoFilled) {
-                        <span class="autofill-badge">✓ Encontrado</span>
+                        <span class="autofill-badge">Encontrado</span>
                         }
                         <small class="form-text text-muted">{{ tutorDocNumberHint }}</small>
                         <div class="invalid-feedback">
@@ -211,7 +211,8 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="text" class="form-control" formControlName="first_name_tutor" id="first_name_tutor"
-                          [class.is-invalid]="isFieldInvalid('first_name_tutor')" required>
+                          [class.is-invalid]="isFieldInvalid('first_name_tutor')"
+                          [class.is-valid]="isFieldValid('first_name_tutor')" required>
                         <label for="first_name_tutor">Nombres</label>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('first_name_tutor') }}</span>
@@ -221,7 +222,8 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="text" class="form-control" formControlName="last_name_tutor" id="last_name_tutor"
-                          [class.is-invalid]="isFieldInvalid('last_name_tutor')" required>
+                          [class.is-invalid]="isFieldInvalid('last_name_tutor')"
+                          [class.is-valid]="isFieldValid('last_name_tutor')" required>
                         <label for="last_name_tutor">Apellidos</label>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('last_name_tutor') }}</span>
@@ -233,7 +235,8 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="text" class="form-control" formControlName="celphone_tutor" id="celphone_tutor"
-                          [class.is-invalid]="isFieldInvalid('celphone_tutor')" required>
+                          [class.is-invalid]="isFieldInvalid('celphone_tutor')"
+                          [class.is-valid]="isFieldValid('celphone_tutor')" required>
                         <label for="celphone_tutor">Celular</label>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('celphone_tutor') }}</span>
@@ -243,7 +246,8 @@
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <input type="email" class="form-control" formControlName="email_tutor" id="email_tutor"
-                          [class.is-invalid]="isFieldInvalid('email_tutor')" required>
+                          [class.is-invalid]="isFieldInvalid('email_tutor')"
+                          [class.is-valid]="isFieldValid('email_tutor')" required>
                         <label for="email_tutor">Correo electrónico</label>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('email_tutor') }}</span>
