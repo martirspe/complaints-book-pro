@@ -12,11 +12,11 @@
 
 /* Branding variables (overridden dynamically by the app) */
 :root {
-  --brand-primary: #01b681;
-  --brand-accent: #2d2a26;
+  --brand-primary: #1a1a1a;
+  --brand-accent: #3a3a3a;
   /* Default RGB fallbacks (overridden by JS) */
-  --brand-primary-rgb: 1, 182, 129;
-  --brand-accent-rgb: 45, 42, 38;
+  --brand-primary-rgb: 26, 26, 26;
+  --brand-accent-rgb: 58, 58, 58;
   /* Design tokens */
   --text-primary: #1c2437;
   --text-secondary: #546274;
