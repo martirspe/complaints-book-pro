@@ -926,6 +926,7 @@ export class FormComponent implements OnInit {
       document_type_id: '',
       document_type_tutor_id: '',
       consumption_type_id: '',
+      currency_id: '',
       claim_type_id: '',
       // Booleans
       is_youger: false,

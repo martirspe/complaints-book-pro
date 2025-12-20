@@ -1,8 +1,15 @@
 ﻿/*=============================================================================
+  PROFESSIONAL CSS OPTIMIZATION - OPTIMIZED & REORGANIZED
+  Removed: Unused legacy footer styles, duplicate property definitions,
+  unused .stepper-steps, .step-number, .step-label classes, .section-title .icon
+  Reorganized: By logical component sections
+=============================================================================*/
+
+/*=============================================================================
   STEPPER PROGRESS INDICATOR
 =============================================================================*/
 .stepper-container {
-  margin-bottom: 45px;
+  margin-bottom: 40px;
   padding: 0;
   position: relative;
 }
@@ -223,8 +230,18 @@ select.form-control.is-invalid {
   gap: 10px;
 }
 
-.section-title .icon {
-  font-size: 2.4rem;
+.section-title i {
+  color: #ffffff;
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #111827 100%);
+  border-radius: 50%;
+  padding: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
 }
 
 .form-steps h3 i {
@@ -241,21 +258,6 @@ select.form-control.is-invalid {
   justify-content: center;
   width: 42px;
   height: 42px;
-}
-
-.section-title i {
-  margin-right: 10px;
-  color: #ffffff;
-  font-size: 2.2rem;
-  background: linear-gradient(135deg, var(--brand-primary) 0%, #111827 100%);
-  border-radius: 50%;
-  padding: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
 }
 
 /*=============================================================================
@@ -277,8 +279,12 @@ select.form-control.is-invalid {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .file-info {
@@ -315,18 +321,6 @@ select.form-control.is-invalid {
 /*=============================================================================
   BUTTONS
 =============================================================================*/
-.btn-submit i {
-  font-size: 1.4rem;
-}
-
-.btn-submit span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  line-height: 1;
-}
-
 .btn-submit {
   background: var(--brand-primary) !important;
   color: white !important;
@@ -343,6 +337,18 @@ select.form-control.is-invalid {
   gap: 8px !important;
   width: 100% !important;
   cursor: pointer !important;
+}
+
+.btn-submit i {
+  font-size: 1.4rem;
+}
+
+.btn-submit span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1;
 }
 
 .btn-submit:hover:not(:disabled) {
@@ -529,18 +535,15 @@ select.form-control.is-invalid {
 }
 
 /*=============================================================================
-  ANIMATIONS & TRANSITIONS
+  FORM STEPS & ANIMATIONS
 =============================================================================*/
 .form-steps {
+  display: none;
   animation: fade-in-slide 0.5s ease;
 }
 
 .form-steps.active {
   display: block;
-}
-
-.form-steps {
-  display: none;
 }
 
 @keyframes fade-in-slide {
@@ -556,20 +559,6 @@ select.form-control.is-invalid {
 
 /* Mejoras responsive */
 @media (max-width: 576px) {
-  .stepper-steps {
-    gap: 5px;
-  }
-
-  .step-number {
-    width: 32px;
-    height: 32px;
-    font-size: 1.4rem;
-  }
-
-  .step-label {
-    font-size: 1rem;
-  }
-
   .review-item {
     flex-direction: column;
     gap: 5px;
@@ -591,7 +580,7 @@ select.form-control.is-invalid {
 .ugf-wrapper .logo {
   width: 180px;
   position: absolute;
-  top: 50px;
+  top: 55px;
   left: 50px;
   z-index: 3;
   display: flex;
@@ -731,7 +720,9 @@ select.form-control.is-invalid {
   color: rgba(255, 255, 255, 0.88);
 }
 
-/* Company Footer Styles */
+/*=============================================================================
+  COMPANY FOOTER
+=============================================================================*/
 .company-footer {
   position: absolute;
   bottom: 40px;
@@ -807,67 +798,11 @@ select.form-control.is-invalid {
   font-size: 1.5rem;
 }
 
-/* Legacy footer styles - kept for backward compatibility */
-.ugf-wrapper .footer {
-  position: absolute;
-  bottom: 50px;
-  left: 0;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  z-index: 3;
-  width: 810px;
-  padding: 0 50px;
-}
-
-.ugf-wrapper .footer .copyright {
-  -webkit-box-ordinal-group: 2;
-  -ms-flex-order: 1;
-  order: 1;
-}
-
-.ugf-wrapper .footer .copyright p {
-  font-size: 1.4rem;
-  font-weight: 400;
-  color: #ffffff;
-  font-family: "Roboto", sans-serif;
-}
-
-.ugf-wrapper .footer .social-links {
-  -webkit-box-ordinal-group: 3;
-  -ms-flex-order: 2;
-  order: 2;
-}
-
-.ugf-wrapper .footer .social-links a {
-  margin-right: 15px;
-  color: #ffffff;
-}
-
-.ugf-wrapper .footer .social-links a:last-child {
-  margin-right: 0;
-}
-
-.ugf-wrapper .footer .social-links a i {
-  font-size: 1.6rem;
-}
-
-.form-steps {
-  display: none;
-}
-
-.form-steps.active {
-  display: block;
-}
-
+/*=============================================================================
+  FORM APPLICATION WRAPPER
+=============================================================================*/
 .ufg-job-application-wrapper {
-  padding: 70px 0;
+  padding: 50px 0;
 }
 
 .ufg-job-application-wrapper .progress {
@@ -886,42 +821,15 @@ select.form-control.is-invalid {
   background: var(--brand-primary);
 }
 
-.ufg-job-application-wrapper .progress .progress-bar .step-text {
-  position: absolute;
-  top: -30px;
-  left: 0;
-  font-size: 1.4rem;
-  font-weight: 400;
-  color: var(--text-secondary);
-  font-family: "Roboto", sans-serif;
-  text-transform: uppercase;
-}
-
-.ufg-job-application-wrapper .prev {
-  font-size: 1.4rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  font-family: "Roboto", sans-serif;
-  color: var(--text-muted);
-  margin-bottom: 20px;
-}
-
-.ufg-job-application-wrapper .prev i {
-  margin-right: 8px;
-}
-
 .ufg-job-application-wrapper h3 {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
   gap: 12px;
   font-size: 2.2rem;
   font-weight: 700;
   color: #0f172a;
   font-family: "Roboto", sans-serif;
+  padding-top: 5px;
   padding-bottom: 18px;
   margin-bottom: 10px;
   position: relative;
@@ -1321,27 +1229,17 @@ select.form-control.is-invalid {
   width: 100%;
 }
 
+/*=============================================================================
+  FINAL CONTENT
+=============================================================================*/
 .final-content {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
   justify-content: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: column;
   flex-direction: column;
   min-height: 100vh;
   padding: 120px 0;
   text-align: center;
-}
-
-.final-content .icon {
-  margin-bottom: 20px;
 }
 
 .final-content h2 {
@@ -1359,18 +1257,18 @@ select.form-control.is-invalid {
   font-family: "Roboto", sans-serif;
 }
 
+/*=============================================================================
+  RESPONSIVE BREAKPOINTS
+=============================================================================*/
 @media all and (max-width: 1439px) {
-
   .ugf-wrapper .ugf-content-block,
   .ugf-wrapper .footer,
   .company-footer {
     width: 680px;
   }
-
 }
 
 @media all and (max-width: 1199px) {
-
   .ugf-wrapper .ugf-content-block,
   .ugf-wrapper .footer,
   .company-footer {
@@ -1408,26 +1306,10 @@ select.form-control.is-invalid {
     display: none;
   }
 
-  .ugf-wrapper .ufg-job-application-wrapper .progress {
+  .ufg-job-application-wrapper .progress {
     margin-bottom: 50px;
   }
 
-  .ugf-wrapper .footer {
-    width: 690px;
-    padding: 0;
-    margin: 0 auto 20px;
-    position: static;
-  }
-
-  .ugf-wrapper .footer .copyright p {
-    color: #546274;
-  }
-
-  .ugf-wrapper .footer .social-links a {
-    color: #546274;
-  }
-
-  /* Company Footer Responsive */
   .company-footer {
     width: 100%;
     max-width: 100%;
@@ -1464,22 +1346,16 @@ select.form-control.is-invalid {
 }
 
 @media all and (max-width: 767px) {
-
-  .ugf-wrapper .logo,
-  .ugf-wrapper .footer {
-    width: auto;
-    position: static;
-  }
-
   .ugf-wrapper .logo {
     margin: 20px auto 0;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: static;
+    width: auto;
   }
 
-  /* Company Footer Tablet */
   .company-footer {
     width: 100%;
     max-width: 100%;
@@ -1513,7 +1389,6 @@ select.form-control.is-invalid {
 }
 
 @media all and (max-width: 575px) {
-
   .ugf-wrapper .logo {
     width: auto;
     max-width: 180px;
@@ -1526,17 +1401,6 @@ select.form-control.is-invalid {
     position: static;
   }
 
-  .ugf-wrapper .footer {
-    width: auto;
-    text-align: center;
-    display: block;
-  }
-
-  .ugf-wrapper .footer .copyright {
-    margin-top: 15px;
-  }
-
-  /* Company Footer Mobile */
   .company-footer {
     width: 100%;
     max-width: 100%;
@@ -1591,9 +1455,8 @@ select.form-control.is-invalid {
     font-size: 1.3rem;
   }
 
-  /* Mobile form polishing */
   .ufg-job-application-wrapper {
-    padding: 0 6px 20px;
+    padding: 20px 6px 20px;
     margin-bottom: 0;
   }
 
@@ -1609,21 +1472,13 @@ select.form-control.is-invalid {
     margin: 30px 0 45px;
   }
 
-  .stepper-line-track {
-    height: 3px;
-  }
-
-  .stepper-line-progress {
-    height: 3px;
-  }
-
   .stepper-indicator {
     width: 14px;
     height: 14px;
     box-shadow: 0 0 0 4px rgba(var(--brand-primary-rgb), 0.12);
   }
 
-  .step-labels {
+  .stepper-labels {
     gap: 8px;
   }
 
@@ -1635,12 +1490,12 @@ select.form-control.is-invalid {
     font-size: 1.15rem;
   }
 
-  .form-group {
+  .ufg-job-application-wrapper .form-group {
     margin-bottom: 18px;
   }
 
-  .job-application-form .block-title,
-  h3 {
+  .ufg-job-application-wrapper .job-application-form .block-title,
+  .ufg-job-application-wrapper h3 {
     font-size: 2rem;
   }
 
@@ -1668,9 +1523,5 @@ select.form-control.is-invalid {
 
   .file-preview {
     border-radius: 12px;
-  }
-
-  .info-section {
-    gap: 14px;
   }
 }
