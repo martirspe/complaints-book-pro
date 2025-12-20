@@ -47,7 +47,6 @@ export class FormComponent implements OnInit {
     'RUC': { min: 11, max: 11, pattern: /^[0-9]+$/, hint: 'RUC: exactamente 11 dígitos' },
     'BREVETE': { min: 8, max: 8, pattern: /^[0-9]+$/, hint: 'Brevete: exactamente 8 dígitos' },
   };
-  public flag = false;
 
   // Descripción de los tipos de reclamo
   public sDescription = '';
@@ -302,11 +301,7 @@ export class FormComponent implements OnInit {
     private claimsService: ClaimsService,
     private toast: ToastService,
     private brandingService: BrandingService
-  ) {
-    setInterval(() => {
-      this.flag = !this.flag;
-    }, 60000);
-  }
+  ) { }
 
   ngOnInit(): void {
     // Cargar branding desde el servidor y aplicar tema

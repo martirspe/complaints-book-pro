@@ -1,54 +1,70 @@
 <div class="ugf-wraper">
   <div class="ugf-wrapper">
-    <div class="logo">
-      <a href="/">
-        <img [src]="branding?.logoLightUrl" class="img-fluid logo-white" alt="logo">
-        <img [src]="branding?.logoDarkUrl" class="img-fluid logo-black" alt="logo">
-      </a>
-    </div>
-    @if (!flag) {
-    <div class="ugf-content-block" role="region" aria-labelledby="hero-title">
+    <header class="page-header" role="banner">
+      <div class="logo">
+        <a href="/">
+          <img [src]="branding?.logoLightUrl" class="img-fluid logo-white" alt="logo">
+          <img [src]="branding?.logoDarkUrl" class="img-fluid logo-black" alt="logo">
+        </a>
+      </div>
+    </header>
+
+    <main class="page-main" role="main">
+      <div class="ugf-content-block" role="region" aria-labelledby="hero-title">
       <div class="content-block">
-        <h1 id="hero-title">¿Qué es un reclamo?</h1>
-        <p>Es la comunicación que puedes establecer con nosotros ante una posible insatisfacción o disconformidad con un
-          producto o servicio prestado por el proveedor, con la finalidad de que éstos sean solucionados.</p>
+        <h1 id="hero-title">Libro de Reclamaciones</h1>
+        <p class="hero-subtitle">Estamos aquí para escucharte y resolver tu situación</p>
+        <div class="info-section">
+          <div class="info-item">
+            <div class="info-icon">📋</div>
+            <div class="info-content">
+              <strong>Reclamo</strong>
+              <p>Disconformidad con productos o servicios</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">💬</div>
+            <div class="info-content">
+              <strong>Queja</strong>
+              <p>Malestar con la atención recibida</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    }
-    @if (flag) {
-    <div class="ugf-content-block" role="region" aria-labelledby="hero-title">
-      <div class="content-block">
-        <h1 id="hero-title">¿Qué es una queja?</h1>
-        <p>Es la comunicación que puedes establecer con nosotros ante una disconformidad relacionada a los productos o
-          servicios, con la finalidad de que éstos sean solucionados.</p>
-      </div>
-    </div>
-    }
-    <div class="container">
+      <div class="container">
       <div class="row">
         <div class="col-lg-5 offset-lg-7 p-sm-0">
           <div class="ufg-job-application-wrapper">
-            <!-- Stepper Línea Horizontal Minimalista -->
-            <div class="stepper-container" aria-label="Progreso del formulario">
-              <div class="stepper-line-track">
+            <!-- Progress Stepper -->
+            <nav class="stepper-container" aria-label="Progreso del formulario" role="navigation">
+              <div class="stepper-line-track" role="progressbar" [attr.aria-valuenow]="currentStep"
+                [attr.aria-valuemin]="1" [attr.aria-valuemax]="totalSteps"
+                [attr.aria-label]="'Paso ' + currentStep + ' de ' + totalSteps">
                 <div class="stepper-line-progress" [style.width.%]="(currentStep / totalSteps) * 100"></div>
                 <div class="stepper-indicator" [style.left.%]="((currentStep - 0.5) / totalSteps) * 100"></div>
               </div>
-              <div class="stepper-labels">
+              <ol class="stepper-labels" role="list">
                 @for (label of stepLabels; track label; let i = $index) {
-                <div class="step-label-item" [class.active]="currentStep === i + 1"
+                <li class="step-label-item" [class.active]="currentStep === i + 1"
                   [class.completed]="currentStep > i + 1" [class.disabled]="!canNavigateTo(i + 1)"
                   (click)="canNavigateTo(i + 1) && onStepClick(i + 1)"
+                  (keydown.enter)="canNavigateTo(i + 1) && onStepClick(i + 1)"
+                  (keydown.space)="canNavigateTo(i + 1) && onStepClick(i + 1); $event.preventDefault()"
                   [attr.role]="canNavigateTo(i + 1) ? 'button' : 'status'"
-                  [attr.tabindex]="canNavigateTo(i + 1) ? 0 : -1">
+                  [attr.tabindex]="canNavigateTo(i + 1) ? 0 : -1"
+                  [attr.aria-current]="currentStep === i + 1 ? 'step' : null">
                   <span class="label-text">{{ label }}</span>
-                </div>
+                </li>
                 }
-              </div>
-            </div>
+              </ol>
+            </nav>
             <form [formGroup]="claimForm" class="job-application-form" autocomplete="off">
-              <div class="form-steps" [class.active]="currentStep === 1">
-                <h3><i class="las la-user-circle"></i> Identificación del Consumidor Reclamante</h3>
+              <section class="form-steps" [class.active]="currentStep === 1" aria-labelledby="step1-title">
+                <h3 id="step1-title">
+                  <i class="las la-user-circle" aria-hidden="true"></i>
+                  Identificación del Consumidor Reclamante
+                </h3>
                 <div class="row">
                   <div class="col-sm-6 p-sm-0">
                     <div class="form-group">
@@ -150,19 +166,13 @@
                 </div>
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
-                    <div class="form-group check-gender">
-                      <span class="lebel-text">Soy menor de edad</span>
+                    <div class="form-group check-gender" role="group" aria-labelledby="minor-check">
                       <div class="custom-radio">
-                        <input type="radio" name="is_youger" class="custom-control-input" id="simenor"
-                          formControlName="is_youger" [value]="true" aria-label="Sí, es menor de edad">
-                        <label class="custom-control-label" for="simenor">Sí</label>
+                        <input type="checkbox" name="is_youger" class="custom-control-input" id="minor-check"
+                          formControlName="is_youger" aria-describedby="age-help">
+                        <label class="custom-control-label" for="minor-check">Soy menor</label>
                       </div>
-                      <div class="custom-radio">
-                        <input type="radio" name="is_youger" class="custom-control-input" id="nomenor"
-                          formControlName="is_youger" [value]="false" aria-label="No, es mayor de edad">
-                        <label class="custom-control-label" for="nomenor">No</label>
-                      </div>
-                      <small class="form-text text-muted">Si es menor, necesitaremos los datos del tutor legal</small>
+                      <small id="age-help" class="form-text text-muted">Se requerirán los datos del tutor legal</small>
                     </div>
                   </div>
                 </div>
@@ -257,11 +267,17 @@
                   </div>
                 </div>
                 }
-                <button class="btn step-btn" [disabled]="!isStepValid(1)" (click)="goNextIfValid(1)"><i
-                    class="las la-arrow-right"></i> Siguiente</button>
-              </div>
-              <div class="form-steps" [class.active]="currentStep === 2">
-                <h3><i class="las la-shopping-cart"></i> Identificación del Bien Contratado</h3>
+                <button type="button" class="btn step-btn" [disabled]="!isStepValid(1)" (click)="goNextIfValid(1)"
+                  aria-label="Ir al siguiente paso: Identificación del Bien Contratado">
+                  <i class="las la-arrow-right" aria-hidden="true"></i>
+                  <span>Siguiente</span>
+                </button>
+              </section>
+              <section class="form-steps" [class.active]="currentStep === 2" aria-labelledby="step2-title">
+                <h3 id="step2-title">
+                  <i class="las la-shopping-cart" aria-hidden="true"></i>
+                  Identificación del Bien Contratado
+                </h3>
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
@@ -346,11 +362,17 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn step-btn" [disabled]="!isStepValid(2)" (click)="goNextIfValid(2)"><i
-                    class="las la-arrow-right"></i> Siguiente</button>
-              </div>
-              <div class="form-steps" [class.active]="currentStep === 3">
-                <h3><i class="las la-comment-alt"></i> Detalle de Reclamación y Pedido del Consumidor</h3>
+                <button type="button" class="btn step-btn" [disabled]="!isStepValid(2)" (click)="goNextIfValid(2)"
+                  aria-label="Ir al siguiente paso: Detalle de Reclamación">
+                  <i class="las la-arrow-right" aria-hidden="true"></i>
+                  <span>Siguiente</span>
+                </button>
+              </section>
+              <section class="form-steps" [class.active]="currentStep === 3" aria-labelledby="step3-title">
+                <h3 id="step3-title">
+                  <i class="las la-comment-alt" aria-hidden="true"></i>
+                  Detalle de Reclamación y Pedido del Consumidor
+                </h3>
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group">
@@ -446,11 +468,17 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn step-btn" [disabled]="!isStepValid(3)" (click)="goNextIfValid(3)"><i
-                    class="las la-eye"></i> Revisar antes de enviar</button>
-              </div>
-              <div class="form-steps review-step" [class.active]="currentStep === 4">
-                <h3><i class="las la-check-circle"></i> Revisión de tu Reclamo</h3>
+                <button type="button" class="btn step-btn" [disabled]="!isStepValid(3)" (click)="goNextIfValid(3)"
+                  aria-label="Revisar información antes de enviar">
+                  <i class="las la-eye" aria-hidden="true"></i>
+                  <span>Revisar antes de enviar</span>
+                </button>
+              </section>
+              <section class="form-steps review-step" [class.active]="currentStep === 4" aria-labelledby="step4-title">
+                <h3 id="step4-title">
+                  <i class="las la-check-circle" aria-hidden="true"></i>
+                  Revisión de tu Reclamo
+                </h3>
                 <p class="review-intro">Por favor verifica que toda la información sea correcta antes de enviar</p>
 
                 <div class="review-section">
@@ -524,6 +552,18 @@
                   }
                 </div>
 
+                <div class="review-section legal-notice">
+                  <h4 class="legal-notice-title">Información Legal Importante</h4>
+                  <div class="legal-notice-item">
+                    <i class="las la-check-circle" aria-hidden="true"></i>
+                    <p>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI.</p>
+                  </div>
+                  <div class="legal-notice-item">
+                    <i class="las la-info-circle" aria-hidden="true"></i>
+                    <p>El proveedor debe dar respuesta al reclamo o queja en un plazo no mayor a quince (15) días hábiles, el cual es improrrogable.</p>
+                  </div>
+                </div>
+
                 <div class="row">
                   <div class="col-sm-12 p-sm-0">
                     <div class="form-group captcha-wrapper">
@@ -533,29 +573,51 @@
                         </re-captcha>
                       </label>
                     </div>
-                    <button [disabled]="claimForm.invalid || isSubmitting" class="btn btn-submit" (click)="onSave()">
+                    <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="btn btn-submit"
+                      (click)="onSave()" [attr.aria-busy]="isSubmitting">
                       @if (!isSubmitting) {
-                      <span><i class="las la-paper-plane"></i> Enviar Reclamo</span>
+                      <span>
+                        <i class="las la-paper-plane" aria-hidden="true"></i>
+                        Enviar Reclamo
+                      </span>
                       }
                       @if (isSubmitting) {
-                      <span><span class="spinner-border spinner-sm"></span> Enviando...</span>
+                      <span>
+                        <span class="spinner-border spinner-sm" role="status" aria-label="Enviando"></span>
+                        Enviando...
+                      </span>
                       }
                     </button>
                   </div>
                 </div>
-              </div>
+              </section>
             </form>
           </div>
         </div>
       </div>
     </div>
-    <div class="footer">
-      <div class="copyright">
-        <p>
-          <strong>{{branding?.companyName}}</strong> - RUC: {{branding?.companyRuc}}<br>
-          Copyright © {{currentYear}} {{branding?.companyBrand}} | Todos los derechos reservados
-        </p>
+    </main>
+
+    <footer class="company-footer" role="contentinfo">
+      <div class="company-info">
+        <div class="company-details">
+          <h3 class="company-name">{{branding?.companyName}}</h3>
+          <div class="company-meta">
+            <div class="meta-item">
+              <i class="las la-building" aria-hidden="true"></i>
+              <span><strong>RUC:</strong> {{branding?.companyRuc}}</span>
+            </div>
+            <div class="meta-item">
+              <i class="las la-bookmark" aria-hidden="true"></i>
+              <span><strong>Marca:</strong> {{branding?.companyBrand}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="copyright">
+          <i class="las la-copyright" aria-hidden="true"></i>
+          <span>{{currentYear}} Todos los derechos reservados</span>
+        </div>
       </div>
-    </div>
+    </footer>
   </div>
 </div>
