@@ -4,16 +4,16 @@ import { Subscription } from 'rxjs';
 import { ToastService, Toast } from './toast.service';
 
 @Component({
-    selector: 'app-toast-container',
-    imports: [CommonModule],
-    templateUrl: './toast-container.component.html',
-    styleUrls: ['./toast-container.component.css']
+  selector: 'app-toast-container',
+  imports: [CommonModule],
+  templateUrl: './toast-container.component.html',
+  styleUrls: ['./toast-container.component.css']
 })
 export class ToastContainerComponent implements OnInit, OnDestroy {
   toasts: Toast[] = [];
   private sub?: Subscription;
 
-  constructor(private toastService: ToastService) {}
+  constructor(private toastService: ToastService) { }
 
   ngOnInit(): void {
     this.sub = this.toastService.toasts$.subscribe(list => this.toasts = list);

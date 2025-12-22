@@ -68,7 +68,9 @@
   opacity: 0.5;
 }
 
-.step-label-item.disabled:hover { transform: none; }
+.step-label-item.disabled:hover {
+  transform: none;
+}
 
 .step-label-item:not(.disabled):hover {
   transform: translateY(-2px);
@@ -113,8 +115,8 @@
   background-size: 18px;
 }
 
-input.is-valid + label,
-textarea.is-valid + label {
+input.is-valid+label,
+textarea.is-valid+label {
   color: var(--success) !important;
   font-weight: 600;
 }
@@ -126,8 +128,8 @@ textarea.is-valid + label {
   padding-right: 45px;
 }
 
-input.is-invalid + label,
-textarea.is-invalid + label {
+input.is-invalid+label,
+textarea.is-invalid+label {
   color: var(--danger) !important;
   font-weight: 600;
 }
@@ -186,6 +188,7 @@ select.form-control.is-invalid {
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -213,6 +216,7 @@ select.form-control.is-invalid {
     max-height: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     max-height: 1000px;
@@ -233,7 +237,7 @@ select.form-control.is-invalid {
 .section-title i {
   color: #ffffff;
   font-size: 2.2rem;
-  background: linear-gradient(135deg, var(--brand-primary) 0%, #111827 100%);
+  background: var(--brand-primary);
   border-radius: 50%;
   padding: 8px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
@@ -249,7 +253,7 @@ select.form-control.is-invalid {
   color: #ffffff;
   font-size: 2.6rem;
   vertical-align: middle;
-  background: linear-gradient(135deg, var(--brand-primary) 0%, #111827 100%);
+  background: var(--brand-primary);
   border-radius: 50%;
   padding: 8px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
@@ -282,6 +286,7 @@ select.form-control.is-invalid {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -437,6 +442,7 @@ select.form-control.is-invalid {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -551,6 +557,7 @@ select.form-control.is-invalid {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -585,7 +592,7 @@ select.form-control.is-invalid {
   z-index: 3;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .ugf-wrapper .logo .logo-black {
@@ -620,7 +627,8 @@ select.form-control.is-invalid {
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  isolation: isolate; /* allow overlay without affecting children */
+  isolation: isolate;
+  /* allow overlay without affecting children */
 }
 
 /* Soft dark overlay to improve text contrast */
@@ -628,7 +636,7 @@ select.form-control.is-invalid {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,.60) 60%, rgba(0,0,0,.50) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, .45) 0%, rgba(0, 0, 0, .60) 60%, rgba(0, 0, 0, .50) 100%);
   z-index: -1;
 }
 
@@ -654,7 +662,7 @@ select.form-control.is-invalid {
 .ugf-wrapper .ugf-content-block .content-block p {
   font-size: 1.6rem;
   font-weight: 400;
-  color: rgba(255,255,255,0.95);
+  color: rgba(255, 255, 255, 0.95);
   font-family: "Roboto", sans-serif;
 }
 
@@ -1061,7 +1069,7 @@ select.form-control.is-invalid {
   padding: 25px 15px 0;
   font-size: 1.4rem;
   font-weight: 400;
-  line-height: 80px;
+  line-height: 1.4;
   color: var(--text-secondary) !important;
 }
 
@@ -1151,7 +1159,7 @@ select.form-control.is-invalid {
 .ufg-job-application-wrapper .job-application-form .form-group textarea.form-control {
   height: 140px;
   padding-top: 25px;
-  line-height: 1.7;
+  line-height: 1.6;
   border: 2px solid rgba(0, 0, 0, 0.12);
 }
 
@@ -1261,6 +1269,7 @@ select.form-control.is-invalid {
   RESPONSIVE BREAKPOINTS
 =============================================================================*/
 @media all and (max-width: 1439px) {
+
   .ugf-wrapper .ugf-content-block,
   .ugf-wrapper .footer,
   .company-footer {
@@ -1269,6 +1278,7 @@ select.form-control.is-invalid {
 }
 
 @media all and (max-width: 1199px) {
+
   .ugf-wrapper .ugf-content-block,
   .ugf-wrapper .footer,
   .company-footer {

@@ -1,33 +1,37 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RecaptchaModule, RecaptchaFormsModule } from 'ng-recaptcha';
 import { forkJoin, switchMap, catchError, throwError, of, finalize, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ToastService } from '../../shared/toast/toast.service';
-import { BrandingService } from '../../services/branding.service';
 
 // Services
 import { ClaimsService } from '../../services/claims.service';
+import { TenantService } from 'src/app/services/tenant.service';
 
 // Interfaces
+import { ICustomer } from '../../interfaces/customer.interface';
+import { ITutor } from '../../interfaces/tutor.interface';
 import { IClaimType } from '../../interfaces/claim-type.interface';
 import { IDocumentType } from '../../interfaces/document-type.interface';
 import { IConsumptionType } from '../../interfaces/consumption-type.interface';
-import { ICustomer } from '../../interfaces/customer.interface';
-import { ITutor } from '../../interfaces/tutor.interface';
-import { IBranding } from '../../interfaces/branding.interface';
 import { ICurrency } from '../../interfaces/currency.interface';
+
+// Environment
+import { environment } from 'src/environments/environment.prod';
 
 @Component({
   selector: 'app-form',
-  imports: [CommonModule, ReactiveFormsModule, RecaptchaModule, RecaptchaFormsModule],
+  imports: [ReactiveFormsModule, RecaptchaModule, RecaptchaFormsModule],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
 })
 export class FormComponent implements OnInit {
 
-  // Branding dinámico
-  public branding: IBranding | null = null;
+  // Información del tenant
+  public tenant = this.tenantService.tenant;
+
+  // Clave del reCAPTCHA
+  siteKey = environment.RECAPTCHA_V2_KEY;
 
   // Variables para el formulario
   private readonly MIN_DESC_LENGTH = 100;
@@ -300,24 +304,10 @@ export class FormComponent implements OnInit {
     private fb: FormBuilder,
     private claimsService: ClaimsService,
     private toast: ToastService,
-    private brandingService: BrandingService
+    private tenantService: TenantService
   ) { }
 
   ngOnInit(): void {
-    // Cargar branding desde el servidor y aplicar tema
-    this.brandingService.getBranding().subscribe({
-      next: (branding) => {
-        this.branding = branding;
-        this.brandingService.applyTheme(branding);
-        // Actualizar título del documento con la marca
-        if (branding?.companyBrand) {
-          document.title = `${branding.companyBrand} | Libro de Reclamaciones`;
-        }
-      },
-      error: (error) => {
-        console.error('Error al cargar branding:', error);
-      }
-    });
     this.loadDocumentTypes();
     this.loadConsumptionTypes();
     this.loadClaimTypes();
@@ -712,7 +702,7 @@ export class FormComponent implements OnInit {
               customer_id: this.extractId(customer),
               tutor_id: this.extractId(tutor)
             });
-            return this.createClaimWithFormData(claimData);
+            return this.createClaim(claimData);
           })
         ).pipe(
           finalize(() => { this.isSubmitting = false; })
@@ -732,7 +722,7 @@ export class FormComponent implements OnInit {
             const claimData = this.buildClaimPayload({
               customer_id: this.extractId(customer)
             });
-            return this.createClaimWithFormData(claimData);
+            return this.createClaim(claimData);
           }),
           finalize(() => { this.isSubmitting = false; })
         ).subscribe({
@@ -890,33 +880,49 @@ export class FormComponent implements OnInit {
     };
   }
 
-  private createClaimWithFormData(claimData: any) {
+  private createClaim(claimData: any) {
+
+    const hasAttachment = claimData.attachment instanceof File;
+
+    // 🟢 CASO 1: SIN ARCHIVO → JSON (como Postman)
+    if (!hasAttachment) {
+      const payload = {
+        customer_id: Number(claimData.customer_id),
+        tutor_id: claimData.tutor_id ? Number(claimData.tutor_id) : undefined,
+        claim_type_id: Number(claimData.claim_type_id),
+        consumption_type_id: Number(claimData.consumption_type_id),
+        currency_id: Number(claimData.currency_id),
+        order_number: Number(claimData.order_number),
+        claimed_amount: Number(claimData.claimed_amount),
+        description: claimData.description,
+        detail: claimData.detail,
+        request: claimData.request,
+        recaptcha: claimData.recaptcha
+      };
+
+      return this.claimsService.createClaim(
+        this.tenantService.tenantSlug(),
+        payload // 👈 JSON
+      );
+    }
+
+    // 🟠 CASO 2: CON ARCHIVO → multipart/form-data
     const formData = new FormData();
 
-    // Normalizar y convertir claimData en FormData (solo campos de reclamo)
-    const numericKeys = ['customer_id', 'tutor_id', 'claim_type_id', 'consumption_type_id', 'currency_id', 'order_number', 'claimed_amount'];
-    const booleanKeys = ['resolved'];
-    Object.keys(claimData).forEach(key => {
-      const value = claimData[key];
-      if (value === undefined || value === null || value === '') return; // omitir vacíos
+    Object.entries(claimData).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return;
+
       if (key === 'attachment' && value instanceof File) {
         formData.append('attachment', value);
-      } else if (numericKeys.includes(key)) {
-        formData.append(key, String(value));
-      } else if (booleanKeys.includes(key)) {
-        formData.append(key, value ? 'true' : 'false');
       } else {
-        formData.append(key, value);
+        formData.append(key, String(value));
       }
     });
 
-    // Asegurar customer_id presente y correcto
-    if (claimData.customer_id !== undefined && claimData.customer_id !== null) {
-      formData.set('customer_id', String(claimData.customer_id));
-    }
-
-    // Enviar el formulario como `multipart/form-data`
-    return this.claimsService.createClaim(formData);
+    return this.claimsService.createClaim(
+      this.tenantService.tenantSlug(),
+      formData
+    );
   }
 
 
@@ -955,17 +961,11 @@ export class FormComponent implements OnInit {
     this.claimForm.markAsUntouched();
   }
 
-  // Google Recaptcha V2
-  public log: string[] = [];
+  onCaptchaResolved(token: string | null): void {
+    if (!token) return;
 
-  public addTokenLog(message: string, token: string | null) {
-    this.log.push(`${message}: ${this.formatToken(token)}`);
-  }
-
-  public formatToken(token: string | null) {
-    return token !== null
-      ? `${token.substr(0, 7)}...${token.substr(-7)}`
-      : 'null';
+    // Guardar token en el form (por seguridad explícita)
+    this.claimForm.get('recaptcha')?.setValue(token);
   }
 
 }

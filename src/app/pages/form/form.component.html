@@ -3,190 +3,76 @@
     <header class="page-header" role="banner">
       <div class="logo">
         <a href="/">
-          <img [src]="branding?.logoLightUrl" class="img-fluid logo-white" alt="logo">
-          <img [src]="branding?.logoDarkUrl" class="img-fluid logo-black" alt="logo">
+          <img [src]="tenant()?.logo_light_url" class="img-fluid logo-white" alt="logo">
+          <img [src]="tenant()?.logo_dark_url" class="img-fluid logo-black" alt="logo">
         </a>
       </div>
     </header>
 
     <main class="page-main" role="main">
       <div class="ugf-content-block" role="region" aria-labelledby="hero-title">
-      <div class="content-block">
-        <h1 id="hero-title">Libro de Reclamaciones</h1>
-        <p class="hero-subtitle">Estamos aquí para escucharte y resolver tu situación</p>
-        <div class="info-section">
-          <div class="info-item">
-            <div class="info-icon">📋</div>
-            <div class="info-content">
-              <strong>Reclamo</strong>
-              <p>Disconformidad con productos o servicios</p>
+        <div class="content-block">
+          <h1 id="hero-title">Libro de Reclamaciones</h1>
+          <p class="hero-subtitle">Estamos aquí para escucharte y resolver tu situación</p>
+          <div class="info-section">
+            <div class="info-item">
+              <div class="info-icon">📋</div>
+              <div class="info-content">
+                <strong>Reclamo</strong>
+                <p>Disconformidad con productos o servicios</p>
+              </div>
             </div>
-          </div>
-          <div class="info-item">
-            <div class="info-icon">💬</div>
-            <div class="info-content">
-              <strong>Queja</strong>
-              <p>Malestar con la atención recibida</p>
+            <div class="info-item">
+              <div class="info-icon">💬</div>
+              <div class="info-content">
+                <strong>Queja</strong>
+                <p>Malestar con la atención recibida</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
       <div class="container">
-      <div class="row">
-        <div class="col-lg-5 offset-lg-7 p-sm-0">
-          <div class="ufg-job-application-wrapper">
-            <!-- Progress Stepper -->
-            <nav class="stepper-container" aria-label="Progreso del formulario" role="navigation">
-              <div class="stepper-line-track" role="progressbar" [attr.aria-valuenow]="currentStep"
-                [attr.aria-valuemin]="1" [attr.aria-valuemax]="totalSteps"
-                [attr.aria-label]="'Paso ' + currentStep + ' de ' + totalSteps">
-                <div class="stepper-line-progress" [style.width.%]="(currentStep / totalSteps) * 100"></div>
-                <div class="stepper-indicator" [style.left.%]="((currentStep - 0.5) / totalSteps) * 100"></div>
-              </div>
-              <ol class="stepper-labels" role="list">
-                @for (label of stepLabels; track label; let i = $index) {
-                <li class="step-label-item" [class.active]="currentStep === i + 1"
-                  [class.completed]="currentStep > i + 1" [class.disabled]="!canNavigateTo(i + 1)"
-                  (click)="canNavigateTo(i + 1) && onStepClick(i + 1)"
-                  (keydown.enter)="canNavigateTo(i + 1) && onStepClick(i + 1)"
-                  (keydown.space)="canNavigateTo(i + 1) && onStepClick(i + 1); $event.preventDefault()"
-                  [attr.role]="canNavigateTo(i + 1) ? 'button' : 'status'"
-                  [attr.tabindex]="canNavigateTo(i + 1) ? 0 : -1"
-                  [attr.aria-current]="currentStep === i + 1 ? 'step' : null">
-                  <span class="label-text">{{ label }}</span>
-                </li>
-                }
-              </ol>
-            </nav>
-            <form [formGroup]="claimForm" class="job-application-form" autocomplete="off">
-              <section class="form-steps" [class.active]="currentStep === 1" aria-labelledby="step1-title">
-                <h3 id="step1-title">
-                  <i class="las la-user-circle" aria-hidden="true"></i>
-                  Identificación del Consumidor Reclamante
-                </h3>
-                <div class="row">
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <div class="select-input">
-                        <span></span>
-                        <select formControlName="document_type_id" id="document_type_id" class="form-control"
-                          [class.is-invalid]="isFieldInvalid('document_type_id')"
-                          [class.is-valid]="isFieldValid('document_type_id')">
-                          <option value="">Elija tipo de documento</option>
-                          @for (type of documentTypes; track type) {
-                          <option [value]="type.id">
-                            {{type.name}}
-                          </option>
-                          }
-                        </select>
-                        <div class="invalid-feedback">
-                          <div class="error-message">{{ getFieldError('document_type_id') }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <input type="tel" inputmode="numeric" class="form-control" formControlName="document_number"
-                        id="document_number" [class.is-invalid]="isFieldInvalid('document_number')"
-                        [class.is-valid]="isFieldValid('document_number')" required aria-describedby="doc-help">
-                      <label for="document_number">No. documento</label>
-                      @if (customerAutoFilled) {
-                      <span class="autofill-badge">Encontrado</span>
-                      }
-                      <small id="doc-help" class="form-text text-muted">{{ docNumberHint }}</small>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('document_number') }}</span>
-                      </div>
-                    </div>
-                  </div>
+        <div class="row">
+          <div class="col-lg-5 offset-lg-7 p-sm-0">
+            <div class="ufg-job-application-wrapper">
+              <!-- Progress Stepper -->
+              <nav class="stepper-container" aria-label="Progreso del formulario" role="navigation">
+                <div class="stepper-line-track" role="progressbar" [attr.aria-valuenow]="currentStep"
+                  [attr.aria-valuemin]="1" [attr.aria-valuemax]="totalSteps"
+                  [attr.aria-label]="'Paso ' + currentStep + ' de ' + totalSteps">
+                  <div class="stepper-line-progress" [style.width.%]="(currentStep / totalSteps) * 100"></div>
+                  <div class="stepper-indicator" [style.left.%]="((currentStep - 0.5) / totalSteps) * 100"></div>
                 </div>
-                <div class="row">
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <input type="text" class="form-control" formControlName="first_name" id="first_name"
-                        [class.is-invalid]="isFieldInvalid('first_name')" [class.is-valid]="isFieldValid('first_name')"
-                        required>
-                      <label for="first_name">Nombres</label>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('first_name') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <input type="text" class="form-control" formControlName="last_name" id="last_name"
-                        [class.is-invalid]="isFieldInvalid('last_name')" [class.is-valid]="isFieldValid('last_name')"
-                        required>
-                      <label for="last_name">Apellidos</label>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('last_name') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <input type="tel" inputmode="numeric" class="form-control" formControlName="celphone"
-                        id="celphone" [class.is-invalid]="isFieldInvalid('celphone')"
-                        [class.is-valid]="isFieldValid('celphone')" maxlength="9" required>
-                      <label for="celphone">Celular</label>
-                      <small class="form-text text-muted">Número de 9 dígitos</small>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('celphone') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <input type="email" class="form-control" formControlName="email" id="email"
-                        [class.is-invalid]="isFieldInvalid('email')" [class.is-valid]="isFieldValid('email')" required>
-                      <label for="email">Correo electrónico</label>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('email') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group">
-                      <input type="text" class="form-control" formControlName="address" id="address"
-                        [class.is-invalid]="isFieldInvalid('address')" [class.is-valid]="isFieldValid('address')"
-                        required>
-                      <label for="address">Dirección actual</label>
-                      <small class="form-text text-muted">Incluye calle, número, distrito y ciudad</small>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('address') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group check-gender" role="group" aria-labelledby="minor-check">
-                      <div class="custom-radio">
-                        <input type="checkbox" name="is_youger" class="custom-control-input" id="minor-check"
-                          formControlName="is_youger" aria-describedby="age-help">
-                        <label class="custom-control-label" for="minor-check">Soy menor</label>
-                      </div>
-                      <small id="age-help" class="form-text text-muted">Se requerirán los datos del tutor legal</small>
-                    </div>
-                  </div>
-                </div>
-                @if (isYouger) {
-                <div class="adult tutor-section">
-                  <h4 class="section-title"><i class="las la-shield-alt"></i> Datos del Tutor Legal</h4>
+                <ol class="stepper-labels" role="list">
+                  @for (label of stepLabels; track label; let i = $index) {
+                  <li class="step-label-item" [class.active]="currentStep === i + 1"
+                    [class.completed]="currentStep > i + 1" [class.disabled]="!canNavigateTo(i + 1)"
+                    (click)="canNavigateTo(i + 1) && onStepClick(i + 1)"
+                    (keydown.enter)="canNavigateTo(i + 1) && onStepClick(i + 1)"
+                    (keydown.space)="canNavigateTo(i + 1) && onStepClick(i + 1); $event.preventDefault()"
+                    [attr.role]="canNavigateTo(i + 1) ? 'button' : 'status'"
+                    [attr.tabindex]="canNavigateTo(i + 1) ? 0 : -1"
+                    [attr.aria-current]="currentStep === i + 1 ? 'step' : null">
+                    <span class="label-text">{{ label }}</span>
+                  </li>
+                  }
+                </ol>
+              </nav>
+              <form [formGroup]="claimForm" class="job-application-form" autocomplete="off">
+                <section class="form-steps" [class.active]="currentStep === 1" aria-labelledby="step1-title">
+                  <h3 id="step1-title">
+                    <i class="las la-user-circle" aria-hidden="true"></i>
+                    Identificación del Consumidor Reclamante
+                  </h3>
                   <div class="row">
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
                         <div class="select-input">
                           <span></span>
-                          <select formControlName="document_type_tutor_id" id="document_type_tutor_id"
-                            class="form-control" [class.is-invalid]="isFieldInvalid('document_type_tutor_id')"
-                            [class.is-valid]="isFieldValid('document_type_tutor_id')">
+                          <select formControlName="document_type_id" id="document_type_id" class="form-control"
+                            [class.is-invalid]="isFieldInvalid('document_type_id')"
+                            [class.is-valid]="isFieldValid('document_type_id')">
                             <option value="">Elija tipo de documento</option>
                             @for (type of documentTypes; track type) {
                             <option [value]="type.id">
@@ -195,24 +81,23 @@
                             }
                           </select>
                           <div class="invalid-feedback">
-                            <div class="error-message">{{ getFieldError('document_type_tutor_id') }}</div>
+                            <div class="error-message">{{ getFieldError('document_type_id') }}</div>
                           </div>
                         </div>
                       </div>
                     </div>
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
-                        <input type="tel" inputmode="numeric" class="form-control"
-                          formControlName="document_number_tutor" id="document_number_tutor"
-                          [class.is-invalid]="isFieldInvalid('document_number_tutor')"
-                          [class.is-valid]="isFieldValid('document_number_tutor')" required>
-                        <label for="document_number_tutor">No. documento</label>
-                        @if (tutorAutoFilled) {
+                        <input type="tel" inputmode="numeric" class="form-control" formControlName="document_number"
+                          id="document_number" [class.is-invalid]="isFieldInvalid('document_number')"
+                          [class.is-valid]="isFieldValid('document_number')" required aria-describedby="doc-help">
+                        <label for="document_number">No. documento</label>
+                        @if (customerAutoFilled) {
                         <span class="autofill-badge">Encontrado</span>
                         }
-                        <small class="form-text text-muted">{{ tutorDocNumberHint }}</small>
+                        <small id="doc-help" class="form-text text-muted">{{ docNumberHint }}</small>
                         <div class="invalid-feedback">
-                          <span>{{ getFieldError('document_number_tutor') }}</span>
+                          <span>{{ getFieldError('document_number') }}</span>
                         </div>
                       </div>
                     </div>
@@ -220,23 +105,23 @@
                   <div class="row">
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
-                        <input type="text" class="form-control" formControlName="first_name_tutor" id="first_name_tutor"
-                          [class.is-invalid]="isFieldInvalid('first_name_tutor')"
-                          [class.is-valid]="isFieldValid('first_name_tutor')" required>
-                        <label for="first_name_tutor">Nombres</label>
+                        <input type="text" class="form-control" formControlName="first_name" id="first_name"
+                          [class.is-invalid]="isFieldInvalid('first_name')"
+                          [class.is-valid]="isFieldValid('first_name')" required>
+                        <label for="first_name">Nombres</label>
                         <div class="invalid-feedback">
-                          <span>{{ getFieldError('first_name_tutor') }}</span>
+                          <span>{{ getFieldError('first_name') }}</span>
                         </div>
                       </div>
                     </div>
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
-                        <input type="text" class="form-control" formControlName="last_name_tutor" id="last_name_tutor"
-                          [class.is-invalid]="isFieldInvalid('last_name_tutor')"
-                          [class.is-valid]="isFieldValid('last_name_tutor')" required>
-                        <label for="last_name_tutor">Apellidos</label>
+                        <input type="text" class="form-control" formControlName="last_name" id="last_name"
+                          [class.is-invalid]="isFieldInvalid('last_name')" [class.is-valid]="isFieldValid('last_name')"
+                          required>
+                        <label for="last_name">Apellidos</label>
                         <div class="invalid-feedback">
-                          <span>{{ getFieldError('last_name_tutor') }}</span>
+                          <span>{{ getFieldError('last_name') }}</span>
                         </div>
                       </div>
                     </div>
@@ -244,372 +129,492 @@
                   <div class="row">
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
-                        <input type="text" class="form-control" formControlName="celphone_tutor" id="celphone_tutor"
-                          [class.is-invalid]="isFieldInvalid('celphone_tutor')"
-                          [class.is-valid]="isFieldValid('celphone_tutor')" required>
-                        <label for="celphone_tutor">Celular</label>
+                        <input type="tel" inputmode="numeric" class="form-control" formControlName="celphone"
+                          id="celphone" [class.is-invalid]="isFieldInvalid('celphone')"
+                          [class.is-valid]="isFieldValid('celphone')" maxlength="9" required>
+                        <label for="celphone">Celular</label>
+                        <small class="form-text text-muted">Número de 9 dígitos</small>
                         <div class="invalid-feedback">
-                          <span>{{ getFieldError('celphone_tutor') }}</span>
+                          <span>{{ getFieldError('celphone') }}</span>
                         </div>
                       </div>
                     </div>
                     <div class="col-sm-6 p-sm-0">
                       <div class="form-group">
-                        <input type="email" class="form-control" formControlName="email_tutor" id="email_tutor"
-                          [class.is-invalid]="isFieldInvalid('email_tutor')"
-                          [class.is-valid]="isFieldValid('email_tutor')" required>
-                        <label for="email_tutor">Correo electrónico</label>
+                        <input type="email" class="form-control" formControlName="email" id="email"
+                          [class.is-invalid]="isFieldInvalid('email')" [class.is-valid]="isFieldValid('email')"
+                          required>
+                        <label for="email">Correo electrónico</label>
                         <div class="invalid-feedback">
-                          <span>{{ getFieldError('email_tutor') }}</span>
+                          <span>{{ getFieldError('email') }}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                }
-                <button type="button" class="btn step-btn" [disabled]="!isStepValid(1)" (click)="goNextIfValid(1)"
-                  aria-label="Ir al siguiente paso: Identificación del Bien Contratado">
-                  <i class="las la-arrow-right" aria-hidden="true"></i>
-                  <span>Siguiente</span>
-                </button>
-              </section>
-              <section class="form-steps" [class.active]="currentStep === 2" aria-labelledby="step2-title">
-                <h3 id="step2-title">
-                  <i class="las la-shopping-cart" aria-hidden="true"></i>
-                  Identificación del Bien Contratado
-                </h3>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group">
-                      <div class="select-input">
-                        <span></span>
-
-                        <select formControlName="consumption_type_id" id="consumption_type_id" class="form-control"
-                          [class.is-invalid]="isFieldInvalid('consumption_type_id')"
-                          [class.is-valid]="isFieldValid('consumption_type_id')">
-                          <option value="">Elija tipo de consumo</option>
-                          @for (type of consumptionTypes; track type) {
-                          <option [value]="type.id">
-                            {{type.name}}
-                          </option>
-                          }
-                        </select>
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group">
+                        <input type="text" class="form-control" formControlName="address" id="address"
+                          [class.is-invalid]="isFieldInvalid('address')" [class.is-valid]="isFieldValid('address')"
+                          required>
+                        <label for="address">Dirección actual</label>
+                        <small class="form-text text-muted">Incluye calle, número, distrito y ciudad</small>
                         <div class="invalid-feedback">
-                          <div class="error-message">{{ getFieldError('consumption_type_id') }}</div>
+                          <span>{{ getFieldError('address') }}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <input type="number" class="form-control" formControlName="order_number" id="order_number"
-                        [class.is-invalid]="isFieldInvalid('order_number')"
-                        [class.is-valid]="isFieldValid('order_number')" required>
-                      <label for="order_number">Número de pedido</label>
-                      <small class="form-text text-muted">Número de orden o boleta</small>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('order_number') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <div class="select-input">
-                        <span></span>
-                        <select formControlName="currency_id" id="currency_id" class="form-control"
-                          [class.is-invalid]="isFieldInvalid('currency_id')"
-                          [class.is-valid]="isFieldValid('currency_id')" required>
-                          <option value="">Seleccione moneda</option>
-                          @for (currency of currencies; track currency) {
-                          <option [value]="currency.id">
-                            {{ currency.symbol }} - {{ currency.name }}
-                          </option>
-                          }
-                        </select>
-                        <div class="invalid-feedback">
-                          <div class="error-message">{{ getFieldError('currency_id') }}</div>
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group check-gender" role="group" aria-labelledby="minor-check">
+                        <div class="custom-radio">
+                          <input type="checkbox" name="is_youger" class="custom-control-input" id="minor-check"
+                            formControlName="is_youger" aria-describedby="age-help">
+                          <label class="custom-control-label" for="minor-check">Soy menor</label>
                         </div>
+                        <small id="age-help" class="form-text text-muted">Se requerirán los datos del tutor
+                          legal</small>
                       </div>
                     </div>
                   </div>
-                  <div class="col-sm-6 p-sm-0">
-                    <div class="form-group">
-                      <input type="number" step="0.01" class="form-control" formControlName="claimed_amount"
-                        id="claimed_amount" [class.is-invalid]="isFieldInvalid('claimed_amount')"
-                        [class.is-valid]="isFieldValid('claimed_amount')" required>
-                      <label for="claimed_amount">Monto reclamado</label>
-                      <small class="form-text text-muted">Monto total del reclamo</small>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('claimed_amount') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group">
-                      <textarea class="form-control" formControlName="description" id="description"
-                        [class.is-invalid]="isFieldInvalid('description')"
-                        [class.is-valid]="isFieldValid('description')" rows="4" required></textarea>
-                      <label for="description">Descripción del bien o servicio</label>
-                      <small class="form-text text-muted">
-                        Describe detalladamente el producto o servicio (mínimo 100 caracteres).
-                        Actual: {{ claimForm.get('description')?.value?.length || 0 }}/100
-                      </small>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('description') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button type="button" class="btn step-btn" [disabled]="!isStepValid(2)" (click)="goNextIfValid(2)"
-                  aria-label="Ir al siguiente paso: Detalle de Reclamación">
-                  <i class="las la-arrow-right" aria-hidden="true"></i>
-                  <span>Siguiente</span>
-                </button>
-              </section>
-              <section class="form-steps" [class.active]="currentStep === 3" aria-labelledby="step3-title">
-                <h3 id="step3-title">
-                  <i class="las la-comment-alt" aria-hidden="true"></i>
-                  Detalle de Reclamación y Pedido del Consumidor
-                </h3>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group">
-                      <div class="select-input">
-                        <span></span>
-                        <select formControlName="claim_type_id" id="claim_type_id" class="form-control"
-                          [class.is-invalid]="isFieldInvalid('claim_type_id')"
-                          [class.is-valid]="isFieldValid('claim_type_id')">
-                          <option value="">Seleccione tipo de reclamo</option>
-                          @for (type of claimTypes; track type) {
-                          <option [value]="type.id">
-                            {{type.name}}
-                          </option>
-                          }
-                        </select>
-
-                        <div class="invalid-feedback">
-                          <div class="error-message">{{ getFieldError('claim_type_id') }}</div>
-                        </div>
-
-                        <p class="mt-2">{{sDescription}}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group">
-                      <textarea class="form-control" formControlName="detail" id="detail"
-                        [class.is-invalid]="isFieldInvalid('detail')" [class.is-valid]="isFieldValid('detail')" rows="4"
-                        required></textarea>
-                      <label for="detail">Detalle del reclamo</label>
-                      <small class="form-text text-muted">
-                        Explica qué ocurrió y por qué presentas este reclamo (mínimo 50 caracteres).
-                        Actual: {{ claimForm.get('detail')?.value?.length || 0 }}/50
-                      </small>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('detail') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group">
-                      <textarea class="form-control" formControlName="request" id="request"
-                        [class.is-invalid]="isFieldInvalid('request')" [class.is-valid]="isFieldValid('request')"
-                        rows="4" required></textarea>
-                      <label for="request">Tu solicitud</label>
-                      <small class="form-text text-muted">
-                        Indica claramente qué esperas como solución (mínimo 100 caracteres).
-                        Actual: {{ claimForm.get('request')?.value?.length || 0 }}/100
-                      </small>
-                      <div class="invalid-feedback">
-                        <span>{{ getFieldError('request') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <h4 class="block-title"><span class="icon">📄</span> Adjuntar evidencia (opcional)</h4>
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group">
-                      <div class="file-upload-wrapper">
-                        @if (!selectedFileName) {
-                        <div class="custom-file">
-                          <input type="file" class="custom-file-input form-control" formControlName="attachment"
-                            id="attachment" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
-                          <label class="custom-file-label" for="attachment">
-                            <span class="file-return">
-                              <i class="las la-cloud-upload-alt"></i>
-                              Selecciona un archivo o arrástralo aquí
-                            </span>
-                          </label>
-                        </div>
-                        }
-                        @if (selectedFileName) {
-                        <div class="file-preview">
-                          <div class="file-info">
-                            <i class="las la-file-alt file-icon"></i>
-                            <span class="file-name">{{ selectedFileName }}</span>
+                  @if (isYouger) {
+                  <div class="adult tutor-section">
+                    <h4 class="section-title"><i class="las la-shield-alt"></i> Datos del Tutor Legal</h4>
+                    <div class="row">
+                      <div class="col-sm-6 p-sm-0">
+                        <div class="form-group">
+                          <div class="select-input">
+                            <span></span>
+                            <select formControlName="document_type_tutor_id" id="document_type_tutor_id"
+                              class="form-control" [class.is-invalid]="isFieldInvalid('document_type_tutor_id')"
+                              [class.is-valid]="isFieldValid('document_type_tutor_id')">
+                              <option value="">Elija tipo de documento</option>
+                              @for (type of documentTypes; track type) {
+                              <option [value]="type.id">
+                                {{type.name}}
+                              </option>
+                              }
+                            </select>
+                            <div class="invalid-feedback">
+                              <div class="error-message">{{ getFieldError('document_type_tutor_id') }}</div>
+                            </div>
                           </div>
-                          <button type="button" class="btn-remove" (click)="removeAttachment()"
-                            aria-label="Eliminar archivo">
-                            <i class="las la-trash"></i> Eliminar
-                          </button>
                         </div>
-                        }
                       </div>
-                      <small class="form-text text-muted">
-                        Formatos: PDF, DOC, DOCX | Tamaño máximo: 150KB
-                      </small>
+                      <div class="col-sm-6 p-sm-0">
+                        <div class="form-group">
+                          <input type="tel" inputmode="numeric" class="form-control"
+                            formControlName="document_number_tutor" id="document_number_tutor"
+                            [class.is-invalid]="isFieldInvalid('document_number_tutor')"
+                            [class.is-valid]="isFieldValid('document_number_tutor')" required>
+                          <label for="document_number_tutor">No. documento</label>
+                          @if (tutorAutoFilled) {
+                          <span class="autofill-badge">Encontrado</span>
+                          }
+                          <small class="form-text text-muted">{{ tutorDocNumberHint }}</small>
+                          <div class="invalid-feedback">
+                            <span>{{ getFieldError('document_number_tutor') }}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <button type="button" class="btn step-btn" [disabled]="!isStepValid(3)" (click)="goNextIfValid(3)"
-                  aria-label="Revisar información antes de enviar">
-                  <i class="las la-eye" aria-hidden="true"></i>
-                  <span>Revisar antes de enviar</span>
-                </button>
-              </section>
-              <section class="form-steps review-step" [class.active]="currentStep === 4" aria-labelledby="step4-title">
-                <h3 id="step4-title">
-                  <i class="las la-check-circle" aria-hidden="true"></i>
-                  Revisión de tu Reclamo
-                </h3>
-                <p class="review-intro">Por favor verifica que toda la información sea correcta antes de enviar</p>
-
-                <div class="review-section">
-                  <h4 class="review-section-title">Datos del Consumidor</h4>
-                  <div class="review-item">
-                    <span class="review-label">Nombre completo:</span>
-                    <span class="review-value">{{ claimForm.get('first_name')?.value }} {{
-                      claimForm.get('last_name')?.value }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Documento:</span>
-                    <span class="review-value">{{ claimForm.get('document_number')?.value }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Email:</span>
-                    <span class="review-value">{{ claimForm.get('email')?.value }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Teléfono:</span>
-                    <span class="review-value">{{ claimForm.get('celphone')?.value }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Dirección:</span>
-                    <span class="review-value">{{ claimForm.get('address')?.value }}</span>
-                  </div>
-                </div>
-
-                @if (isYouger) {
-                <div class="review-section">
-                  <h4 class="review-section-title">Datos del Tutor Legal</h4>
-                  <div class="review-item">
-                    <span class="review-label">Nombre completo:</span>
-                    <span class="review-value">{{ claimForm.get('first_name_tutor')?.value }} {{
-                      claimForm.get('last_name_tutor')?.value }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Documento:</span>
-                    <span class="review-value">{{ claimForm.get('document_number_tutor')?.value }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Email:</span>
-                    <span class="review-value">{{ claimForm.get('email_tutor')?.value }}</span>
-                  </div>
-                </div>
-                }
-
-                <div class="review-section">
-                  <h4 class="review-section-title">Detalles del Reclamo</h4>
-                  <div class="review-item">
-                    <span class="review-label">Número de pedido:</span>
-                    <span class="review-value">{{ claimForm.get('order_number')?.value }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Monto:</span>
-                    <span class="review-value">{{ getCurrencySymbol() }} {{ claimForm.get('claimed_amount')?.value
-                      }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Detalle:</span>
-                    <span class="review-value">{{ claimForm.get('detail')?.value }}</span>
-                  </div>
-                  <div class="review-item">
-                    <span class="review-label">Solicitud:</span>
-                    <span class="review-value">{{ claimForm.get('request')?.value }}</span>
-                  </div>
-                  @if (selectedFileName) {
-                  <div class="review-item">
-                    <span class="review-label">Archivo adjunto:</span>
-                    <span class="review-value"><i class="las la-file-alt"></i> {{ selectedFileName }}</span>
+                    <div class="row">
+                      <div class="col-sm-6 p-sm-0">
+                        <div class="form-group">
+                          <input type="text" class="form-control" formControlName="first_name_tutor"
+                            id="first_name_tutor" [class.is-invalid]="isFieldInvalid('first_name_tutor')"
+                            [class.is-valid]="isFieldValid('first_name_tutor')" required>
+                          <label for="first_name_tutor">Nombres</label>
+                          <div class="invalid-feedback">
+                            <span>{{ getFieldError('first_name_tutor') }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-sm-6 p-sm-0">
+                        <div class="form-group">
+                          <input type="text" class="form-control" formControlName="last_name_tutor" id="last_name_tutor"
+                            [class.is-invalid]="isFieldInvalid('last_name_tutor')"
+                            [class.is-valid]="isFieldValid('last_name_tutor')" required>
+                          <label for="last_name_tutor">Apellidos</label>
+                          <div class="invalid-feedback">
+                            <span>{{ getFieldError('last_name_tutor') }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-6 p-sm-0">
+                        <div class="form-group">
+                          <input type="text" class="form-control" formControlName="celphone_tutor" id="celphone_tutor"
+                            [class.is-invalid]="isFieldInvalid('celphone_tutor')"
+                            [class.is-valid]="isFieldValid('celphone_tutor')" required>
+                          <label for="celphone_tutor">Celular</label>
+                          <div class="invalid-feedback">
+                            <span>{{ getFieldError('celphone_tutor') }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-sm-6 p-sm-0">
+                        <div class="form-group">
+                          <input type="email" class="form-control" formControlName="email_tutor" id="email_tutor"
+                            [class.is-invalid]="isFieldInvalid('email_tutor')"
+                            [class.is-valid]="isFieldValid('email_tutor')" required>
+                          <label for="email_tutor">Correo electrónico</label>
+                          <div class="invalid-feedback">
+                            <span>{{ getFieldError('email_tutor') }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   }
-                </div>
+                  <button type="button" class="btn step-btn" [disabled]="!isStepValid(1)" (click)="goNextIfValid(1)"
+                    aria-label="Ir al siguiente paso: Identificación del Bien Contratado">
+                    <i class="las la-arrow-right" aria-hidden="true"></i>
+                    <span>Siguiente</span>
+                  </button>
+                </section>
+                <section class="form-steps" [class.active]="currentStep === 2" aria-labelledby="step2-title">
+                  <h3 id="step2-title">
+                    <i class="las la-shopping-cart" aria-hidden="true"></i>
+                    Identificación del Bien Contratado
+                  </h3>
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group">
+                        <div class="select-input">
+                          <span></span>
 
-                <div class="review-section legal-notice">
-                  <h4 class="legal-notice-title">Información Legal Importante</h4>
-                  <div class="legal-notice-item">
-                    <i class="las la-check-circle" aria-hidden="true"></i>
-                    <p>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI.</p>
-                  </div>
-                  <div class="legal-notice-item">
-                    <i class="las la-info-circle" aria-hidden="true"></i>
-                    <p>El proveedor debe dar respuesta al reclamo o queja en un plazo no mayor a quince (15) días hábiles, el cual es improrrogable.</p>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-sm-12 p-sm-0">
-                    <div class="form-group captcha-wrapper">
-                      <label class="captcha" id="captcha">
-                        <re-captcha formControlName="recaptcha"
-                          (resolved)="addTokenLog('Reactive form mode resolved', $event)">
-                        </re-captcha>
-                      </label>
+                          <select formControlName="consumption_type_id" id="consumption_type_id" class="form-control"
+                            [class.is-invalid]="isFieldInvalid('consumption_type_id')"
+                            [class.is-valid]="isFieldValid('consumption_type_id')">
+                            <option value="">Elija tipo de consumo</option>
+                            @for (type of consumptionTypes; track type) {
+                            <option [value]="type.id">
+                              {{type.name}}
+                            </option>
+                            }
+                          </select>
+                          <div class="invalid-feedback">
+                            <div class="error-message">{{ getFieldError('consumption_type_id') }}</div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="btn btn-submit"
-                      (click)="onSave()" [attr.aria-busy]="isSubmitting">
-                      @if (!isSubmitting) {
-                      <span>
-                        <i class="las la-paper-plane" aria-hidden="true"></i>
-                        Enviar Reclamo
-                      </span>
-                      }
-                      @if (isSubmitting) {
-                      <span>
-                        <span class="spinner-border spinner-sm" role="status" aria-label="Enviando"></span>
-                        Enviando...
-                      </span>
-                      }
-                    </button>
+                    <div class="col-sm-6 p-sm-0">
+                      <div class="form-group">
+                        <input type="number" class="form-control" formControlName="order_number" id="order_number"
+                          [class.is-invalid]="isFieldInvalid('order_number')"
+                          [class.is-valid]="isFieldValid('order_number')" required>
+                        <label for="order_number">Número de pedido</label>
+                        <small class="form-text text-muted">Número de orden o boleta</small>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('order_number') }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-sm-6 p-sm-0">
+                      <div class="form-group">
+                        <div class="select-input">
+                          <span></span>
+                          <select formControlName="currency_id" id="currency_id" class="form-control"
+                            [class.is-invalid]="isFieldInvalid('currency_id')"
+                            [class.is-valid]="isFieldValid('currency_id')" required>
+                            <option value="">Seleccione moneda</option>
+                            @for (currency of currencies; track currency) {
+                            <option [value]="currency.id">
+                              {{ currency.symbol }} - {{ currency.name }}
+                            </option>
+                            }
+                          </select>
+                          <div class="invalid-feedback">
+                            <div class="error-message">{{ getFieldError('currency_id') }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-sm-6 p-sm-0">
+                      <div class="form-group">
+                        <input type="number" step="0.01" class="form-control" formControlName="claimed_amount"
+                          id="claimed_amount" [class.is-invalid]="isFieldInvalid('claimed_amount')"
+                          [class.is-valid]="isFieldValid('claimed_amount')" required>
+                        <label for="claimed_amount">Monto reclamado</label>
+                        <small class="form-text text-muted">Monto total del reclamo</small>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('claimed_amount') }}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </section>
-            </form>
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group">
+                        <textarea class="form-control" formControlName="description" id="description"
+                          [class.is-invalid]="isFieldInvalid('description')"
+                          [class.is-valid]="isFieldValid('description')" rows="4" required></textarea>
+                        <label for="description">Descripción del bien o servicio</label>
+                        <small class="form-text text-muted">
+                          Describe detalladamente el producto o servicio (mínimo 100 caracteres).
+                          Actual: {{ claimForm.get('description')?.value?.length || 0 }}/100
+                        </small>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('description') }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn step-btn" [disabled]="!isStepValid(2)" (click)="goNextIfValid(2)"
+                    aria-label="Ir al siguiente paso: Detalle de Reclamación">
+                    <i class="las la-arrow-right" aria-hidden="true"></i>
+                    <span>Siguiente</span>
+                  </button>
+                </section>
+                <section class="form-steps" [class.active]="currentStep === 3" aria-labelledby="step3-title">
+                  <h3 id="step3-title">
+                    <i class="las la-comment-alt" aria-hidden="true"></i>
+                    Detalle de Reclamación y Pedido del Consumidor
+                  </h3>
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group">
+                        <div class="select-input">
+                          <span></span>
+                          <select formControlName="claim_type_id" id="claim_type_id" class="form-control"
+                            [class.is-invalid]="isFieldInvalid('claim_type_id')"
+                            [class.is-valid]="isFieldValid('claim_type_id')">
+                            <option value="">Seleccione tipo de reclamo</option>
+                            @for (type of claimTypes; track type) {
+                            <option [value]="type.id">
+                              {{type.name}}
+                            </option>
+                            }
+                          </select>
+
+                          <div class="invalid-feedback">
+                            <div class="error-message">{{ getFieldError('claim_type_id') }}</div>
+                          </div>
+
+                          <p class="mt-2">{{sDescription}}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group">
+                        <textarea class="form-control" formControlName="detail" id="detail"
+                          [class.is-invalid]="isFieldInvalid('detail')" [class.is-valid]="isFieldValid('detail')"
+                          rows="4" required></textarea>
+                        <label for="detail">Detalle del reclamo</label>
+                        <small class="form-text text-muted">
+                          Explica qué ocurrió y por qué presentas este reclamo (mínimo 50 caracteres).
+                          Actual: {{ claimForm.get('detail')?.value?.length || 0 }}/50
+                        </small>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('detail') }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group">
+                        <textarea class="form-control" formControlName="request" id="request"
+                          [class.is-invalid]="isFieldInvalid('request')" [class.is-valid]="isFieldValid('request')"
+                          rows="4" required></textarea>
+                        <label for="request">Tu solicitud</label>
+                        <small class="form-text text-muted">
+                          Indica claramente qué esperas como solución (mínimo 100 caracteres).
+                          Actual: {{ claimForm.get('request')?.value?.length || 0 }}/100
+                        </small>
+                        <div class="invalid-feedback">
+                          <span>{{ getFieldError('request') }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <h4 class="block-title"><span class="icon">📄</span> Adjuntar evidencia (opcional)</h4>
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group">
+                        <div class="file-upload-wrapper">
+                          @if (!selectedFileName) {
+                          <div class="custom-file">
+                            <input type="file" class="custom-file-input form-control" formControlName="attachment"
+                              id="attachment" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
+                            <label class="custom-file-label" for="attachment">
+                              <span class="file-return">
+                                <i class="las la-cloud-upload-alt"></i>
+                                Selecciona un archivo o arrástralo aquí
+                              </span>
+                            </label>
+                          </div>
+                          }
+                          @if (selectedFileName) {
+                          <div class="file-preview">
+                            <div class="file-info">
+                              <i class="las la-file-alt file-icon"></i>
+                              <span class="file-name">{{ selectedFileName }}</span>
+                            </div>
+                            <button type="button" class="btn-remove" (click)="removeAttachment()"
+                              aria-label="Eliminar archivo">
+                              <i class="las la-trash"></i> Eliminar
+                            </button>
+                          </div>
+                          }
+                        </div>
+                        <small class="form-text text-muted">
+                          Formatos: PDF, DOC, DOCX | Tamaño máximo: 150KB
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn step-btn" [disabled]="!isStepValid(3)" (click)="goNextIfValid(3)"
+                    aria-label="Revisar información antes de enviar">
+                    <i class="las la-eye" aria-hidden="true"></i>
+                    <span>Revisar antes de enviar</span>
+                  </button>
+                </section>
+                <section class="form-steps review-step" [class.active]="currentStep === 4"
+                  aria-labelledby="step4-title">
+                  <h3 id="step4-title">
+                    <i class="las la-check-circle" aria-hidden="true"></i>
+                    Revisión de tu Reclamo
+                  </h3>
+                  <p class="review-intro">Por favor verifica que toda la información sea correcta antes de enviar</p>
+
+                  <div class="review-section">
+                    <h4 class="review-section-title">Datos del Consumidor</h4>
+                    <div class="review-item">
+                      <span class="review-label">Nombre completo:</span>
+                      <span class="review-value">{{ claimForm.get('first_name')?.value }} {{
+                        claimForm.get('last_name')?.value }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Documento:</span>
+                      <span class="review-value">{{ claimForm.get('document_number')?.value }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Email:</span>
+                      <span class="review-value">{{ claimForm.get('email')?.value }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Teléfono:</span>
+                      <span class="review-value">{{ claimForm.get('celphone')?.value }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Dirección:</span>
+                      <span class="review-value">{{ claimForm.get('address')?.value }}</span>
+                    </div>
+                  </div>
+
+                  @if (isYouger) {
+                  <div class="review-section">
+                    <h4 class="review-section-title">Datos del Tutor Legal</h4>
+                    <div class="review-item">
+                      <span class="review-label">Nombre completo:</span>
+                      <span class="review-value">{{ claimForm.get('first_name_tutor')?.value }} {{
+                        claimForm.get('last_name_tutor')?.value }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Documento:</span>
+                      <span class="review-value">{{ claimForm.get('document_number_tutor')?.value }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Email:</span>
+                      <span class="review-value">{{ claimForm.get('email_tutor')?.value }}</span>
+                    </div>
+                  </div>
+                  }
+
+                  <div class="review-section">
+                    <h4 class="review-section-title">Detalles del Reclamo</h4>
+                    <div class="review-item">
+                      <span class="review-label">Número de pedido:</span>
+                      <span class="review-value">{{ claimForm.get('order_number')?.value }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Monto:</span>
+                      <span class="review-value">{{ getCurrencySymbol() }} {{ claimForm.get('claimed_amount')?.value
+                        }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Detalle:</span>
+                      <span class="review-value">{{ claimForm.get('detail')?.value }}</span>
+                    </div>
+                    <div class="review-item">
+                      <span class="review-label">Solicitud:</span>
+                      <span class="review-value">{{ claimForm.get('request')?.value }}</span>
+                    </div>
+                    @if (selectedFileName) {
+                    <div class="review-item">
+                      <span class="review-label">Archivo adjunto:</span>
+                      <span class="review-value"><i class="las la-file-alt"></i> {{ selectedFileName }}</span>
+                    </div>
+                    }
+                  </div>
+
+                  <div class="review-section legal-notice">
+                    <h4 class="legal-notice-title">Información Legal Importante</h4>
+                    <div class="legal-notice-item">
+                      <i class="las la-check-circle" aria-hidden="true"></i>
+                      <p>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es
+                        requisito previo para interponer una denuncia ante el INDECOPI.</p>
+                    </div>
+                    <div class="legal-notice-item">
+                      <i class="las la-info-circle" aria-hidden="true"></i>
+                      <p>El proveedor debe dar respuesta al reclamo o queja en un plazo no mayor a quince (15) días
+                        hábiles, el cual es improrrogable.</p>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-sm-12 p-sm-0">
+                      <div class="form-group captcha-wrapper">
+                        <label class="captcha" id="captcha">
+                          <re-captcha formControlName="recaptcha" [siteKey]="siteKey"
+                            (resolved)="onCaptchaResolved($event)">
+                          </re-captcha>
+                        </label>
+                      </div>
+                      <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="btn btn-submit"
+                        (click)="onSave()" [attr.aria-busy]="isSubmitting">
+                        @if (!isSubmitting) {
+                        <span>
+                          <i class="las la-paper-plane" aria-hidden="true"></i>
+                          Enviar Reclamo
+                        </span>
+                        }
+                        @if (isSubmitting) {
+                        <span>
+                          <span class="spinner-border spinner-sm" role="status" aria-label="Enviando"></span>
+                          Enviando...
+                        </span>
+                        }
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </main>
 
     <footer class="company-footer" role="contentinfo">
       <div class="company-info">
         <div class="company-details">
-          <h3 class="company-name">{{branding?.companyName}}</h3>
+          <h3 class="company-name">{{tenant()?.company_name}}</h3>
           <div class="company-meta">
             <div class="meta-item">
               <i class="las la-building" aria-hidden="true"></i>
-              <span><strong>RUC:</strong> {{branding?.companyRuc}}</span>
+              <span><strong>RUC:</strong> {{tenant()?.company_ruc}}</span>
             </div>
             <div class="meta-item">
               <i class="las la-bookmark" aria-hidden="true"></i>
-              <span><strong>Marca:</strong> {{branding?.companyBrand}}</span>
+              <span><strong>Marca:</strong> {{tenant()?.company_brand}}</span>
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "complaints-book-pro": {
+    "reclamofacil-client": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -14,7 +14,7 @@
           "builder": "@angular/build:application",
           "options": {
             "outputPath": {
-              "base": "dist/complaints-book-pro"
+              "base": "dist/reclamofacil-client"
             },
             "index": "src/index.html",
             "polyfills": [
@@ -66,10 +66,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "complaints-book-pro:build:production"
+              "buildTarget": "reclamofacil-client:build:production"
             },
             "development": {
-              "buildTarget": "complaints-book-pro:build:development"
+              "buildTarget": "reclamofacil-client:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -77,7 +77,7 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n",
           "options": {
-            "buildTarget": "complaints-book-pro:build"
+            "buildTarget": "reclamofacil-client:build"
           }
         },
         "test": {
