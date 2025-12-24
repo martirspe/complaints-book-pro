@@ -57,6 +57,8 @@ export class FormComponent implements OnInit {
 
   // Variable para almacenar el nombre de archivo
   public selectedFileName: string | null = null;
+  // Variable para almacenar el archivo adjunto
+  private attachedFile: File | null = null;
 
   // Variables progress bar
   readonly totalSteps = 4; // Ahora incluye paso de revisión
@@ -614,9 +616,10 @@ export class FormComponent implements OnInit {
       }
 
       this.selectedFileName = file.name;
-      this.claimForm.get('attachment')?.setValue(file);
+      this.attachedFile = file;
     } else {
       this.selectedFileName = null;
+      this.attachedFile = null;
       input.value = '';
     }
   }
@@ -624,7 +627,7 @@ export class FormComponent implements OnInit {
   // Método para remover archivo adjunto
   removeAttachment(): void {
     this.selectedFileName = null;
-    this.claimForm.get('attachment')?.setValue(null);
+    this.attachedFile = null;
     const fileInput = document.getElementById('attachment') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
@@ -875,7 +878,7 @@ export class FormComponent implements OnInit {
       description: fv.description,
       detail: fv.detail,
       request: fv.request,
-      attachment: fv.attachment,
+      attachment: this.attachedFile,
       recaptcha: fv.recaptcha
     };
   }
@@ -944,6 +947,7 @@ export class FormComponent implements OnInit {
     // Reflect radio state and UI flags
     this.isYouger = false;
     this.selectedFileName = null;
+    this.attachedFile = null;
 
     // Reset progress to first step
     this.currentStep = 1;

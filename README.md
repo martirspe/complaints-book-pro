@@ -216,7 +216,7 @@ PATCH  /api/tenants/:slug/claims/:id/assign
 PATCH  /api/tenants/:slug/claims/:id/resolve
 
 // Branding
-GET /api/tenants/:slug/branding
+GET /api/tenants/:slug
 ```
 
 ### Autenticación
