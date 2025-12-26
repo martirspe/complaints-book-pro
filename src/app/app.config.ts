@@ -2,7 +2,7 @@ import { APP_INITIALIZER, ApplicationConfig, provideZoneChangeDetection } from '
 import { provideRouter, withHashLocation } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { RECAPTCHA_SETTINGS, RecaptchaSettings } from 'ng-recaptcha';
+import { RECAPTCHA_V3_SITE_KEY } from 'ng-recaptcha';
 
 // Routes
 import { routes } from './app.routes';
@@ -43,10 +43,8 @@ export const appConfig: ApplicationConfig = {
     },
 
     {
-      provide: RECAPTCHA_SETTINGS,
-      useValue: {
-        siteKey: environment.RECAPTCHA_V2_KEY
-      } as RecaptchaSettings
+      provide: RECAPTCHA_V3_SITE_KEY,
+      useValue: environment.RECAPTCHA_V3_KEY
     }
   ]
 };

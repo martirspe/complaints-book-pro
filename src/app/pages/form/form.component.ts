@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RecaptchaModule, RecaptchaFormsModule } from 'ng-recaptcha';
-import { forkJoin, switchMap, catchError, throwError, of, finalize, debounceTime, distinctUntilChanged } from 'rxjs';
+import { RecaptchaV3Module, ReCaptchaV3Service } from 'ng-recaptcha';
+import { forkJoin, switchMap, catchError, throwError, of, finalize, debounceTime, distinctUntilChanged, firstValueFrom } from 'rxjs';
 import { ToastService } from '../../shared/toast/toast.service';
 
 // Services
@@ -17,11 +17,11 @@ import { IConsumptionType } from '../../interfaces/consumption-type.interface';
 import { ICurrency } from '../../interfaces/currency.interface';
 
 // Environment
-import { environment } from 'src/environments/environment.prod';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-form',
-  imports: [ReactiveFormsModule, RecaptchaModule, RecaptchaFormsModule],
+  imports: [ReactiveFormsModule, RecaptchaV3Module],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
 })
@@ -30,8 +30,8 @@ export class FormComponent implements OnInit {
   // Información del tenant
   public tenant = this.tenantService.tenant;
 
-  // Clave del reCAPTCHA
-  siteKey = environment.RECAPTCHA_V2_KEY;
+  // Acción de reCAPTCHA v3
+  private readonly recaptchaAction = 'claim_submit';
 
   // Variables para el formulario
   private readonly MIN_DESC_LENGTH = 100;
@@ -153,8 +153,8 @@ export class FormComponent implements OnInit {
       ];
     }
     if (step === 4) {
-      // Paso de revisión: validar recaptcha
-      return ['recaptcha'];
+      // Paso de revisión (solo lectura, sin campos obligatorios adicionales)
+      return [];
     }
     return [];
   }
@@ -306,7 +306,8 @@ export class FormComponent implements OnInit {
     private fb: FormBuilder,
     private claimsService: ClaimsService,
     private toast: ToastService,
-    private tenantService: TenantService
+    private tenantService: TenantService,
+    private recaptchaV3Service: ReCaptchaV3Service
   ) { }
 
   ngOnInit(): void {
@@ -402,7 +403,7 @@ export class FormComponent implements OnInit {
     detail: ['', [Validators.required, Validators.minLength(this.MIN_DETAIL_LENGTH)]],
     request: ['', [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)]],
     attachment: [null],
-    recaptcha: ['', Validators.required]
+    recaptcha: ['']
   });
 
   loadDocumentTypes() {
@@ -635,13 +636,26 @@ export class FormComponent implements OnInit {
   }
 
   async onSave(): Promise<void> {
-    if (this.claimForm.invalid) {
-      this.claimForm.markAllAsTouched();
-      return;
-    }
-
     try {
       this.isSubmitting = true;
+
+      // Obtener token score-based de reCAPTCHA v3 antes de validar/enviar
+      let recaptchaToken = '';
+      try {
+        recaptchaToken = await this.executeRecaptcha();
+      } catch (recaptchaError) {
+        this.toast.showError('No pudimos validar reCAPTCHA. Intenta de nuevo.');
+        this.isSubmitting = false;
+        return;
+      }
+
+      this.claimForm.get('recaptcha')?.setValue(recaptchaToken);
+
+      if (this.claimForm.invalid) {
+        this.claimForm.markAllAsTouched();
+        this.isSubmitting = false;
+        return;
+      }
       // Preparar datos del cliente
       const customerData: ICustomer = {
         document_type_id: this.claimForm.get('document_type_id')?.value,
@@ -929,6 +943,15 @@ export class FormComponent implements OnInit {
   }
 
 
+  private async executeRecaptcha(): Promise<string> {
+    const token = await firstValueFrom(this.recaptchaV3Service.execute(this.recaptchaAction));
+    if (!token) {
+      throw new Error('No se pudo obtener token de reCAPTCHA');
+    }
+    return token;
+  }
+
+
   private resetForm(): void {
     this.claimForm.reset({
       // Selects
@@ -963,13 +986,6 @@ export class FormComponent implements OnInit {
     // Restore pristine/untouched state
     this.claimForm.markAsPristine();
     this.claimForm.markAsUntouched();
-  }
-
-  onCaptchaResolved(token: string | null): void {
-    if (!token) return;
-
-    // Guardar token en el form (por seguridad explícita)
-    this.claimForm.get('recaptcha')?.setValue(token);
   }
 
 }

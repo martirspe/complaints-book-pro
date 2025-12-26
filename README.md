@@ -15,7 +15,7 @@ SPA Angular 21 para la gestión de Libro de Reclamaciones digital con arquitectu
 - **Autocompletado de clientes** basado en documento (búsqueda por debounce)
 - **Gestión de tutores** para menores de edad
 - **Adjuntos de archivos** con validación (imágenes, PDFs)
-- **reCAPTCHA v2** para prevención de spam
+- **reCAPTCHA v3 (score)** para prevención de spam
 - **Vista previa de datos** antes de envío final
 
 ### Catálogos dinámicos
@@ -137,7 +137,7 @@ export const environment = {
   production: false,
   API_URL_CLAIM: 'http://localhost:3000',
   PUBLIC_API_KEY: 'tu-api-key-aqui',
-  RECAPTCHA_V2_KEY: 'tu-recaptcha-key'
+  RECAPTCHA_V3_KEY: 'tu-recaptcha-key'
 };
 ```
 
@@ -147,7 +147,7 @@ export const environment = {
   production: true,
   API_URL_CLAIM: 'https://api.tudominio.com',
   PUBLIC_API_KEY: 'tu-api-key-produccion',
-  RECAPTCHA_V2_KEY: 'tu-recaptcha-key-produccion'
+  RECAPTCHA_V3_KEY: 'tu-recaptcha-key-produccion'
 };
 ```
 
@@ -158,8 +158,8 @@ export const environment = {
 
 ### Configurar reCAPTCHA
 1. Obtén keys en https://www.google.com/recaptcha/admin
-2. Usa reCAPTCHA v2 "Checkbox"
-3. Configura `RECAPTCHA_V2_KEY` en environments
+2. Usa reCAPTCHA v3 (score) para tu dominio
+3. Configura `RECAPTCHA_V3_KEY` en environments
 
 ---
 
@@ -296,7 +296,7 @@ ng generate service <name>    # Crear nuevo servicio
 
 ## 🔒 Seguridad
 
-- **reCAPTCHA v2**: protección contra bots
+- **reCAPTCHA v3 (score)**: protección contra bots
 - **API Key en interceptor**: todas las requests autenticadas
 - **Validación client-side**: antes de envío al servidor
 - **CORS**: configurado en el backend
@@ -320,9 +320,15 @@ Ver [../README.md](../README.md) para setup completo con Docker.
 
 ## 🤝 Contribución
 
-Para agregar nuevas funcionalidades:
+Contribución limitada a colaboradores internos. Para agregar nuevas funcionalidades internamente:
 1. Crea interfaces en `src/app/interfaces/`
 2. Agrega métodos al servicio correspondiente
 3. Actualiza el componente con la lógica
 4. Implementa validaciones en formularios reactivos
 5. Testea con el backend local
+
+---
+
+## 📜 Licencia
+
+Proyecto privado. Todos los derechos reservados.

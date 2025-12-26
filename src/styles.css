@@ -45,6 +45,10 @@
   /* Bootstrap Theme Bridge */
   --bs-primary: var(--brand-primary);
   --bs-link-color: var(--brand-accent);
+
+  /* Scrollbar (Firefox) */
+  scrollbar-color: var(--brand-primary) transparent;
+  scrollbar-width: thin;
 }
 
 /*=============================================================================
@@ -63,6 +67,27 @@ body {
   font-size: 1.4rem;
   line-height: 1.85;
   color: var(--text-secondary);
+}
+
+/* Scrollbar (WebKit) */
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--brand-primary);
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-accent);
+  background-clip: padding-box;
 }
 
 h1, h2, h3, h4, h5, h6 {

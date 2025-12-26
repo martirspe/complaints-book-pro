@@ -1,15 +1,26 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# Compiled output
+# Angular
 /dist
+/bazel-out
+.angular/cache/
+.angular/
+
+# Compiled output
 /tmp
 /out-tsc
-/bazel-out
+/build
 
 # Node
 /node_modules
-npm-debug.log
-yarn-error.log
+node_modules/
+package-lock.json
+yarn.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+*.log
 
 # IDEs and editors
 .idea/
@@ -38,6 +49,27 @@ yarn-error.log
 testem.log
 /typings
 
+# Environment files
+.env
+.env.local
+.env.*.local
+
 # System files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+
+# OS-specific
+.AppleDouble
+.LSOverride
+.vscode-test
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
