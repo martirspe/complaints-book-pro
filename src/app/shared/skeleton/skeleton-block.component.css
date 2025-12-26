@@ -1,0 +1,20 @@
+.skeleton {
+  display: inline-block;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--brand-primary-rgb), 0.06) 25%,
+    rgba(var(--brand-primary-rgb), 0.12) 50%,
+    rgba(var(--brand-primary-rgb), 0.06) 75%
+  );
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

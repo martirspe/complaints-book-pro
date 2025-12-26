@@ -1547,3 +1547,25 @@ select.form-control.is-invalid {
   padding: 0;
   line-height: 1.4;
 }
+/*=============================================================================
+  SKELETON & LOADING STYLES
+=============================================================================*/
+.logo-skeleton {
+  display: inline-block;
+  width: 160px;
+  height: 48px;
+}
+
+.form-skeleton-wrapper {
+  padding: 20px 0;
+}
+
+.stepper-skeleton {
+  margin-bottom: 40px;
+}
+
+.form-fields-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { RecaptchaV3Module, ReCaptchaV3Service } from 'ng-recaptcha';
 import { forkJoin, switchMap, catchError, throwError, of, finalize, debounceTime, distinctUntilChanged, firstValueFrom } from 'rxjs';
 import { ToastService } from '../../shared/toast/toast.service';
+import { SkeletonBlockComponent } from '../../shared/skeleton/skeleton-block.component';
 
 // Services
 import { ClaimsService } from '../../services/claims.service';
@@ -21,7 +22,7 @@ import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-form',
-  imports: [ReactiveFormsModule, RecaptchaV3Module],
+  imports: [ReactiveFormsModule, RecaptchaV3Module, SkeletonBlockComponent],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
 })
@@ -29,6 +30,8 @@ export class FormComponent implements OnInit {
 
   // Información del tenant
   public tenant = this.tenantService.tenant;
+  // Lazy loading: datos listos para mostrar
+  public isDataReady = false;
 
   // Acción de reCAPTCHA v3
   private readonly recaptchaAction = 'claim_submit';
@@ -319,6 +322,21 @@ export class FormComponent implements OnInit {
     // setupDocumentTypeValidation se llama en loadDocumentTypes después de cargar los tipos
     this.setupCustomerLookupByDocument();
     this.setupTutorLookupByDocument();
+    // Marcar datos como listos cuando todas las cargas terminen
+    this.checkAllDataReady();
+  }
+
+  private checkAllDataReady(): void {
+    forkJoin([
+      of(this.documentTypes.length > 0),
+      of(this.consumptionTypes.length > 0),
+      of(this.claimTypes.length > 0),
+      of(this.currencies.length > 0)
+    ]).subscribe(() => {
+      setTimeout(() => {
+        this.isDataReady = this.documentTypes.length > 0 && this.consumptionTypes.length > 0 && this.claimTypes.length > 0 && this.currencies.length > 0;
+      }, 300);
+    });
   }
 
   setupYoungerValidation(): void {

@@ -2,10 +2,16 @@
   <div class="ugf-wrapper">
     <header class="page-header" role="banner">
       <div class="logo">
+        @if (tenant()) {
         <a href="/">
-          <img [src]="tenant()?.logo_light_url" class="img-fluid logo-white" alt="logo">
-          <img [src]="tenant()?.logo_dark_url" class="img-fluid logo-black" alt="logo">
+          <img [src]="tenant()?.logo_light_url" class="img-fluid logo-white" alt="logo" loading="eager" decoding="async" width="160" height="48">
+          <img [src]="tenant()?.logo_dark_url" class="img-fluid logo-black" alt="logo" loading="eager" decoding="async" width="160" height="48">
         </a>
+        } @else {
+        <div class="logo-skeleton">
+          <app-skeleton-block width="160px" height="48px" radius="8px"></app-skeleton-block>
+        </div>
+        }
       </div>
     </header>
 
@@ -36,6 +42,7 @@
         <div class="row">
           <div class="col-lg-5 offset-lg-7 p-sm-0">
             <div class="ufg-job-application-wrapper">
+              @if (isDataReady) {
               <!-- Progress Stepper -->
               <nav class="stepper-container" aria-label="Progreso del formulario" role="navigation">
                 <div class="stepper-line-track" role="progressbar" [attr.aria-valuenow]="currentStep"
@@ -592,6 +599,20 @@
                   </div>
                 </section>
               </form>
+              } @else {
+              <!-- Loading Skeleton -->
+              <div class="form-skeleton-wrapper">
+                <div class="stepper-skeleton">
+                  <app-skeleton-block width="100%" height="40px" radius="8px"></app-skeleton-block>
+                </div>
+                <div class="form-fields-skeleton">
+                  <app-skeleton-block width="100%" height="48px" radius="4px"></app-skeleton-block>
+                  <app-skeleton-block width="100%" height="48px" radius="4px"></app-skeleton-block>
+                  <app-skeleton-block width="100%" height="48px" radius="4px"></app-skeleton-block>
+                  <app-skeleton-block width="100%" height="48px" radius="4px"></app-skeleton-block>
+                </div>
+              </div>
+              }
             </div>
           </div>
         </div>
