@@ -314,29 +314,35 @@ export class FormComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadDocumentTypes();
-    this.loadConsumptionTypes();
-    this.loadClaimTypes();
-    this.loadCurrencies();
+    // Cargar todos los datos en paralelo y marcar como listo al terminar
+    forkJoin({
+      documentTypes: this.claimsService.getDocumentTypes(),
+      consumptionTypes: this.claimsService.getConsumptionTypes(),
+      claimTypes: this.claimsService.getClaimTypes(),
+      currencies: this.claimsService.getCurrencies()
+    }).subscribe({
+      next: (data) => {
+        this.documentTypes = data.documentTypes;
+        this.consumptionTypes = data.consumptionTypes;
+        this.claimTypes = data.claimTypes;
+        this.currencies = data.currencies;
+
+        // Configurar validaciones después de tener tipos de documento
+        this.setupDocumentTypeValidation();
+
+        // Marcar datos como listos
+        this.isDataReady = true;
+      },
+      error: (error) => {
+        console.error('Error al cargar datos iniciales:', error);
+        // Aún así permitir mostrar el formulario para mejor UX
+        this.isDataReady = true;
+      }
+    });
+
     this.setupYoungerValidation();
-    // setupDocumentTypeValidation se llama en loadDocumentTypes después de cargar los tipos
     this.setupCustomerLookupByDocument();
     this.setupTutorLookupByDocument();
-    // Marcar datos como listos cuando todas las cargas terminen
-    this.checkAllDataReady();
-  }
-
-  private checkAllDataReady(): void {
-    forkJoin([
-      of(this.documentTypes.length > 0),
-      of(this.consumptionTypes.length > 0),
-      of(this.claimTypes.length > 0),
-      of(this.currencies.length > 0)
-    ]).subscribe(() => {
-      setTimeout(() => {
-        this.isDataReady = this.documentTypes.length > 0 && this.consumptionTypes.length > 0 && this.claimTypes.length > 0 && this.currencies.length > 0;
-      }, 300);
-    });
   }
 
   setupYoungerValidation(): void {
@@ -424,69 +430,7 @@ export class FormComponent implements OnInit {
     recaptcha: ['']
   });
 
-  loadDocumentTypes() {
-    this.claimsService.getDocumentTypes()
-      .subscribe({
-        next: (types) => {
-          this.documentTypes = types;
 
-          // IMPORTANTE: Configurar suscripciones DESPUÉS de tener los tipos cargados
-          this.setupDocumentTypeValidation();
-
-          // Solo después de cargar los tipos, aplicar validadores iniciales si hay selección
-          const selectedTypeId = this.claimForm.get('document_type_id')?.value;
-          if (selectedTypeId) {
-            this.applyDocumentValidators('document_type_id', 'document_number', 'docNumberHint', true);
-          }
-          // Lo mismo para tutor
-          if (this.isYouger) {
-            const selectedTutorTypeId = this.claimForm.get('document_type_tutor_id')?.value;
-            if (selectedTutorTypeId) {
-              this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true);
-            }
-          }
-        },
-        error: (error) => {
-          console.error('Error al cargar tipos de documento:', error);
-        }
-      });
-  }
-
-  loadConsumptionTypes() {
-    this.claimsService.getConsumptionTypes()
-      .subscribe({
-        next: (types) => {
-          this.consumptionTypes = types;
-        },
-        error: (error) => {
-          console.error('Error al cargar tipos de consumo:', error);
-        }
-      });
-  }
-
-  loadClaimTypes() {
-    this.claimsService.getClaimTypes()
-      .subscribe({
-        next: (types) => {
-          this.claimTypes = types;
-        },
-        error: (error) => {
-          console.error('Error al cargar tipos de reclamo:', error);
-        }
-      });
-  }
-
-  loadCurrencies() {
-    this.claimsService.getCurrencies()
-      .subscribe({
-        next: (currencies) => {
-          this.currencies = currencies;
-        },
-        error: (error) => {
-          console.error('Error al cargar monedas:', error);
-        }
-      });
-  }
 
   // Progress bar
   updateProgress(direction: 'next' | 'prev'): void {
