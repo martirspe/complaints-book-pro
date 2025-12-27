@@ -1,4 +1,4 @@
-export interface IConsumptionType {
+export interface ConsumptionType {
   id: number;
   name: string;
 }

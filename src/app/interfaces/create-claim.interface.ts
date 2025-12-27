@@ -1,4 +1,4 @@
-export interface ICreateClaimPayload {
+export interface CreateClaimPayload {
   customer_id: number;
   tutor_id?: number;
   claim_type_id: number;

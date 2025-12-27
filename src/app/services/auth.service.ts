@@ -1,4 +1,6 @@
 import { Injectable, signal } from '@angular/core';
+
+// --- IMPORTS - ENVIRONMENT
 import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })

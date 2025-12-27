@@ -1,52 +1,51 @@
-import { Component, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RecaptchaV3Module, ReCaptchaV3Service } from 'ng-recaptcha';
-import { forkJoin, switchMap, catchError, throwError, of, finalize, debounceTime, distinctUntilChanged, firstValueFrom } from 'rxjs';
+// --- IMPORTS - ANGULAR
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+
+// --- IMPORTS - RXJS
+import { forkJoin, switchMap, catchError, throwError, of, debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil, tap } from 'rxjs';
+
+// --- IMPORTS - SHARED
 import { ToastService } from '../../shared/toast/toast.service';
 import { SkeletonBlockComponent } from '../../shared/skeleton/skeleton-block.component';
 
-// Services
+// --- IMPORTS - SERVICES
 import { ClaimsService } from '../../services/claims.service';
 import { TenantService } from 'src/app/services/tenant.service';
+import { RecaptchaService } from '../../services/recaptcha.service';
 
-// Interfaces
-import { ICustomer } from '../../interfaces/customer.interface';
-import { ITutor } from '../../interfaces/tutor.interface';
-import { IClaimType } from '../../interfaces/claim-type.interface';
-import { IDocumentType } from '../../interfaces/document-type.interface';
-import { IConsumptionType } from '../../interfaces/consumption-type.interface';
-import { ICurrency } from '../../interfaces/currency.interface';
-
-// Environment
-import { environment } from 'src/environments/environment';
+// --- IMPORTS - INTERFACES
+import { Customer } from '../../interfaces/customer.interface';
+import { Tutor } from '../../interfaces/tutor.interface';
+import { ClaimType } from '../../interfaces/claim-type.interface';
+import { DocumentType } from '../../interfaces/document-type.interface';
+import { ConsumptionType } from '../../interfaces/consumption-type.interface';
+import { Currency } from '../../interfaces/currency.interface';
+import { ClaimForm } from '../../interfaces/claim-form.interface';
 
 @Component({
   selector: 'app-form',
-  imports: [ReactiveFormsModule, RecaptchaV3Module, SkeletonBlockComponent],
+  imports: [ReactiveFormsModule, SkeletonBlockComponent, RouterLink],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
 })
-export class FormComponent implements OnInit {
+export class FormComponent implements OnInit, OnDestroy {
 
-  // Información del tenant
-  public tenant = this.tenantService.tenant;
-  // Lazy loading: datos listos para mostrar
-  public isDataReady = false;
+  // --- CONSTANTES PRIVADAS - VALIDACIÓN
 
-  // Acción de reCAPTCHA v3
-  private readonly recaptchaAction = 'claim_submit';
-
-  // Variables para el formulario
   private readonly MIN_DESC_LENGTH = 100;
   private readonly MIN_DETAIL_LENGTH = 50;
   private readonly PHONE_LENGTH = 9;
   private readonly MIN_ADDRESS_LENGTH = 25;
+  private readonly MAX_FILE_SIZE = 153600; // 150KB
+  private readonly recaptchaAction = 'claim_submit';
 
-  // Hints dinámicos por tipo de documento
-  public docNumberHint = 'Ingresa tu número de documento';
-  public tutorDocNumberHint = 'Ingresa el número de documento del tutor';
+  private readonly namePattern = '^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1 ]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]+$';
+  private readonly emailPattern = '^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$';
 
-  // Reglas de validación por tipo de documento (debe coincidir exactamente con los nombres del seed)
+  // --- CONSTANTES PRIVADAS - REGLAS DE DOCUMENTOS
+
   private readonly DOCUMENT_RULES: Record<string, { min: number; max: number; pattern: RegExp; hint: string }> = {
     'DNI': { min: 8, max: 8, pattern: /^[0-9]+$/, hint: 'DNI: exactamente 8 dígitos' },
     'CARNET DE EXTRANJERIA': { min: 9, max: 12, pattern: /^[0-9]+$/, hint: 'Carnet de Extranjería: 9 a 12 dígitos' },
@@ -55,227 +54,188 @@ export class FormComponent implements OnInit {
     'BREVETE': { min: 8, max: 8, pattern: /^[0-9]+$/, hint: 'Brevete: exactamente 8 dígitos' },
   };
 
-  // Descripción de los tipos de reclamo
-  public sDescription = '';
+  private readonly ALLOWED_FILE_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
-  // Variable para almacenar el nombre de archivo
-  public selectedFileName: string | null = null;
-  // Variable para almacenar el archivo adjunto
-  private attachedFile: File | null = null;
+  // --- PROPIEDADES PÚBLICAS - INFORMACIÓN DEL TENANT
 
-  // Variables progress bar
-  readonly totalSteps = 4; // Ahora incluye paso de revisión
+  public tenant = this.tenantService.tenant;
+  public currentYear = new Date().getFullYear();
+
+  // --- PROPIEDADES PÚBLICAS - ESTADO DE CARGA
+
+  public isDataReady = false;
+
+  // --- PROPIEDADES PÚBLICAS - DATOS CARGADOS
+
+  public documentTypes: DocumentType[] = [];
+  public consumptionTypes: ConsumptionType[] = [];
+  public claimTypes: ClaimType[] = [];
+  public currencies: Currency[] = [];
+
+  // --- PROPIEDADES PÚBLICAS - CONFIGURACIÓN DE PASOS
+
+  readonly totalSteps = 4;
   public currentStep = 1;
   public progressWidth = (1 / this.totalSteps) * 100;
+  public progressIndicatorPosition = ((this.currentStep - 0.5) / this.totalSteps) * 100;
 
-  // Labels descriptivos para cada paso
-  public stepLabels = [
+  readonly stepLabels = [
     'Datos Personales',
     'Tipo de Consumo',
     'Detalles del Reclamo',
     'Revisión Final'
   ];
 
-  // Obtener el año actual
-  currentYear = new Date().getFullYear();
+  // --- PROPIEDADES PÚBLICAS - FORMULARIO TIPADO
 
-  // Estados de autocompletado
+  public claimForm: FormGroup<ClaimForm> = this.fb.group<ClaimForm>({
+    document_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+    document_number: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+    first_name: this.fb.control('', { validators: [Validators.required, Validators.pattern(this.namePattern)], nonNullable: true }),
+    last_name: this.fb.control('', { validators: [Validators.required, Validators.pattern(this.namePattern)], nonNullable: true }),
+    celphone: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.PHONE_LENGTH), Validators.maxLength(this.PHONE_LENGTH), Validators.pattern('[0-9]+')], nonNullable: true }),
+    email: this.fb.control('', { validators: [Validators.required, Validators.email, Validators.pattern(this.emailPattern)], nonNullable: true }),
+    address: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_ADDRESS_LENGTH)], nonNullable: true }),
+    is_younger: this.fb.control(false, { nonNullable: true }),
+    document_type_tutor_id: this.fb.control('', { nonNullable: true }),
+    document_number_tutor: this.fb.control('', { nonNullable: true }),
+    first_name_tutor: this.fb.control('', { validators: [Validators.pattern(this.namePattern)], nonNullable: true }),
+    last_name_tutor: this.fb.control('', { validators: [Validators.pattern(this.namePattern)], nonNullable: true }),
+    celphone_tutor: this.fb.control('', { validators: [Validators.minLength(this.PHONE_LENGTH), Validators.maxLength(this.PHONE_LENGTH), Validators.pattern('[0-9]+')], nonNullable: true }),
+    email_tutor: this.fb.control('', { validators: [Validators.email, Validators.pattern(this.emailPattern)], nonNullable: true }),
+    claim_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+    order_number: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+    claimed_amount: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+    currency_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+    description: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)], nonNullable: true }),
+    consumption_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+    detail: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DETAIL_LENGTH)], nonNullable: true }),
+    request: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)], nonNullable: true }),
+    attachment: this.fb.control<File | null>(null),
+    recaptcha: this.fb.control('', { nonNullable: true })
+  });
+
+  // --- PROPIEDADES PÚBLICAS - ESTADO DEL CLIENTE
+
   public customerAutoFilled = false;
   public tutorAutoFilled = false;
-
-  // Arreglo de tipos de documentos
-  documentTypes: IDocumentType[] = [];
-
-  // Arreglo de tipos de consumo
-  consumptionTypes: IConsumptionType[] = [];
-
-  // Arreglo de tipos de reclamo
-  claimTypes: IClaimType[] = [];
-
-  // Arreglo de monedas
-  currencies: ICurrency[] = [];
-
-  // Variables boleanas
-  isYouger = false;
-  sSend = false;
-  eSend = false;
-  // Estado de envío
   public isSubmitting = false;
-  // Evitar bucles de autocompletado
+
+  // --- PROPIEDADES PÚBLICAS - MENSAJES Y ARCHIVOS
+
+  public docNumberHint = 'Ingresa tu número de documento';
+  public tutorDocNumberHint = 'Ingresa el número de documento del tutor';
+  public selectedFileName: string | null = null;
+
+  // --- PROPIEDADES PRIVADAS - SUSCRIPCIONES Y ESTADO INTERNO
+
+  private readonly destroy$ = new Subject<void>();
+  private attachedFile: File | null = null;
   private lastCustomerDocLoaded: string | null = null;
   private lastTutorDocLoaded: string | null = null;
 
-  // Campos por paso para validación
+  // --- CONSTRUCTOR
+
+  constructor(
+    private fb: FormBuilder,
+    private claimsService: ClaimsService,
+    private toast: ToastService,
+    private tenantService: TenantService,
+    private recaptchaService: RecaptchaService
+  ) { }
+
+  // --- CICLO DE VIDA - ANGULAR LIFECYCLE HOOKS
+
+  ngOnInit(): void {
+    this.loadInitialData();
+    this.setupYoungerValidation();
+    this.setupCustomerLookupByDocument();
+    this.setupTutorLookupByDocument();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // --- MÉTODOS PÚBLICOS - GETTERS Y UTILIDAD
+
+  /**
+   * Obtiene la etiqueta del paso actual
+   */
   public getCurrentStepLabel(): string {
     return this.stepLabels[this.currentStep - 1] || '';
   }
 
+  /**
+   * Obtiene el símbolo de moneda según la seleccionada
+   */
   public getCurrencySymbol(): string {
-    const currencyId = this.claimForm.get('currency_id')?.value;
+    const currencyId = this.claimForm.controls.currency_id.value;
     const currency = this.currencies.find(c => Number(c.id) === Number(currencyId));
     return currency ? currency.symbol : '';
   }
 
-  private getStepControls(step: number): string[] {
-    if (step === 1) {
-      const base = [
-        'document_type_id',
-        'document_number',
-        'first_name',
-        'last_name',
-        'celphone',
-        'email',
-        'address'
-      ];
-      if (this.isYouger) {
-        base.push(
-          'document_type_tutor_id',
-          'document_number_tutor',
-          'first_name_tutor',
-          'last_name_tutor',
-          'celphone_tutor',
-          'email_tutor'
-        );
-      }
-      return base;
-    }
-    if (step === 2) {
-      return [
-        'consumption_type_id',
-        'order_number',
-        'claimed_amount',
-        'currency_id',
-        'description'
-      ];
-    }
-    if (step === 3) {
-      return [
-        'claim_type_id',
-        'detail',
-        'request'
-      ];
-    }
-    if (step === 4) {
-      // Paso de revisión (solo lectura, sin campos obligatorios adicionales)
-      return [];
-    }
-    return [];
+  // --- MÉTODOS PÚBLICOS - VALIDACIÓN DE CAMPOS
+
+  /**
+   * Valida si un campo es válido y ha sido tocado
+   */
+  public isValidField(field: string): boolean | null {
+    const control = this.claimForm.get(field);
+    return !!(control?.valid && control?.touched) || null;
   }
 
-  // Obtiene la regla de validación según el tipo de documento seleccionado
-  private getDocRuleByTypeControl(typeControlName: string, typeIdOverride?: number): { min: number; max: number; pattern: RegExp; hint: string } {
-    // Usar el typeId pasado directamente o leerlo del formulario
-    const typeId = typeIdOverride !== undefined ? typeIdOverride : this.claimForm.get(typeControlName)?.value;
-
-    if (!typeId) {
-      return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Selecciona primero un tipo de documento' };
-    }
-
-    // Convertir a número para asegurar comparación correcta (los IDs pueden venir como string del select)
-    const numericTypeId = Number(typeId);
-    const docType = this.documentTypes.find(t => Number(t.id) === numericTypeId);
-
-    if (!docType) {
-      return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Selecciona primero un tipo de documento' };
-    }
-
-    const typeName = docType.name.trim().toUpperCase();
-    const rule = this.DOCUMENT_RULES[typeName];
-
-    if (!rule) {
-      return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Número de documento' };
-    }
-
-    return rule;
+  /**
+   * Determina si un campo es inválido y ha sido tocado
+   */
+  public isFieldInvalid(field: string): boolean {
+    const control = this.claimForm.get(field);
+    return !!(control?.invalid && control?.touched);
   }
 
-  private applyDocumentValidators(typeControlName: string, numberControlName: string, hintField: 'docNumberHint' | 'tutorDocNumberHint', isRequired: boolean, typeIdOverride?: number): void {
-    const rule = this.getDocRuleByTypeControl(typeControlName, typeIdOverride);
-    const control = this.claimForm.get(numberControlName);
-    if (!control) return;
-
-    // Construir validadores en orden correcto
-    const validators: any[] = [];
-    if (isRequired) validators.push(Validators.required);
-    validators.push(Validators.minLength(rule.min));
-    validators.push(Validators.maxLength(rule.max));
-    validators.push(Validators.pattern(rule.pattern));
-
-    control.setValidators(validators);
-    control.updateValueAndValidity({ emitEvent: false });
-
-    // Actualizar hints
-    if (hintField === 'docNumberHint') this.docNumberHint = rule.hint;
-    if (hintField === 'tutorDocNumberHint') this.tutorDocNumberHint = rule.hint;
+  /**
+   * Determina si un campo es válido y ha sido tocado
+   */
+  public isFieldValid(field: string): boolean {
+    const control = this.claimForm.get(field);
+    return !!(control?.valid && control?.touched);
   }
 
+  /**
+   * Obtiene el mensaje de error para un campo específico
+   */
+  public getFieldError(field: string): string {
+    const control = this.claimForm.get(field);
+    if (!control?.errors) return '';
+
+    const errors = control.errors;
+    const errorKey = Object.keys(errors)[0];
+
+    return this.buildErrorMessage(field, errorKey, errors);
+  }
+
+  // --- MÉTODOS PÚBLICOS - NAVEGACIÓN Y PASOS
+
+  /**
+   * Verifica si todos los campos del paso actual son válidos
+   */
   public isStepValid(step: number): boolean {
     const controls = this.getStepControls(step);
     return controls.every(name => this.claimForm.get(name)?.valid);
   }
 
-  private setupDocumentTypeValidation(): void {
-    // Cuando cambia el tipo de documento del cliente
-    this.claimForm.get('document_type_id')?.valueChanges.subscribe((typeId) => {
-      if (!typeId) return;
-      // Revalidar el campo de número de documento inmediatamente, pasando el typeId directamente
-      this.applyDocumentValidators('document_type_id', 'document_number', 'docNumberHint', true, typeId);
-      // Limpiar campos autocompletados y estado de tutor al cambiar tipo
-      this.claimForm.patchValue({
-        document_number: '',
-        first_name: '',
-        last_name: '',
-        email: '',
-        celphone: '',
-        address: '',
-        // Resetear tutor completo
-        is_youger: false,
-        document_type_tutor_id: '',
-        document_number_tutor: '',
-        first_name_tutor: '',
-        last_name_tutor: '',
-        email_tutor: '',
-        celphone_tutor: ''
-      }, { emitEvent: false });
-      this.isYouger = false;
-      this.lastCustomerDocLoaded = null;
-      this.customerAutoFilled = false;
-      this.tutorAutoFilled = false;
-    });
-
-    // Cuando cambia el tipo de documento del tutor
-    this.claimForm.get('document_type_tutor_id')?.valueChanges.subscribe((typeId) => {
-      if (!this.isYouger || !typeId) return;
-      // Revalidar el campo de número de documento del tutor, pasando el typeId directamente
-      this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true, typeId);
-      // Limpiar campos autocompletados del tutor al cambiar tipo
-      this.claimForm.patchValue({
-        document_number_tutor: '',
-        first_name_tutor: '',
-        last_name_tutor: '',
-        email_tutor: '',
-        celphone_tutor: ''
-      }, { emitEvent: false });
-      this.lastTutorDocLoaded = null;
-      this.tutorAutoFilled = false;
-    });
-  }
-
-  // Valida en cadena si todos los pasos anteriores están completos
-  private allStepsValidUpTo(step: number): boolean {
-    for (let i = 1; i < step; i++) {
-      if (!this.isStepValid(i)) return false;
-    }
-    return true;
-  }
-
-  // Determina si se puede navegar al paso solicitado
+  /**
+   * Verifica si es posible navegar a un paso específico
+   */
   public canNavigateTo(step: number): boolean {
-    if (step <= this.currentStep) return true; // Siempre permitir ir hacia atrás
-    return this.allStepsValidUpTo(step); // Hacia adelante solo si los previos son válidos
+    if (step <= this.currentStep) return true;
+    return this.allStepsValidUpTo(step);
   }
 
-  // Maneja clics en el stepper para navegar entre pasos
+  /**
+   * Navega a un paso específico si es permitido
+   */
   public onStepClick(step: number): void {
     if (step === this.currentStep) return;
     if (!this.canNavigateTo(step)) {
@@ -283,15 +243,12 @@ export class FormComponent implements OnInit {
       return;
     }
     this.currentStep = step;
-    this.progressWidth = (this.currentStep / this.totalSteps) * 100;
-    this.updateStepsVisibility();
+    this.updateProgressAndVisibility();
   }
 
-  private markStepFieldsTouched(step: number): void {
-    const controls = this.getStepControls(step);
-    controls.forEach(name => this.claimForm.get(name)?.markAsTouched());
-  }
-
+  /**
+   * Avanza al siguiente paso si todos los campos del paso actual son válidos
+   */
   public goNextIfValid(step: number): void {
     if (this.isStepValid(step)) {
       this.nextStep();
@@ -301,20 +258,112 @@ export class FormComponent implements OnInit {
     }
   }
 
-  // Patterns
-  private readonly namePattern = '^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1 ]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]+$';
-  private readonly emailPattern = '^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$';
+  /**
+   * Avanza al siguiente paso
+   */
+  public nextStep(): void {
+    if (this.currentStep < this.totalSteps) {
+      this.currentStep++;
+      this.updateProgressAndVisibility();
+    }
+  }
 
-  constructor(
-    private fb: FormBuilder,
-    private claimsService: ClaimsService,
-    private toast: ToastService,
-    private tenantService: TenantService,
-    private recaptchaV3Service: ReCaptchaV3Service
-  ) { }
+  /**
+   * Retrocede al paso anterior
+   */
+  public prevStep(): void {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+      this.updateProgressAndVisibility();
+    }
+  }
 
-  ngOnInit(): void {
-    // Cargar todos los datos en paralelo y marcar como listo al terminar
+  /**
+   * Actualiza el progreso en dirección especificada
+   */
+  public updateProgress(direction: 'next' | 'prev'): void {
+    if (direction === 'next' && this.currentStep < this.totalSteps) {
+      this.currentStep++;
+    } else if (direction === 'prev' && this.currentStep > 1) {
+      this.currentStep--;
+    }
+    this.updateProgressAndVisibility();
+  }
+
+  // --- MÉTODOS PÚBLICOS - ESTADO DEL CLIENTE
+
+  /**
+   * Marca si el cliente es menor de edad y actualiza los validadores correspondientes
+   */
+  public isYounger(value: boolean): void {
+    this.claimForm.controls.is_younger.setValue(value, { emitEvent: true });
+  }
+
+  // --- MÉTODOS PÚBLICOS - GESTIÓN DE ARCHIVOS
+
+  /**
+   * Procesa un archivo seleccionado por el usuario
+   */
+  public onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+
+    if (file) {
+      if (!this.validateFile(file)) {
+        input.value = '';
+        return;
+      }
+      this.selectedFileName = file.name;
+      this.attachedFile = file;
+      this.claimForm.controls.attachment.setValue(file);
+    } else {
+      this.clearFileSelection(input);
+    }
+  }
+
+  /**
+   * Elimina el archivo adjunto seleccionado
+   */
+  public removeAttachment(): void {
+    this.selectedFileName = null;
+    this.attachedFile = null;
+    this.claimForm.controls.attachment.setValue(null);
+  }
+
+  // --- MÉTODOS PÚBLICOS - ENVÍO DE FORMULARIO
+
+  /**
+   * Maneja el evento de guardar/enviar el reclamo
+   * Valida reCAPTCHA, valida el formulario y envía el reclamo
+   */
+  public async onSave(): Promise<void> {
+    try {
+      this.isSubmitting = true;
+      const recaptchaToken = await this.executeRecaptchaWithFallback();
+
+      if (!recaptchaToken) {
+        this.isSubmitting = false;
+        this.toast.showError('No pudimos validar reCAPTCHA. Intenta de nuevo.');
+        return;
+      }
+
+      this.claimForm.controls.recaptcha.setValue(recaptchaToken);
+      if (this.claimForm.invalid) {
+        this.claimForm.markAllAsTouched();
+        this.isSubmitting = false;
+        return;
+      }
+      await this.submitClaim();
+    } catch (error) {
+      this.toast.showError('No pudimos enviar tu reclamo. Intenta nuevamente.');
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  // --- MÉTODOS PRIVADOS - INICIALIZACIÓN
+
+  private loadInitialData(): void {
     forkJoin({
       documentTypes: this.claimsService.getDocumentTypes(),
       consumptionTypes: this.claimsService.getConsumptionTypes(),
@@ -326,191 +375,398 @@ export class FormComponent implements OnInit {
         this.consumptionTypes = data.consumptionTypes;
         this.claimTypes = data.claimTypes;
         this.currencies = data.currencies;
-
-        // Configurar validaciones después de tener tipos de documento
         this.setupDocumentTypeValidation();
-
-        // Marcar datos como listos
         this.isDataReady = true;
       },
-      error: (error) => {
-        console.error('Error al cargar datos iniciales:', error);
-        // Aún así permitir mostrar el formulario para mejor UX
+      error: (error: any) => {
         this.isDataReady = true;
       }
     });
-
-    this.setupYoungerValidation();
-    this.setupCustomerLookupByDocument();
-    this.setupTutorLookupByDocument();
   }
 
-  setupYoungerValidation(): void {
-    this.claimForm.get('is_youger')?.valueChanges.subscribe((isYounger: boolean) => {
-      // Sincronizar la variable visual con el valor del FormControl
-      this.isYouger = isYounger;
+  private setupDocumentTypeValidation(): void {
+    this.claimForm.controls.document_type_id.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((typeId) => {
+        if (!typeId) return;
+        this.applyDocumentValidators('document_type_id', 'document_number', 'docNumberHint', true, Number(typeId));
+        this.resetCustomerFields();
+      });
 
-      const phoneLen = this.PHONE_LENGTH;
+    this.claimForm.controls.document_type_tutor_id.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((typeId) => {
+        if (!this.claimForm.controls.is_younger.value || !typeId) return;
+        this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true, Number(typeId));
+        this.resetTutorFields();
+      });
+  }
 
-      const setValidators = (field: string, validators: any[]) => {
-        const control = this.claimForm.get(field);
-        if (!control) return;
+  private setupYoungerValidation(): void {
+    this.claimForm.controls.is_younger.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isYounger: boolean) => {
+        if (isYounger) {
+          this.enableTutorValidators();
+        } else {
+          this.disableTutorValidators();
+        }
+        this.claimForm.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      });
+  }
+
+  private setupCustomerLookupByDocument(): void {
+    this.claimForm.controls.document_number.valueChanges.pipe(
+      debounceTime(600),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe((docNumber) => {
+      this.performCustomerLookup(docNumber);
+    });
+  }
+
+  private setupTutorLookupByDocument(): void {
+    this.claimForm.controls.document_number_tutor.valueChanges.pipe(
+      debounceTime(600),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe((docNumber) => {
+      if (this.claimForm.controls.is_younger.value) {
+        this.performTutorLookup(docNumber);
+      }
+    });
+  }
+
+  // --- MÉTODOS PRIVADOS - VALIDACIÓN DE DOCUMENTOS
+
+  private getDocRuleByTypeControl(typeControlName: string, typeIdOverride?: number) {
+    const typeId = typeIdOverride !== undefined ? typeIdOverride : this.claimForm.get(typeControlName)?.value;
+
+    if (!typeId) {
+      return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Selecciona primero un tipo de documento' };
+    }
+
+    const numericTypeId = Number(typeId);
+    const docType = this.documentTypes.find(t => Number(t.id) === numericTypeId);
+
+    if (!docType) {
+      return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Selecciona primero un tipo de documento' };
+    }
+
+    const typeName = docType.name.trim().toUpperCase();
+    return this.DOCUMENT_RULES[typeName] || { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Número de documento' };
+  }
+
+  private applyDocumentValidators(typeControlName: string, numberControlName: string, hintField: 'docNumberHint' | 'tutorDocNumberHint', isRequired: boolean, typeIdOverride?: number): void {
+    const rule = this.getDocRuleByTypeControl(typeControlName, typeIdOverride);
+    const control = this.claimForm.get(numberControlName);
+    if (!control) return;
+
+    const validators: any[] = [];
+    if (isRequired) validators.push(Validators.required);
+    validators.push(Validators.minLength(rule.min), Validators.maxLength(rule.max), Validators.pattern(rule.pattern));
+
+    control.setValidators(validators);
+    control.updateValueAndValidity({ emitEvent: false });
+
+    if (hintField === 'docNumberHint') this.docNumberHint = rule.hint;
+    if (hintField === 'tutorDocNumberHint') this.tutorDocNumberHint = rule.hint;
+  }
+
+  // --- MÉTODOS PRIVADOS - PASOS Y TUTORES
+
+  private getStepControls(step: number): string[] {
+    const baseCustomer = ['document_type_id', 'document_number', 'first_name', 'last_name', 'celphone', 'email', 'address'];
+    const tutorFields = ['document_type_tutor_id', 'document_number_tutor', 'first_name_tutor', 'last_name_tutor', 'celphone_tutor', 'email_tutor'];
+    const consumptionFields = ['consumption_type_id', 'order_number', 'claimed_amount', 'currency_id', 'description'];
+    const claimFields = ['claim_type_id', 'detail', 'request'];
+
+    switch (step) {
+      case 1:
+        return this.claimForm.controls.is_younger.value ? [...baseCustomer, ...tutorFields] : baseCustomer;
+      case 2:
+        return consumptionFields;
+      case 3:
+        return claimFields;
+      default:
+        return [];
+    }
+  }
+
+  private allStepsValidUpTo(step: number): boolean {
+    for (let i = 1; i < step; i++) {
+      if (!this.isStepValid(i)) return false;
+    }
+    return true;
+  }
+
+  private enableTutorValidators(): void {
+    const phoneLen = this.PHONE_LENGTH;
+    const setValidators = (field: string, validators: any[]) => {
+      const control = this.claimForm.get(field);
+      if (control) {
         control.setValidators(validators);
         control.updateValueAndValidity();
-      };
-
-      if (isYounger) {
-        setValidators('document_type_tutor_id', [Validators.required]);
-        // Validación dinámica según tipo de documento del tutor
-        this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true);
-        setValidators('first_name_tutor', [Validators.required, Validators.pattern(this.namePattern)]);
-        setValidators('last_name_tutor', [Validators.required, Validators.pattern(this.namePattern)]);
-        setValidators('celphone_tutor', [
-          Validators.required,
-          Validators.minLength(phoneLen),
-          Validators.maxLength(phoneLen),
-          Validators.pattern('[0-9]+')
-        ]);
-        setValidators('email_tutor', [Validators.required, Validators.email, Validators.pattern(this.emailPattern)]);
-      } else {
-        ['document_type_tutor_id', 'document_number_tutor', 'first_name_tutor', 'last_name_tutor', 'celphone_tutor', 'email_tutor']
-          .forEach(field => {
-            const control = this.claimForm.get(field);
-            if (!control) return;
-            control.clearValidators();
-            // Reset to empty string so selects show placeholder (not null)
-            control.reset('');
-            control.updateValueAndValidity();
-          });
       }
+    };
 
-      // Actualizar la validez del formulario sin perder el estado visual de los campos ya validados
-      this.claimForm.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    setValidators('document_type_tutor_id', [Validators.required]);
+    this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true);
+    setValidators('first_name_tutor', [Validators.required, Validators.pattern(this.namePattern)]);
+    setValidators('last_name_tutor', [Validators.required, Validators.pattern(this.namePattern)]);
+    setValidators('celphone_tutor', [Validators.required, Validators.minLength(phoneLen), Validators.maxLength(phoneLen), Validators.pattern('[0-9]+')]);
+    setValidators('email_tutor', [Validators.required, Validators.email, Validators.pattern(this.emailPattern)]);
+  }
+
+  private disableTutorValidators(): void {
+    const tutorFields = ['document_type_tutor_id', 'document_number_tutor', 'first_name_tutor', 'last_name_tutor', 'celphone_tutor', 'email_tutor'];
+    tutorFields.forEach(field => {
+      const control = this.claimForm.get(field);
+      if (control) {
+        control.clearValidators();
+        control.reset('');
+        control.updateValueAndValidity();
+      }
     });
   }
 
+  private markStepFieldsTouched(step: number): void {
+    this.getStepControls(step).forEach(name => this.claimForm.get(name)?.markAsTouched());
+  }
 
-  public claimForm: FormGroup = this.fb.group({
-    document_type_id: ['', Validators.required],
-    document_number: ['', [Validators.required]],
-    first_name: ['', [Validators.required, Validators.pattern(this.namePattern)]],
-    last_name: ['', [Validators.required, Validators.pattern(this.namePattern)]],
-    celphone: ['', [
-      Validators.required,
-      Validators.minLength(this.PHONE_LENGTH),
-      Validators.maxLength(this.PHONE_LENGTH),
-      Validators.pattern('[0-9]+')
-    ]],
-    email: ['', [Validators.required, Validators.email, Validators.pattern(this.emailPattern)]],
-    address: ['', [Validators.required, Validators.minLength(this.MIN_ADDRESS_LENGTH)]],
-    is_youger: [this.isYouger],
+  // --- MÉTODOS PRIVADOS - AUTOCOMPLETADO
 
-    // Tutor fields
-    document_type_tutor_id: [''],
-    document_number_tutor: ['', []],
-    first_name_tutor: ['', Validators.pattern(this.namePattern)],
-    last_name_tutor: ['', Validators.pattern(this.namePattern)],
-    celphone_tutor: ['', [
-      Validators.minLength(this.PHONE_LENGTH),
-      Validators.maxLength(this.PHONE_LENGTH),
-      Validators.pattern('[0-9]+')
-    ]],
-    email_tutor: ['', [Validators.email, Validators.pattern(this.emailPattern)]],
+  private performCustomerLookup(docNumber: string): void {
+    const value = String(docNumber || '').trim();
+    if (!value || this.lastCustomerDocLoaded === value) return;
 
-    // Claim details
-    claim_type_id: ['', Validators.required],
-    order_number: ['', Validators.required],
-    claimed_amount: ['', Validators.required],
-    currency_id: ['', Validators.required],
-    description: ['', [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)]],
-    consumption_type_id: ['', Validators.required],
-    detail: ['', [Validators.required, Validators.minLength(this.MIN_DETAIL_LENGTH)]],
-    request: ['', [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)]],
-    attachment: [null],
-    recaptcha: ['']
-  });
+    const rule = this.getDocRuleByTypeControl('document_type_id');
+    const isValidFormat = value.length >= rule.min && value.length <= rule.max && rule.pattern.test(value) && /^[0-9]+$/.test(value);
 
+    if (isValidFormat) {
+      this.claimsService.getCustomerByDocument(this.tenantService.tenantSlug(), value).subscribe({
+        next: (customer) => this.populateCustomerForm(customer),
+        error: (err: any) => {
+          if (err?.status !== 404) {
+            this.toast.showWarning('No pudimos cargar los datos del cliente');
+          }
+        }
+      });
+    }
+  }
 
+  private performTutorLookup(docNumber: string): void {
+    const value = String(docNumber || '').trim();
+    if (!value || this.lastTutorDocLoaded === value) return;
 
-  // Progress bar
-  updateProgress(direction: 'next' | 'prev'): void {
-    if (direction === 'next' && this.currentStep < this.totalSteps) {
-      this.currentStep++;
-    } else if (direction === 'prev' && this.currentStep > 1) {
-      this.currentStep--;
+    const rule = this.getDocRuleByTypeControl('document_type_tutor_id');
+    const isValidFormat = value.length >= rule.min && value.length <= rule.max && rule.pattern.test(value) && /^[0-9]+$/.test(value);
+
+    if (isValidFormat) {
+      this.claimsService.getTutorByDocument(this.tenantService.tenantSlug(), value).subscribe({
+        next: (tutor) => this.populateTutorForm(tutor),
+        error: (err: any) => {
+          if (err?.status !== 404) {
+            this.toast.showWarning('No pudimos cargar los datos del tutor');
+          }
+        }
+      });
+    }
+  }
+
+  private populateCustomerForm(customer: Customer): void {
+    this.claimForm.patchValue({
+      document_type_id: String(customer.document_type_id),
+      first_name: customer.first_name,
+      last_name: customer.last_name,
+      email: customer.email,
+      celphone: customer.phone,
+      address: customer.address,
+      is_younger: customer.is_younger ?? false,
+    }, { emitEvent: false });
+    this.lastCustomerDocLoaded = String(customer.document_number);
+    this.customerAutoFilled = true;
+    this.toast.showSuccess('Cliente encontrado. Datos cargados automáticamente');
+  }
+
+  private populateTutorForm(tutor: Tutor): void {
+    this.claimForm.patchValue({
+      document_type_tutor_id: String(tutor.document_type_id),
+      document_number_tutor: String(tutor.document_number),
+      first_name_tutor: tutor.first_name,
+      last_name_tutor: tutor.last_name,
+      email_tutor: tutor.email,
+      celphone_tutor: tutor.phone,
+    }, { emitEvent: false });
+    this.lastTutorDocLoaded = String(tutor.document_number);
+    this.tutorAutoFilled = true;
+    this.toast.showSuccess('Tutor encontrado. Datos cargados automáticamente');
+  }
+
+  private resetCustomerFields(): void {
+    this.claimForm.patchValue({
+      document_number: '',
+      first_name: '',
+      last_name: '',
+      email: '',
+      celphone: '',
+      address: '',
+      is_younger: false,
+      document_type_tutor_id: '',
+      document_number_tutor: '',
+      first_name_tutor: '',
+      last_name_tutor: '',
+      email_tutor: '',
+      celphone_tutor: ''
+    }, { emitEvent: false });
+    this.lastCustomerDocLoaded = null;
+    this.customerAutoFilled = false;
+    this.tutorAutoFilled = false;
+  }
+
+  private resetTutorFields(): void {
+    this.claimForm.patchValue({
+      document_number_tutor: '',
+      first_name_tutor: '',
+      last_name_tutor: '',
+      email_tutor: '',
+      celphone_tutor: ''
+    }, { emitEvent: false });
+    this.lastTutorDocLoaded = null;
+    this.tutorAutoFilled = false;
+  }
+
+  // --- MÉTODOS PRIVADOS - ARCHIVO
+
+  private validateFile(file: File): boolean {
+    if (file.size > this.MAX_FILE_SIZE) {
+      this.toast.showWarning('El archivo es demasiado pesado. Máximo permitido: 150KB');
+      return false;
     }
 
+    if (!this.ALLOWED_FILE_TYPES.includes(file.type)) {
+      this.toast.showWarning('Solo aceptamos archivos en formato PDF, DOC o DOCX');
+      return false;
+    }
+
+    return true;
+  }
+
+  private clearFileSelection(input: HTMLInputElement | null): void {
+    this.selectedFileName = null;
+    this.attachedFile = null;
+    if (input) input.value = '';
+  }
+
+  // --- MÉTODOS PRIVADOS - ENVÍO
+
+  private async submitClaim(): Promise<void> {
+    try {
+      const customerData = this.buildCustomerData();
+      const customerObservable = this.getOrCreateCustomer(customerData);
+
+      if (this.claimForm.controls.is_younger.value) {
+        const tutorData = this.buildTutorData();
+        const tutorObservable = this.getOrCreateTutor(tutorData);
+        const result = await firstValueFrom(this.submitWithTutor(customerObservable, tutorObservable));
+      } else {
+        const result = await firstValueFrom(this.submitWithoutTutor(customerObservable));
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  private buildCustomerData(): Customer {
+    return {
+      document_type_id: Number(this.claimForm.controls.document_type_id.value),
+      document_number: String(this.claimForm.controls.document_number.value || '').trim(),
+      first_name: this.claimForm.controls.first_name.value,
+      last_name: this.claimForm.controls.last_name.value,
+      email: this.claimForm.controls.email.value,
+      phone: this.claimForm.controls.celphone.value,
+      address: this.claimForm.controls.address.value,
+      is_younger: this.claimForm.controls.is_younger.value
+    };
+  }
+
+  private buildTutorData(): Tutor {
+    return {
+      document_type_id: Number(this.claimForm.controls.document_type_tutor_id.value),
+      document_number: String(this.claimForm.controls.document_number_tutor.value || '').trim(),
+      first_name: this.claimForm.controls.first_name_tutor.value,
+      last_name: this.claimForm.controls.last_name_tutor.value,
+      email: this.claimForm.controls.email_tutor.value,
+      phone: this.claimForm.controls.celphone_tutor.value
+    };
+  }
+
+  private getOrCreateCustomer(customerData: Customer) {
+    return this.claimsService.getCustomerByDocument(this.tenantService.tenantSlug(), customerData.document_number as string).pipe(
+      catchError((err: any) => err?.status === 404 ? of(null) : throwError(() => err)),
+      switchMap((found) => found && found.id ? of(found) : this.claimsService.createCustomer(this.tenantService.tenantSlug(), customerData))
+    );
+  }
+
+  private getOrCreateTutor(tutorData: Tutor) {
+    return this.claimsService.getTutorByDocument(this.tenantService.tenantSlug(), String(tutorData.document_number)).pipe(
+      catchError((err: any) => err?.status === 404 ? of(null) : throwError(() => err)),
+      switchMap((found) => found && (found as any).id ? of(found) : this.claimsService.createTutor(this.tenantService.tenantSlug(), tutorData))
+    );
+  }
+
+  private submitWithTutor(customerObservable: any, tutorObservable: any) {
+    return forkJoin({ customer: customerObservable, tutor: tutorObservable }).pipe(
+      switchMap(({ customer, tutor }) => {
+        const claimData = this.buildClaimPayload({
+          customer_id: this.extractId(customer),
+          tutor_id: this.extractId(tutor)
+        });
+        return this.createClaim(claimData);
+      }),
+      tap((response: any) => {
+        this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
+        this.resetForm();
+      }),
+      catchError((error: any) => {
+        this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  private submitWithoutTutor(customerObservable: any) {
+    return customerObservable.pipe(
+      switchMap(customer => {
+        const claimData = this.buildClaimPayload({ customer_id: this.extractId(customer) });
+        return this.createClaim(claimData);
+      }),
+      tap((response: any) => {
+        this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
+        this.resetForm();
+      }),
+      catchError((error: any) => {
+        this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // --- MÉTODOS PRIVADOS - UTILIDAD
+
+  private updateProgressAndVisibility(): void {
     this.progressWidth = (this.currentStep / this.totalSteps) * 100;
-    this.updateStepsVisibility();
+    this.progressIndicatorPosition = ((this.currentStep - 0.5) / this.totalSteps) * 100;
   }
 
-  private updateStepsVisibility(): void {
-    document.querySelectorAll('.form-steps').forEach((step, index) => {
-      step.classList.toggle('active', index + 1 === this.currentStep);
-    });
-  }
-
-  nextStep() {
-    if (this.currentStep < this.totalSteps) {
-      this.currentStep++;
-      this.progressWidth = (this.currentStep / this.totalSteps) * 100;
-      this.updateStepsVisibility();
-    }
-  }
-
-  prevStep() {
-    if (this.currentStep > 1) {
-      this.currentStep--;
-      this.progressWidth = (this.currentStep / this.totalSteps) * 100;
-      this.updateStepsVisibility();
-    }
-  }
-
-  isYounger(value: boolean): void {
-    this.isYouger = value;
-    // Sincronizar el FormControl con el valor
-    this.claimForm.get('is_youger')?.setValue(value, { emitEvent: true });
-  }
-
-  isValidField(field: string): boolean | null {
-    const control = this.claimForm.get(field);
-    return !!(control?.valid && control?.touched) || null;
-  }
-
-  isFieldInvalid(field: string): boolean {
-    const control = this.claimForm.get(field);
-    return !!(control?.invalid && control?.touched);
-  }
-
-  public isFieldValid(field: string): boolean {
-    const control = this.claimForm.get(field);
-    return !!(control?.valid && control?.touched);
-  }
-
-  getFieldError(field: string): string {
-    const control = this.claimForm.get(field);
-    if (!control?.errors) return '';
-
-    const errors = control.errors;
-    const errorKey = Object.keys(errors)[0];
-
-    // Mensajes dinámicos para campos de documento según el tipo seleccionado
+  private buildErrorMessage(field: string, errorKey: string, errors: Record<string, any>): string {
     if (field === 'document_number' || field === 'document_number_tutor') {
       const typeControlName = field === 'document_number' ? 'document_type_id' : 'document_type_tutor_id';
       const rule = this.getDocRuleByTypeControl(typeControlName);
-
-      const docSpecificMessages: { [error: string]: string } = {
-        required: 'Este campo es obligatorio',
-        minlength: rule.hint,
-        maxlength: rule.hint,
-        pattern: rule.hint
-      };
-
-      return docSpecificMessages[errorKey] || 'Por favor verifica este campo';
+      return { required: 'Este campo es obligatorio', minlength: rule.hint, maxlength: rule.hint, pattern: rule.hint }[errorKey] || 'Por favor verifica este campo';
     }
 
-    // Mensajes más específicos y humanizados por campo
-    const fieldSpecificMessages: { [key: string]: { [error: string]: string } } = {
+    const fieldMessages: { [key: string]: { [error: string]: string } } = {
       celphone: {
         minlength: 'El número de celular debe tener 9 dígitos',
         maxlength: 'El número de celular debe tener 9 dígitos',
@@ -520,33 +776,19 @@ export class FormComponent implements OnInit {
         email: 'Por favor ingresa un correo electrónico válido (ejemplo: usuario@dominio.com)',
         pattern: 'Por favor ingresa un correo electrónico válido'
       },
-      first_name: {
-        pattern: 'El nombre solo puede contener letras y espacios'
-      },
-      last_name: {
-        pattern: 'Los apellidos solo pueden contener letras y espacios'
-      },
-      address: {
-        minlength: 'Por favor proporciona una dirección más completa (mínimo 25 caracteres)'
-      },
-      description: {
-        minlength: 'Por favor describe tu caso con más detalle (mínimo 100 caracteres)'
-      },
-      detail: {
-        minlength: 'Por favor explica el detalle de tu reclamo (mínimo 50 caracteres)'
-      },
-      request: {
-        minlength: 'Por favor indica claramente qué solicitas (mínimo 100 caracteres)'
-      }
+      first_name: { pattern: 'El nombre solo puede contener letras y espacios' },
+      last_name: { pattern: 'Los apellidos solo pueden contener letras y espacios' },
+      address: { minlength: 'Por favor proporciona una dirección más completa (mínimo 25 caracteres)' },
+      description: { minlength: 'Por favor describe tu caso con más detalle (mínimo 100 caracteres)' },
+      detail: { minlength: 'Por favor explica el detalle de tu reclamo (mínimo 50 caracteres)' },
+      request: { minlength: 'Por favor indica claramente qué solicitas (mínimo 100 caracteres)' }
     };
 
-    // Buscar mensaje específico para el campo
-    if (fieldSpecificMessages[field]?.[errorKey]) {
-      return fieldSpecificMessages[field][errorKey];
+    if (fieldMessages[field]?.[errorKey]) {
+      return fieldMessages[field][errorKey];
     }
 
-    // Mensajes genéricos mejorados
-    const errorMessages: { [key: string]: string } = {
+    const genericMessages: { [key: string]: string } = {
       required: 'Este campo es obligatorio',
       minlength: `Debe tener al menos ${errors['minlength']?.requiredLength} caracteres`,
       maxlength: `No puede exceder ${errors['maxlength']?.requiredLength} caracteres`,
@@ -554,276 +796,15 @@ export class FormComponent implements OnInit {
       email: 'Por favor ingresa un correo electrónico válido'
     };
 
-    return errorMessages[errorKey] || 'Por favor verifica este campo';
+    return genericMessages[errorKey] || 'Por favor verifica este campo';
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input?.files?.[0]) {
-      const file = input.files[0];
-
-      // Validar tamaño (150KB = 153600 bytes)
-      const maxSize = 153600;
-      if (file.size > maxSize) {
-        this.toast.showWarning('El archivo es demasiado pesado. Máximo permitido: 150KB');
-        input.value = '';
-        return;
-      }
-
-      // Validar tipo
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      if (!allowedTypes.includes(file.type)) {
-        this.toast.showWarning('Solo aceptamos archivos en formato PDF, DOC o DOCX');
-        input.value = '';
-        return;
-      }
-
-      this.selectedFileName = file.name;
-      this.attachedFile = file;
-    } else {
-      this.selectedFileName = null;
-      this.attachedFile = null;
-      input.value = '';
-    }
-  }
-
-  // Método para remover archivo adjunto
-  removeAttachment(): void {
-    this.selectedFileName = null;
-    this.attachedFile = null;
-    const fileInput = document.getElementById('attachment') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  }
-
-  async onSave(): Promise<void> {
+  private handleErrorToast(error: any, fallback: string): void {
     try {
-      this.isSubmitting = true;
-
-      // Obtener token score-based de reCAPTCHA v3 antes de validar/enviar
-      let recaptchaToken = '';
-      try {
-        recaptchaToken = await this.executeRecaptcha();
-      } catch (recaptchaError) {
-        this.toast.showError('No pudimos validar reCAPTCHA. Intenta de nuevo.');
-        this.isSubmitting = false;
-        return;
-      }
-
-      this.claimForm.get('recaptcha')?.setValue(recaptchaToken);
-
-      if (this.claimForm.invalid) {
-        this.claimForm.markAllAsTouched();
-        this.isSubmitting = false;
-        return;
-      }
-      // Preparar datos del cliente
-      const customerData: ICustomer = {
-        document_type_id: this.claimForm.get('document_type_id')?.value,
-        document_number: String(this.claimForm.get('document_number')?.value || '').trim(),
-        first_name: this.claimForm.get('first_name')?.value,
-        last_name: this.claimForm.get('last_name')?.value,
-        email: this.claimForm.get('email')?.value,
-        phone: this.claimForm.get('celphone')?.value,
-        address: this.claimForm.get('address')?.value,
-        is_younger: this.isYouger
-      };
-
-      // Buscar cliente por documento; si existe, usarlo. Si no, crearlo.
-      const customerObservable = this.claimsService.getCustomerByDocument(customerData.document_number as string).pipe(
-        // Si no existe (404), crear
-        catchError((err) => {
-          if (err?.status === 404) {
-            return of(null);
-          }
-          return throwError(() => err);
-        }),
-        switchMap((found) => {
-          if (found && found.id) return of(found);
-          return this.claimsService.createCustomer(customerData);
-        })
-      );
-
-      // Si hay tutor, preparar sus datos
-      let tutorObservable = null;
-      if (this.isYouger) {
-        const tutorData: ITutor = {
-          document_type_id: this.claimForm.get('document_type_tutor_id')?.value,
-          document_number: String(this.claimForm.get('document_number_tutor')?.value || '').trim(),
-          first_name: this.claimForm.get('first_name_tutor')?.value,
-          last_name: this.claimForm.get('last_name_tutor')?.value,
-          email: this.claimForm.get('email_tutor')?.value,
-          phone: this.claimForm.get('celphone_tutor')?.value
-        };
-        // Buscar tutor primero; si no existe, crearlo
-        const docNumForLookup = String(tutorData.document_number);
-        tutorObservable = this.claimsService.getTutorByDocument(docNumForLookup).pipe(
-          catchError((err) => {
-            if (err?.status === 404) return of(null);
-            return throwError(() => err);
-          }),
-          switchMap((found) => {
-            if (found && (found as any).id) return of(found);
-            return this.claimsService.createTutor(tutorData);
-          })
-        );
-      }
-
-      // Manejar las creaciones y el envío del reclamo
-      if (tutorObservable) {
-        forkJoin({
-          customer: customerObservable,
-          tutor: tutorObservable
-        }).pipe(
-          switchMap(({ customer, tutor }) => {
-            const claimData = this.buildClaimPayload({
-              customer_id: this.extractId(customer),
-              tutor_id: this.extractId(tutor)
-            });
-            return this.createClaim(claimData);
-          })
-        ).pipe(
-          finalize(() => { this.isSubmitting = false; })
-        ).subscribe({
-          next: (response) => {
-            this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
-            this.resetForm();
-          },
-          error: (error) => {
-            this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
-            this.eSend = true;
-          }
-        });
-      } else {
-        customerObservable.pipe(
-          switchMap(customer => {
-            const claimData = this.buildClaimPayload({
-              customer_id: this.extractId(customer)
-            });
-            return this.createClaim(claimData);
-          }),
-          finalize(() => { this.isSubmitting = false; })
-        ).subscribe({
-          next: (response) => {
-            this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
-            this.resetForm();
-          },
-          error: (error) => {
-            this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
-            this.eSend = true;
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Error en el procesamiento:', error);
-      this.eSend = true;
-      this.isSubmitting = false;
-    }
-  }
-
-  private setupCustomerLookupByDocument(): void {
-    this.claimForm.get('document_number')?.valueChanges.pipe(
-      debounceTime(600), // Esperar 600ms después de que el usuario deje de escribir
-      distinctUntilChanged() // Solo emitir si el valor cambió
-    ).subscribe((docNumber) => {
-      const v = String(docNumber || '').trim();
-
-      // No hacer nada si está vacío o ya se cargó este documento
-      if (!v || (this.lastCustomerDocLoaded === v)) return;
-
-      // Validar que cumpla con el formato esperado
-      const rule = this.getDocRuleByTypeControl('document_type_id');
-      const isValidFormat = v.length >= rule.min && v.length <= rule.max && rule.pattern.test(v);
-
-      // Solo buscar si el formato es válido y es completamente numérico (para búsqueda en BD)
-      if (isValidFormat && /^[0-9]+$/.test(v)) {
-        this.claimsService.getCustomerByDocument(v).subscribe({
-          next: (customer) => {
-            this.populateCustomerForm(customer);
-          },
-          error: (err) => {
-            if (err?.status !== 404) {
-              this.toast.showWarning('No pudimos cargar los datos del cliente');
-            }
-          }
-        });
-      }
-    });
-  }
-
-  private populateCustomerForm(customer: ICustomer): void {
-    this.claimForm.patchValue({
-      document_type_id: customer.document_type_id,
-      first_name: customer.first_name,
-      last_name: customer.last_name,
-      email: customer.email,
-      celphone: customer.phone,
-      address: customer.address,
-      is_youger: customer.is_younger ?? false,
-    }, { emitEvent: false });
-    this.isYouger = !!customer.is_younger;
-    this.lastCustomerDocLoaded = String(customer.document_number);
-    this.customerAutoFilled = true;
-
-    this.toast.showSuccess('Cliente encontrado. Datos cargados automáticamente');
-  }
-
-  private setupTutorLookupByDocument(): void {
-    this.claimForm.get('document_number_tutor')?.valueChanges.pipe(
-      debounceTime(600), // Esperar 600ms después de que el usuario deje de escribir
-      distinctUntilChanged() // Solo emitir si el valor cambió
-    ).subscribe((docNumber) => {
-      // Solo aplica si requiere tutor
-      if (!this.isYouger) return;
-
-      const v = String(docNumber || '').trim();
-
-      // No hacer nada si está vacío o ya se cargó este documento
-      if (!v || (this.lastTutorDocLoaded === v)) return;
-
-      // Validar que cumpla con el formato esperado
-      const rule = this.getDocRuleByTypeControl('document_type_tutor_id');
-      const isValidFormat = v.length >= rule.min && v.length <= rule.max && rule.pattern.test(v);
-
-      // Solo buscar si el formato es válido y es completamente numérico (para búsqueda en BD)
-      if (isValidFormat && /^[0-9]+$/.test(v)) {
-        this.claimsService.getTutorByDocument(v).subscribe({
-          next: (tutor) => {
-            this.populateTutorForm(tutor as any);
-          },
-          error: (err) => {
-            if (err?.status !== 404) {
-              this.toast.showWarning('No pudimos cargar los datos del tutor');
-            }
-          }
-        });
-      }
-    });
-  }
-
-  private populateTutorForm(tutor: ITutor): void {
-    this.claimForm.patchValue({
-      document_type_tutor_id: tutor.document_type_id,
-      document_number_tutor: String(tutor.document_number),
-      first_name_tutor: tutor.first_name,
-      last_name_tutor: tutor.last_name,
-      email_tutor: tutor.email,
-      celphone_tutor: tutor.phone,
-    }, { emitEvent: false });
-    this.lastTutorDocLoaded = String(tutor.document_number);
-    this.tutorAutoFilled = true;
-
-    this.toast.showSuccess('Tutor encontrado. Datos cargados automáticamente');
-  }
-
-  private handleErrorToast(error: any, fallback: string) {
-    try {
-      const status = error?.status;
-      const body = error?.error;
+      const status = error?.['status'];
+      const body = error?.['error'];
       if (status === 422 && body?.errors?.length) {
-        const first = body.errors[0];
-        this.toast.showError(`${first.field}: ${first.message}`);
+        this.toast.showError(`${body.errors[0].field}: ${body.errors[0].message}`);
       } else if ((status === 400 || status === 409 || status === 404) && body?.message) {
         this.toast.showError(body.message);
       } else {
@@ -834,23 +815,20 @@ export class FormComponent implements OnInit {
     }
   }
 
-  // Extrae id de respuestas potencialmente anidadas
   private extractId(entity: any): number | undefined {
-    if (!entity) return undefined;
-    return entity.id ?? entity?.data?.id ?? entity?.customer?.id ?? undefined;
+    return entity ? (entity.id ?? entity?.data?.id ?? entity?.customer?.id) : undefined;
   }
 
-  // Construye solo los campos requeridos por el endpoint de reclamos
-  private buildClaimPayload(base: { customer_id?: number; tutor_id?: number }) {
-    const fv = this.claimForm.value;
+  private buildClaimPayload(base: { customer_id?: number; tutor_id?: number }): any {
+    const fv = this.claimForm.getRawValue();
     return {
       customer_id: base.customer_id,
       tutor_id: base.tutor_id,
-      claim_type_id: fv.claim_type_id,
-      consumption_type_id: fv.consumption_type_id,
-      currency_id: fv.currency_id,
-      order_number: fv.order_number,
-      claimed_amount: fv.claimed_amount,
+      claim_type_id: Number(fv.claim_type_id),
+      consumption_type_id: Number(fv.consumption_type_id),
+      currency_id: Number(fv.currency_id),
+      order_number: Number(fv.order_number),
+      claimed_amount: Number(fv.claimed_amount),
       description: fv.description,
       detail: fv.detail,
       request: fv.request,
@@ -860,94 +838,85 @@ export class FormComponent implements OnInit {
   }
 
   private createClaim(claimData: any) {
-
     const hasAttachment = claimData.attachment instanceof File;
 
-    // 🟢 CASO 1: SIN ARCHIVO → JSON (como Postman)
     if (!hasAttachment) {
-      const payload = {
-        customer_id: Number(claimData.customer_id),
-        tutor_id: claimData.tutor_id ? Number(claimData.tutor_id) : undefined,
-        claim_type_id: Number(claimData.claim_type_id),
-        consumption_type_id: Number(claimData.consumption_type_id),
-        currency_id: Number(claimData.currency_id),
-        order_number: Number(claimData.order_number),
-        claimed_amount: Number(claimData.claimed_amount),
-        description: claimData.description,
-        detail: claimData.detail,
-        request: claimData.request,
-        recaptcha: claimData.recaptcha
-      };
-
-      return this.claimsService.createClaim(
-        this.tenantService.tenantSlug(),
-        payload // 👈 JSON
-      );
+      return this.claimsService.createClaim(this.tenantService.tenantSlug(), this.buildJsonPayload(claimData));
     }
 
-    // 🟠 CASO 2: CON ARCHIVO → multipart/form-data
-    const formData = new FormData();
+    return this.claimsService.createClaim(this.tenantService.tenantSlug(), this.buildFormDataPayload(claimData));
+  }
 
+  private buildJsonPayload(claimData: any) {
+    return {
+      customer_id: Number(claimData.customer_id),
+      tutor_id: claimData.tutor_id ? Number(claimData.tutor_id) : undefined,
+      claim_type_id: Number(claimData.claim_type_id),
+      consumption_type_id: Number(claimData.consumption_type_id),
+      currency_id: Number(claimData.currency_id),
+      order_number: Number(claimData.order_number),
+      claimed_amount: Number(claimData.claimed_amount),
+      description: claimData.description,
+      detail: claimData.detail,
+      request: claimData.request,
+      recaptcha: claimData.recaptcha
+    };
+  }
+
+  private buildFormDataPayload(claimData: any): FormData {
+    const formData = new FormData();
     Object.entries(claimData).forEach(([key, value]) => {
       if (value === undefined || value === null || value === '') return;
-
       if (key === 'attachment' && value instanceof File) {
         formData.append('attachment', value);
       } else {
         formData.append(key, String(value));
       }
     });
-
-    return this.claimsService.createClaim(
-      this.tenantService.tenantSlug(),
-      formData
-    );
+    return formData;
   }
 
+  private async executeRecaptchaWithFallback(): Promise<string> {
+    try {
+      const token = await this.executeRecaptcha();
+      return token;
+    } catch (error) {
+      this.toast.showError('No pudimos validar reCAPTCHA. Intenta de nuevo.');
+      this.isSubmitting = false;
+      throw error;
+    }
+  }
 
   private async executeRecaptcha(): Promise<string> {
-    const token = await firstValueFrom(this.recaptchaV3Service.execute(this.recaptchaAction));
-    if (!token) {
-      throw new Error('No se pudo obtener token de reCAPTCHA');
+    try {
+      const token = await this.recaptchaService.execute(this.recaptchaAction);
+      return token;
+    } catch (error) {
+      throw error;
     }
-    return token;
   }
-
 
   private resetForm(): void {
     this.claimForm.reset({
-      // Selects
       document_type_id: '',
       document_type_tutor_id: '',
       consumption_type_id: '',
       currency_id: '',
       claim_type_id: '',
-      // Booleans
-      is_youger: false,
-      // Files and tokens
+      is_younger: false,
       attachment: null,
       recaptcha: ''
     });
 
-    // Reflect radio state and UI flags
-    this.isYouger = false;
     this.selectedFileName = null;
     this.attachedFile = null;
-
-    // Reset progress to first step
     this.currentStep = 1;
-    this.progressWidth = (1 / this.totalSteps) * 100;
-    this.updateStepsVisibility();
-
-    // Clear auto-fill trackers
+    this.updateProgressAndVisibility();
     this.lastCustomerDocLoaded = null;
     this.lastTutorDocLoaded = null;
     this.customerAutoFilled = false;
     this.tutorAutoFilled = false;
-
-    // Restore pristine/untouched state
     this.claimForm.markAsPristine();
     this.claimForm.markAsUntouched();
   }
-
 }

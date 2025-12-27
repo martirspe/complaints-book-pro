@@ -1,11 +1,10 @@
-// claim.interface.ts
-import { ICustomer } from './customer.interface';
-import { ITutor } from './tutor.interface';
-import { IConsumptionType } from './consumption-type.interface';
-import { IClaimType } from './claim-type.interface';
-import { ICurrency } from './currency.interface';
+import { Customer } from './customer.interface';
+import { Tutor } from './tutor.interface';
+import { ConsumptionType } from './consumption-type.interface';
+import { ClaimType } from './claim-type.interface';
+import { Currency } from './currency.interface';
 
-export interface IClaim {
+export interface Claim {
   id: number;
   code: string;
   customer_id: number;
@@ -29,9 +28,9 @@ export interface IClaim {
   assignment_date: string | null;
   response_date: string | null;
   update_date: string;
-  Customer: ICustomer;
-  Tutor: ITutor;
-  ConsumptionType: IConsumptionType;
-  ClaimType: IClaimType;
-  Currency: ICurrency;
+  Customer: Customer;
+  Tutor: Tutor;
+  ConsumptionType: ConsumptionType;
+  ClaimType: ClaimType;
+  Currency: Currency;
 }

@@ -1,4 +1,4 @@
-export interface IDocumentType {
+export interface DocumentType {
   id: number;
   name: string;
 }

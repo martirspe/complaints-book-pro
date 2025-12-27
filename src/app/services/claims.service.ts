@@ -3,15 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-// Interfaces
-import { IDocumentType } from '../interfaces/document-type.interface';
-import { IClaim } from '../interfaces/claim.interface';
-import { IConsumptionType } from '../interfaces/consumption-type.interface';
-import { IClaimType } from '../interfaces/claim-type.interface';
-import { ICustomer } from '../interfaces/customer.interface';
-import { ITutor } from '../interfaces/tutor.interface';
-import { ICurrency } from '../interfaces/currency.interface';
-import { ICreateClaimPayload } from '../interfaces/create-claim.dto';
+// --- IMPORTS - INTERFACES
+import { DocumentType } from '../interfaces/document-type.interface';
+import { Claim } from '../interfaces/claim.interface';
+import { ConsumptionType } from '../interfaces/consumption-type.interface';
+import { ClaimType } from '../interfaces/claim-type.interface';
+import { Customer } from '../interfaces/customer.interface';
+import { Tutor } from '../interfaces/tutor.interface';
+import { Currency } from '../interfaces/currency.interface';
+import { CreateClaimPayload } from '../interfaces/create-claim.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ClaimsService {
@@ -20,82 +20,73 @@ export class ClaimsService {
 
   constructor(private http: HttpClient) { }
 
-  /* ======================================================
-   * CUSTOMERS
-   * ====================================================== */
-
-  createCustomer(customer: ICustomer): Observable<ICustomer> {
-    return this.http.post<ICustomer>(`${this.api}/customers`, customer);
+  // --- CUSTOMERS
+  createCustomer(tenantSlug: string, customer: Customer): Observable<Customer> {
+    return this.http.post<Customer>(`${this.api}/tenants/${tenantSlug}/customers`, customer);
   }
 
-  getCustomerByDocument(documentNumber: string): Observable<ICustomer> {
-    return this.http.get<ICustomer>(
-      `${this.api}/customers/document/${documentNumber}`
+  getCustomerByDocument(tenantSlug: string, documentNumber: string): Observable<Customer> {
+    return this.http.get<Customer>(
+      `${this.api}/tenants/${tenantSlug}/customers/document/${documentNumber}`
     );
   }
 
-  getCustomer(id: number): Observable<ICustomer> {
-    return this.http.get<ICustomer>(`${this.api}/customers/${id}`);
+  getCustomer(tenantSlug: string, id: number): Observable<Customer> {
+    return this.http.get<Customer>(`${this.api}/tenants/${tenantSlug}/customers/${id}`);
   }
 
-  updateCustomer(id: number, payload: Partial<ICustomer>): Observable<ICustomer> {
-    return this.http.put<ICustomer>(`${this.api}/customers/${id}`, payload);
+  updateCustomer(tenantSlug: string, id: number, payload: Partial<Customer>): Observable<Customer> {
+    return this.http.put<Customer>(`${this.api}/tenants/${tenantSlug}/customers/${id}`, payload);
   }
 
-  deleteCustomer(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/customers/${id}`);
+  deleteCustomer(tenantSlug: string, id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/tenants/${tenantSlug}/customers/${id}`);
   }
 
-  /* ======================================================
-   * TUTORS
-   * ====================================================== */
-
-  createTutor(tutor: ITutor): Observable<ITutor> {
-    return this.http.post<ITutor>(`${this.api}/tutors`, tutor);
+  // --- TUTORS
+  createTutor(tenantSlug: string, tutor: Tutor): Observable<Tutor> {
+    return this.http.post<Tutor>(`${this.api}/tenants/${tenantSlug}/tutors`, tutor);
   }
 
-  getTutorByDocument(documentNumber: string): Observable<ITutor> {
-    return this.http.get<ITutor>(
-      `${this.api}/tutors/document/${documentNumber}`
+  getTutorByDocument(tenantSlug: string, documentNumber: string): Observable<Tutor> {
+    return this.http.get<Tutor>(
+      `${this.api}/tenants/${tenantSlug}/tutors/document/${documentNumber}`
     );
   }
 
-  getTutor(id: number): Observable<ITutor> {
-    return this.http.get<ITutor>(`${this.api}/tutors/${id}`);
+  getTutor(tenantSlug: string, id: number): Observable<Tutor> {
+    return this.http.get<Tutor>(`${this.api}/tenants/${tenantSlug}/tutors/${id}`);
   }
 
-  updateTutor(id: number, payload: Partial<ITutor>): Observable<ITutor> {
-    return this.http.put<ITutor>(`${this.api}/tutors/${id}`, payload);
+  updateTutor(tenantSlug: string, id: number, payload: Partial<Tutor>): Observable<Tutor> {
+    return this.http.put<Tutor>(`${this.api}/tenants/${tenantSlug}/tutors/${id}`, payload);
   }
 
-  deleteTutor(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/tutors/${id}`);
+  deleteTutor(tenantSlug: string, id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/tenants/${tenantSlug}/tutors/${id}`);
   }
 
-  /* ======================================================
-   * CLAIMS (TENANT-SCOPED)
-   * ====================================================== */
-
-  getClaims(tenantSlug: string): Observable<IClaim[]> {
-    return this.http.get<IClaim[]>(
+  // --- CLAIMS (TENANT-SCOPED)
+  getClaims(tenantSlug: string): Observable<Claim[]> {
+    return this.http.get<Claim[]>(
       `${this.api}/tenants/${tenantSlug}/claims`
     );
   }
 
-  getClaim(tenantSlug: string, claimId: number): Observable<IClaim> {
-    return this.http.get<IClaim>(
+  getClaim(tenantSlug: string, claimId: number): Observable<Claim> {
+    return this.http.get<Claim>(
       `${this.api}/tenants/${tenantSlug}/claims/${claimId}`
     );
   }
 
-  createClaim(tenantSlug: string, payload: ICreateClaimPayload | FormData): Observable<IClaim> {
-    return this.http.post<IClaim>(
+  createClaim(tenantSlug: string, payload: CreateClaimPayload | FormData): Observable<Claim> {
+    return this.http.post<Claim>(
       `${this.api}/integrations/${tenantSlug}/claims`, payload
     );
   }
 
-  updateClaim(tenantSlug: string, claimId: number, payload: Partial<IClaim>): Observable<IClaim> {
-    return this.http.put<IClaim>(
+  updateClaim(tenantSlug: string, claimId: number, payload: Partial<Claim>): Observable<Claim> {
+    return this.http.put<Claim>(
       `${this.api}/tenants/${tenantSlug}/claims/${claimId}`, payload
     );
   }
@@ -106,45 +97,32 @@ export class ClaimsService {
     );
   }
 
-  assignClaim(
-    tenantSlug: string,
-    claimId: number,
-    assigneeId: number
-  ): Observable<IClaim> {
-    return this.http.patch<IClaim>(
-      `${this.api}/tenants/${tenantSlug}/claims/${claimId}/assign`,
-      { assignee_id: assigneeId }
+  assignClaim(tenantSlug: string, claimId: number, assigneeId: number): Observable<Claim> {
+    return this.http.patch<Claim>(
+      `${this.api}/tenants/${tenantSlug}/claims/${claimId}/assign`, { assignee_id: assigneeId }
     );
   }
 
-  resolveClaim(
-    tenantSlug: string,
-    claimId: number,
-    resolutionNotes: string
-  ): Observable<IClaim> {
-    return this.http.patch<IClaim>(
-      `${this.api}/tenants/${tenantSlug}/claims/${claimId}/resolve`,
-      { resolution_notes: resolutionNotes }
+  resolveClaim(tenantSlug: string, claimId: number, resolutionNotes: string): Observable<Claim> {
+    return this.http.patch<Claim>(
+      `${this.api}/tenants/${tenantSlug}/claims/${claimId}/resolve`, { resolution_notes: resolutionNotes }
     );
   }
 
-  /* ======================================================
-   * CATALOGS
-   * ====================================================== */
-
-  getDocumentTypes(): Observable<IDocumentType[]> {
-    return this.http.get<IDocumentType[]>(`${this.api}/document_types`);
+  // --- CATALOGS
+  getDocumentTypes(): Observable<DocumentType[]> {
+    return this.http.get<DocumentType[]>(`${this.api}/document_types`);
   }
 
-  getConsumptionTypes(): Observable<IConsumptionType[]> {
-    return this.http.get<IConsumptionType[]>(`${this.api}/consumption_types`);
+  getConsumptionTypes(): Observable<ConsumptionType[]> {
+    return this.http.get<ConsumptionType[]>(`${this.api}/consumption_types`);
   }
 
-  getClaimTypes(): Observable<IClaimType[]> {
-    return this.http.get<IClaimType[]>(`${this.api}/claim_types`);
+  getClaimTypes(): Observable<ClaimType[]> {
+    return this.http.get<ClaimType[]>(`${this.api}/claim_types`);
   }
 
-  getCurrencies(): Observable<ICurrency[]> {
-    return this.http.get<ICurrency[]>(`${this.api}/currencies`);
+  getCurrencies(): Observable<Currency[]> {
+    return this.http.get<Currency[]>(`${this.api}/currencies`);
   }
 }

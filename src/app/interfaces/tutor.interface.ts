@@ -1,4 +1,4 @@
-export interface ITutor {
+export interface Tutor {
   id?: number;
   document_type_id: number;
   document_number: string | number;

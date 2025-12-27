@@ -1,4 +1,4 @@
-export interface ITenant {
+export interface Tenant {
   tenant: string;
   company_brand: string;
   company_name: string;

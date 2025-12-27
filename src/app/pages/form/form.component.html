@@ -3,9 +3,11 @@
     <header class="page-header" role="banner">
       <div class="logo">
         @if (tenant()) {
-        <a href="/">
-          <img [src]="tenant()?.logo_light_url" class="img-fluid logo-white" alt="logo" loading="eager" decoding="async" width="160" height="48">
-          <img [src]="tenant()?.logo_dark_url" class="img-fluid logo-black" alt="logo" loading="eager" decoding="async" width="160" height="48">
+        <a routerLink="/">
+          <img [src]="tenant()?.logo_light_url" class="img-fluid logo-white" alt="logo" loading="eager" decoding="async"
+            width="160" height="48">
+          <img [src]="tenant()?.logo_dark_url" class="img-fluid logo-black" alt="logo" loading="eager" decoding="async"
+            width="160" height="48">
         </a>
         } @else {
         <div class="logo-skeleton">
@@ -48,8 +50,8 @@
                 <div class="stepper-line-track" role="progressbar" [attr.aria-valuenow]="currentStep"
                   [attr.aria-valuemin]="1" [attr.aria-valuemax]="totalSteps"
                   [attr.aria-label]="'Paso ' + currentStep + ' de ' + totalSteps">
-                  <div class="stepper-line-progress" [style.width.%]="(currentStep / totalSteps) * 100"></div>
-                  <div class="stepper-indicator" [style.left.%]="((currentStep - 0.5) / totalSteps) * 100"></div>
+                  <div class="stepper-line-progress" [style.width.%]="progressWidth"></div>
+                  <div class="stepper-indicator" [style.left.%]="progressIndicatorPosition"></div>
                 </div>
                 <ol class="stepper-labels" role="list">
                   @for (label of stepLabels; track label; let i = $index) {
@@ -176,8 +178,8 @@
                     <div class="col-sm-12 p-sm-0">
                       <div class="form-group check-gender" role="group" aria-labelledby="minor-check">
                         <div class="custom-radio">
-                          <input type="checkbox" name="is_youger" class="custom-control-input" id="minor-check"
-                            formControlName="is_youger" aria-describedby="age-help">
+                          <input type="checkbox" name="is_younger" class="custom-control-input" id="minor-check"
+                            formControlName="is_younger" aria-describedby="age-help">
                           <label class="custom-control-label" for="minor-check">Soy menor</label>
                         </div>
                         <small id="age-help" class="form-text text-muted">Se requerirán los datos del tutor
@@ -185,7 +187,7 @@
                       </div>
                     </div>
                   </div>
-                  @if (isYouger) {
+                  @if (claimForm.controls.is_younger.value) {
                   <div class="adult tutor-section">
                     <h4 class="section-title"><i class="las la-shield-alt"></i> Datos del Tutor Legal</h4>
                     <div class="row">
@@ -253,7 +255,8 @@
                     <div class="row">
                       <div class="col-sm-6 p-sm-0">
                         <div class="form-group">
-                          <input type="text" class="form-control" formControlName="celphone_tutor" id="celphone_tutor"
+                          <input type="tel" inputmode="numeric" maxlength="9" class="form-control"
+                            formControlName="celphone_tutor" id="celphone_tutor"
                             [class.is-invalid]="isFieldInvalid('celphone_tutor')"
                             [class.is-valid]="isFieldValid('celphone_tutor')" required>
                           <label for="celphone_tutor">Celular</label>
@@ -401,8 +404,6 @@
                           <div class="invalid-feedback">
                             <div class="error-message">{{ getFieldError('claim_type_id') }}</div>
                           </div>
-
-                          <p class="mt-2">{{sDescription}}</p>
                         </div>
                       </div>
                     </div>
@@ -448,8 +449,8 @@
                         <div class="file-upload-wrapper">
                           @if (!selectedFileName) {
                           <div class="custom-file">
-                            <input type="file" class="custom-file-input form-control"
-                              id="attachment" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
+                            <input type="file" class="custom-file-input form-control" id="attachment"
+                              (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
                             <label class="custom-file-label" for="attachment">
                               <span class="file-return">
                                 <i class="las la-cloud-upload-alt"></i>
@@ -516,7 +517,7 @@
                     </div>
                   </div>
 
-                  @if (isYouger) {
+                  @if (claimForm.controls.is_younger.value) {
                   <div class="review-section">
                     <h4 class="review-section-title">Datos del Tutor Legal</h4>
                     <div class="review-item">

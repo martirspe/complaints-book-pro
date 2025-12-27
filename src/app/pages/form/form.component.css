@@ -1,13 +1,6 @@
-﻿/*=============================================================================
-  PROFESSIONAL CSS OPTIMIZATION - OPTIMIZED & REORGANIZED
-  Removed: Unused legacy footer styles, duplicate property definitions,
-  unused .stepper-steps, .step-number, .step-label classes, .section-title .icon
-  Reorganized: By logical component sections
-=============================================================================*/
+﻿/* --- PROFESSIONAL CSS OPTIMIZATION - OPTIMIZED & REORGANIZED */
 
-/*=============================================================================
-  STEPPER PROGRESS INDICATOR
-=============================================================================*/
+/* --- STEPPER PROGRESS INDICATOR */
 .stepper-container {
   margin-bottom: 40px;
   padding: 0;
@@ -102,9 +95,7 @@
 }
 
 
-/*=============================================================================
-  FORM VALIDATION & CONTROLS
-=============================================================================*/
+/* --- FORM VALIDATION & CONTROLS */
 .form-control.is-valid {
   border: 2px solid var(--success) !important;
   color: var(--text-secondary) !important;
@@ -162,9 +153,7 @@ select.form-control.is-invalid {
   color: var(--text-secondary) !important;
 }
 
-/*=============================================================================
-  BADGES & NOTIFICATIONS
-=============================================================================*/
+/* --- BADGES & NOTIFICATIONS */
 .autofill-badge {
   position: absolute;
   right: 15px;
@@ -202,9 +191,7 @@ select.form-control.is-invalid {
   display: block;
 }
 
-/*=============================================================================
-  SECTIONS & LAYOUTS
-=============================================================================*/
+/* --- SECTIONS & LAYOUTS */
 .tutor-section {
   animation: slide-down 0.4s ease;
   margin-top: 20px;
@@ -264,9 +251,7 @@ select.form-control.is-invalid {
   height: 42px;
 }
 
-/*=============================================================================
-  FILE UPLOAD & PREVIEW
-=============================================================================*/
+/* --- FILE UPLOAD & PREVIEW */
 .file-upload-wrapper {
   margin-bottom: 15px;
 }
@@ -323,9 +308,7 @@ select.form-control.is-invalid {
   font-size: 2.4rem;
 }
 
-/*=============================================================================
-  BUTTONS
-=============================================================================*/
+/* --- BUTTONS */
 .btn-submit {
   background: var(--brand-primary) !important;
   color: white !important;
@@ -400,9 +383,7 @@ select.form-control.is-invalid {
   box-shadow: 0 1px 3px rgba(var(--danger-rgb), 0.1) !important;
 }
 
-/*=============================================================================
-  CAPTCHA
-=============================================================================*/
+/* --- CAPTCHA */
 .captcha-wrapper {
   display: flex;
   justify-content: center;
@@ -415,9 +396,7 @@ select.form-control.is-invalid {
   width: 100%;
 }
 
-/*=============================================================================
-  REVIEW SECTION
-=============================================================================*/
+/* --- REVIEW SECTION */
 .review-step .review-intro {
   font-size: 1.5rem;
   color: var(--text-secondary);
@@ -540,9 +519,7 @@ select.form-control.is-invalid {
   word-break: break-word;
 }
 
-/*=============================================================================
-  FORM STEPS & ANIMATIONS
-=============================================================================*/
+/* --- FORM STEPS & ANIMATIONS */
 .form-steps {
   display: none;
   animation: fade-in-slide 0.5s ease;
@@ -576,9 +553,7 @@ select.form-control.is-invalid {
   }
 }
 
-/*=============================================================================
-  PAGE LAYOUT & WRAPPER
-=============================================================================*/
+/* --- PAGE LAYOUT & WRAPPER */
 .ugf-wrapper {
   position: relative;
   min-height: 100vh;
@@ -728,9 +703,7 @@ select.form-control.is-invalid {
   color: rgba(255, 255, 255, 0.88);
 }
 
-/*=============================================================================
-  COMPANY FOOTER
-=============================================================================*/
+/* --- COMPANY FOOTER */
 .company-footer {
   position: absolute;
   bottom: 40px;
@@ -806,9 +779,7 @@ select.form-control.is-invalid {
   font-size: 1.5rem;
 }
 
-/*=============================================================================
-  FORM APPLICATION WRAPPER
-=============================================================================*/
+/* --- FORM APPLICATION WRAPPER */
 .ufg-job-application-wrapper {
   padding: 50px 0;
 }
@@ -1237,9 +1208,7 @@ select.form-control.is-invalid {
   width: 100%;
 }
 
-/*=============================================================================
-  FINAL CONTENT
-=============================================================================*/
+/* --- FINAL CONTENT */
 .final-content {
   display: flex;
   justify-content: center;
@@ -1265,9 +1234,7 @@ select.form-control.is-invalid {
   font-family: "Roboto", sans-serif;
 }
 
-/*=============================================================================
-  RESPONSIVE BREAKPOINTS
-=============================================================================*/
+/* --- RESPONSIVE BREAKPOINTS */
 @media all and (max-width: 1439px) {
 
   .ugf-wrapper .ugf-content-block,
@@ -1536,9 +1503,7 @@ select.form-control.is-invalid {
   }
 }
 
-/*=============================================================================
-  RECAPTCHA HINT
-=============================================================================*/
+/* --- RECAPTCHA HINT */
 .recaptcha-hint {
   font-size: 12px;
   color: #999;
@@ -1547,9 +1512,8 @@ select.form-control.is-invalid {
   padding: 0;
   line-height: 1.4;
 }
-/*=============================================================================
-  SKELETON & LOADING STYLES
-=============================================================================*/
+
+/* --- SKELETON & LOADING STYLES */
 .logo-skeleton {
   display: inline-block;
   width: 160px;

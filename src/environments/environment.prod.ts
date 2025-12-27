@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
   API_URL_CLAIM: 'https://api.reclamofacil.com',
-  PUBLIC_API_KEY: '11361393a7366b39ab57ac37ba72de11fe383b57654cdac30d3f2497c75048e3',
-  RECAPTCHA_V3_KEY: '6LcUh58qAAAAAA8HIxcfi4Xp7-X3T72Na0k9hLYy'
+  PUBLIC_API_KEY: 'c7b97c0a7d0d5849a284f03bf8b70c90a871f55a41195a929479bc170c1a0760',
+  RECAPTCHA_V3_KEY: '6LeI6DcsAAAAAOqtqojQI_dMn4itZ2vAZda4XxHO'
 };

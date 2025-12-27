@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { ITenant } from '../interfaces/tenant.interface';
+import { Tenant } from '../interfaces/tenant.interface';
 
 @Injectable({ providedIn: 'root' })
 export class TenantService {
@@ -9,7 +9,7 @@ export class TenantService {
   private readonly api = `${environment.API_URL_CLAIM}/api`;
   private readonly cacheKey = 'tenant_cache_v1';
 
-  private readonly _tenant = signal<ITenant | null>(null);
+  private readonly _tenant = signal<Tenant | null>(null);
   readonly tenant = this._tenant.asReadonly();
 
   private readonly _tenantSlug = signal<string>('default');
@@ -84,32 +84,32 @@ export class TenantService {
 
     // 🟠 2) Refrescar siempre desde API para mantener datos al día
     this.http
-      .get<ITenant>(`${this.api}/tenants/${slug}`)
+      .get<Tenant>(`${this.api}/tenants/${slug}`)
       .subscribe({
         next: tenant => {
           this._tenant.set(tenant);
           this.writeCache(slug, tenant);
         },
-        error: err => console.error('[TenantService] Error loading tenant', err)
+        error: () => {}
       });
   }
 
-  private readCache(): { slug: string; tenant: ITenant } | null {
+  private readCache(): { slug: string; tenant: Tenant } | null {
     try {
       const raw = localStorage.getItem(this.cacheKey);
       if (!raw) return null;
       return JSON.parse(raw);
     } catch (err) {
-      console.warn('[TenantService] No se pudo leer cache de tenant', err);
+      // silent
       return null;
     }
   }
 
-  private writeCache(slug: string, tenant: ITenant): void {
+  private writeCache(slug: string, tenant: Tenant): void {
     try {
       localStorage.setItem(this.cacheKey, JSON.stringify({ slug, tenant }));
     } catch (err) {
-      console.warn('[TenantService] No se pudo guardar cache de tenant', err);
+      // silent
     }
   }
 }
