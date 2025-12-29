@@ -49,7 +49,7 @@ export class TenantService {
       const tenant = this._tenant();
       if (!tenant) return;
 
-      document.title = `${tenant.company_brand} | Libro de Reclamaciones`;
+      document.title = `${tenant.brand_name || tenant.legal_name} | Libro de Reclamaciones`;
     });
 
     /* ✅ EFFECT 4: FAVICON */
@@ -90,7 +90,7 @@ export class TenantService {
           this._tenant.set(tenant);
           this.writeCache(slug, tenant);
         },
-        error: () => {}
+        error: () => { }
       });
   }
 

@@ -127,9 +127,6 @@ a {
 
 a:hover, a:focus { text-decoration: none; }
 
-/* Form Elements */
-textarea { resize: none; }
-
 input::-webkit-input-placeholder,
 .form-control::-webkit-input-placeholder,
 input:-moz-placeholder,
@@ -235,15 +232,7 @@ input:-ms-input-placeholder,
   background-color: var(--brand-primary);
 }
 
-/* Navigation */
-a.prev { color: var(--brand-primary); }
-
 /* Utility Color Classes */
-.primary-color { color: #1e85ff; }
-.primary-bg { background: #1e85ff; }
-.white-text { color: #ffffff; }
-.white-bg { background: #ffffff; }
-.ugf-bg { background-size: cover; }
 .text-muted { color: var(--text-muted) !important; }
 
 /*=============================================================================
@@ -287,13 +276,4 @@ button, a, input[type="radio"], input[type="checkbox"], select {
   }
 }
 
-/*=============================================================================
-  RESPONSIVE DESIGN
-=============================================================================*/
-@media (max-width: 991px) {
-  .right-content-md { margin-top: 30px; }
-}
 
-@media (max-width: 767px) {
-  .right-content-sm { margin-top: 30px; }
-}

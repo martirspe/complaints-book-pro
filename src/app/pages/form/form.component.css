@@ -383,19 +383,6 @@ select.form-control.is-invalid {
   box-shadow: 0 1px 3px rgba(var(--danger-rgb), 0.1) !important;
 }
 
-/* --- CAPTCHA */
-.captcha-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 35px !important;
-}
-
-.captcha-wrapper .captcha {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
 /* --- REVIEW SECTION */
 .review-step .review-intro {
   font-size: 1.5rem;
@@ -784,22 +771,6 @@ select.form-control.is-invalid {
   padding: 50px 0;
 }
 
-.ufg-job-application-wrapper .progress {
-  background: var(--bg-light);
-  height: 8px;
-  overflow: visible;
-  border-radius: 4px;
-  margin-bottom: 50px;
-}
-
-.ufg-job-application-wrapper .progress .progress-bar {
-  position: relative;
-  overflow: visible;
-  line-height: 1.7;
-  border-radius: 4px;
-  background: var(--brand-primary);
-}
-
 .ufg-job-application-wrapper h3 {
   display: flex;
   align-items: center;
@@ -855,20 +826,6 @@ select.form-control.is-invalid {
   border: none;
   margin-bottom: 25px;
   padding-top: 0;
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.check-gender .lebel-text,
-.ufg-job-application-wrapper .job-application-form fieldset.check-gender legend.lebel-text {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1c2437;
-  font-family: "Roboto", sans-serif;
-  margin-bottom: 10px;
-  padding: 0;
 }
 
 .ufg-job-application-wrapper .job-application-form .form-group.check-gender .form-text,
@@ -963,71 +920,6 @@ select.form-control.is-invalid {
   transform: translateY(-50%);
   content: '';
   position: absolute;
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.radio-group {
-  margin-bottom: 15px;
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.radio-group:nth-last-child(2) {
-  color: var(--text-muted);
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.radio-group .custom-radio .custom-control-input {
-  display: none;
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.radio-group .custom-radio .custom-control-input:checked~.custom-control-label::before {
-  border-width: 2px;
-  border-color: var(--brand-primary);
-  background: #ffffff;
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.radio-group .custom-radio .custom-control-input:checked~.custom-control-label::after {
-  opacity: 1;
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.radio-group .custom-radio .custom-control-label {
-  width: auto;
-  text-align: left;
-  position: static;
-  top: auto;
-  left: auto;
-  -webkit-transform: translateY(0);
-  -ms-transform: translateY(0);
-  transform: translateY(0);
-  padding-left: 30px;
-  cursor: default;
-  text-transform: capitalize;
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: var(--text-secondary);
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.radio-group .custom-radio .custom-control-label:before {
-  top: 2px;
-  left: 0;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  border: 1px solid var(--border-light);
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  outline: none;
-}
-
-.ufg-job-application-wrapper .job-application-form .form-group.radio-group .custom-radio .custom-control-label:after {
-  top: 7px;
-  left: 5px;
-  height: 10px;
-  width: 10px;
-  border-radius: 50%;
-  background: var(--brand-primary);
-  opacity: 0;
-  content: '';
-  -webkit-transition: all .3s ease;
-  -o-transition: all .3s ease;
-  transition: all .3s ease;
 }
 
 .ufg-job-application-wrapper .job-application-form .form-group .form-control {
@@ -1185,11 +1077,6 @@ select.form-control.is-invalid {
   border: 0;
 }
 
-.ufg-job-application-wrapper .job-application-form .form-group .captcha {
-  position: relative;
-  left: 0;
-}
-
 .ufg-job-application-wrapper .job-application-form .btn {
   min-height: 60px;
   display: inline-flex;
@@ -1206,32 +1093,6 @@ select.form-control.is-invalid {
   -webkit-box-shadow: none;
   box-shadow: none;
   width: 100%;
-}
-
-/* --- FINAL CONTENT */
-.final-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  min-height: 100vh;
-  padding: 120px 0;
-  text-align: center;
-}
-
-.final-content h2 {
-  font-size: 3.6rem;
-  font-weight: 700;
-  color: #1c2437;
-  font-family: "Roboto", sans-serif;
-  margin-bottom: 10px;
-}
-
-.final-content p {
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: #546274;
-  font-family: "Roboto", sans-serif;
 }
 
 /* --- RESPONSIVE BREAKPOINTS */
@@ -1281,10 +1142,6 @@ select.form-control.is-invalid {
 
   .ugf-wrapper .ugf-content-block {
     display: none;
-  }
-
-  .ufg-job-application-wrapper .progress {
-    margin-bottom: 50px;
   }
 
   .company-footer {

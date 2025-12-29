@@ -1,8 +1,8 @@
 export interface Tenant {
   tenant: string;
-  company_brand: string;
-  company_name: string;
-  company_ruc: string;
+  legal_name: string;
+  brand_name: string;
+  tax_id: string;
   primary_color: string;
   accent_color: string;
   favicon_url?: string;
