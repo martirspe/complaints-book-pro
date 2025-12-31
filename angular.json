@@ -64,6 +64,12 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [
+              "localhost",
+              ".reclamofacil.local"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "reclamofacil-client:build:production"

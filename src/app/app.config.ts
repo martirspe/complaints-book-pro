@@ -32,8 +32,9 @@ export const appConfig: ApplicationConfig = {
           // ⬅️ 1. AUTH PRIMERO
           await auth.initAuth();
 
-          // ⬅️ 2. LUEGO TENANT (ya con API KEY)
-          tenant.loadTenant('default');
+          // ⬅️ 2. LUEGO TENANT - Auto-detect from subdomain
+          const detectedSlug = tenant.detectTenantFromSubdomain();
+          tenant.loadTenant(detectedSlug);
         };
       }
     }

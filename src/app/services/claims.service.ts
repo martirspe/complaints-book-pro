@@ -85,6 +85,17 @@ export class ClaimsService {
     );
   }
 
+  /**
+   * Create claim from public complaint book (no authentication required)
+   * Uses the public endpoint that doesn't require API key or JWT
+   */
+  createPublicClaim(tenantSlug: string, payload: FormData): Observable<Claim> {
+    return this.http.post<Claim>(
+      `${this.api}/libro-reclamaciones/${tenantSlug}/claims`,
+      payload
+    );
+  }
+
   updateClaim(tenantSlug: string, claimId: number, payload: Partial<Claim>): Observable<Claim> {
     return this.http.put<Claim>(
       `${this.api}/tenants/${tenantSlug}/claims/${claimId}`, payload

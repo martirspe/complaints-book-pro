@@ -94,6 +94,38 @@ export class TenantService {
       });
   }
 
+  /**
+   * Automatically detect tenant slug from subdomain
+   * Examples:
+   * - empresa1.reclamofacil.com -> returns "empresa1"
+   * - localhost:4200 -> returns "default"
+   * - reclamofacil.com -> returns "default"
+   */
+  detectTenantFromSubdomain(): string {
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+
+    // localhost or IP address -> use default
+    if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+      return 'default';
+    }
+
+    // Less than 3 parts (e.g., reclamofacil.com) -> use default
+    if (parts.length < 3) {
+      return 'default';
+    }
+
+    // Extract subdomain (first part)
+    const subdomain = parts[0].toLowerCase();
+
+    // www or api subdomains -> use default
+    if (subdomain === 'www' || subdomain === 'api') {
+      return 'default';
+    }
+
+    return subdomain;
+  }
+
   private readCache(): { slug: string; tenant: Tenant } | null {
     try {
       const raw = localStorage.getItem(this.cacheKey);

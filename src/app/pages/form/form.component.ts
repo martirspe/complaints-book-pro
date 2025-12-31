@@ -841,10 +841,11 @@ export class FormComponent implements OnInit, OnDestroy {
     const hasAttachment = claimData.attachment instanceof File;
 
     if (!hasAttachment) {
-      return this.claimsService.createClaim(this.tenantService.tenantSlug(), this.buildJsonPayload(claimData));
+      // Use public endpoint (no authentication required)
+      return this.claimsService.createPublicClaim(this.tenantService.tenantSlug(), this.buildFormDataPayload(claimData));
     }
 
-    return this.claimsService.createClaim(this.tenantService.tenantSlug(), this.buildFormDataPayload(claimData));
+    return this.claimsService.createPublicClaim(this.tenantService.tenantSlug(), this.buildFormDataPayload(claimData));
   }
 
   private buildJsonPayload(claimData: any) {
