@@ -101,9 +101,6 @@
                           id="document_number" [class.is-invalid]="isFieldInvalid('document_number')"
                           [class.is-valid]="isFieldValid('document_number')" required aria-describedby="doc-help">
                         <label for="document_number">No. documento</label>
-                        @if (customerAutoFilled()) {
-                        <span class="autofill-badge">Encontrado</span>
-                        }
                         <small id="doc-help" class="form-text text-muted">{{ docNumberHint() }}</small>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('document_number') }}</span>
@@ -218,9 +215,6 @@
                             [class.is-invalid]="isFieldInvalid('document_number_tutor')"
                             [class.is-valid]="isFieldValid('document_number_tutor')" required>
                           <label for="document_number_tutor">No. documento</label>
-                          @if (tutorAutoFilled()) {
-                          <span class="autofill-badge">Encontrado</span>
-                          }
                           <small class="form-text text-muted">{{ tutorDocNumberHint() }}</small>
                           <div class="invalid-feedback">
                             <span>{{ getFieldError('document_number_tutor') }}</span>

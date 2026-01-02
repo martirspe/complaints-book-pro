@@ -26,12 +26,6 @@ export class ClaimsService {
     return this.http.post<Customer>(`${this.api}/tenants/${tenantSlug}/customers`, customer);
   }
 
-  getCustomerByDocument(tenantSlug: string, documentNumber: string): Observable<Customer> {
-    return this.http.get<Customer>(
-      `${this.api}/tenants/${tenantSlug}/customers/document/${documentNumber}`
-    );
-  }
-
   getCustomer(tenantSlug: string, id: number): Observable<Customer> {
     return this.http.get<Customer>(`${this.api}/tenants/${tenantSlug}/customers/${id}`);
   }
@@ -47,12 +41,6 @@ export class ClaimsService {
   // --- TUTORS
   createTutor(tenantSlug: string, tutor: Tutor): Observable<Tutor> {
     return this.http.post<Tutor>(`${this.api}/tenants/${tenantSlug}/tutors`, tutor);
-  }
-
-  getTutorByDocument(tenantSlug: string, documentNumber: string): Observable<Tutor> {
-    return this.http.get<Tutor>(
-      `${this.api}/tenants/${tenantSlug}/tutors/document/${documentNumber}`
-    );
   }
 
   getTutor(tenantSlug: string, id: number): Observable<Tutor> {

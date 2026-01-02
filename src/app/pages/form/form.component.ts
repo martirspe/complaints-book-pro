@@ -1,11 +1,11 @@
 // --- IMPORTS - ANGULAR
-import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, signal, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, DestroyRef, signal, computed } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // --- IMPORTS - RXJS
-import { debounceTime, distinctUntilChanged, tap, catchError, firstValueFrom, forkJoin, EMPTY } from 'rxjs';
+import { tap, catchError, firstValueFrom, forkJoin } from 'rxjs';
 
 // --- IMPORTS - SHARED
 import { ToastService } from '../../shared/toast/toast.service';
@@ -35,7 +35,6 @@ import { ClaimForm } from '../../interfaces/claim-form.interface';
 export class FormComponent {
 
   // --- CONSTRUCTOR E INYECCIÓN (PRIMERO)
-
   private readonly fb = inject(FormBuilder);
   private readonly claimsService = inject(ClaimsService);
   private readonly toast = inject(ToastService);
@@ -44,7 +43,6 @@ export class FormComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   // --- CONSTANTES PRIVADAS - VALIDACIÓN
-
   private readonly MIN_DESC_LENGTH = 100;
   private readonly MIN_DETAIL_LENGTH = 50;
   private readonly PHONE_LENGTH = 9;
@@ -56,7 +54,6 @@ export class FormComponent {
   private readonly emailPattern = '^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$';
 
   // --- CONSTANTES PRIVADAS - REGLAS DE DOCUMENTOS
-
   private readonly DOCUMENT_RULES: Record<string, { min: number; max: number; pattern: RegExp; hint: string }> = {
     'DNI': { min: 8, max: 8, pattern: /^[0-9]+$/, hint: 'DNI: exactamente 8 dígitos' },
     'CARNET DE EXTRANJERIA': { min: 9, max: 12, pattern: /^[0-9]+$/, hint: 'Carnet de Extranjería: 9 a 12 dígitos' },
@@ -68,23 +65,19 @@ export class FormComponent {
   private readonly ALLOWED_FILE_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
   // --- PROPIEDADES PÚBLICAS - INFORMACIÓN DEL TENANT
-
   public tenant = this.tenantService.tenant;
   public currentYear = new Date().getFullYear();
 
   // --- PROPIEDADES PÚBLICAS - ESTADO DE CARGA
-
   public isDataReady = signal(false);
 
   // --- PROPIEDADES PÚBLICAS - DATOS CARGADOS
-
   public documentTypes = signal<DocumentType[]>([]);
   public consumptionTypes = signal<ConsumptionType[]>([]);
   public claimTypes = signal<ClaimType[]>([]);
   public currencies = signal<Currency[]>([]);
 
   // --- PROPIEDADES PÚBLICAS - CONFIGURACIÓN DE PASOS
-
   readonly totalSteps = 4;
   public currentStep = signal(1);
   public progressWidth = computed(() => (this.currentStep() / this.totalSteps) * 100);
@@ -98,29 +91,20 @@ export class FormComponent {
   ];
 
   // --- PROPIEDADES PÚBLICAS - FORMULARIO TIPADO
-
   public claimForm: FormGroup<ClaimForm> = this.initializeForm();
 
   // --- PROPIEDADES PÚBLICAS - ESTADO DEL CLIENTE
-
-  public customerAutoFilled = signal(false);
-  public tutorAutoFilled = signal(false);
   public isSubmitting = signal(false);
 
   // --- PROPIEDADES PÚBLICAS - MENSAJES Y ARCHIVOS
-
   public docNumberHint = signal('Ingresa tu número de documento');
   public tutorDocNumberHint = signal('Ingresa el número de documento del tutor');
   public selectedFileName = signal<string | null>(null);
 
   // --- PROPIEDADES PRIVADAS - SUSCRIPCIONES Y ESTADO INTERNO
-
   private attachedFile = signal<File | null>(null);
-  private lastCustomerDocLoaded = signal<string | null>(null);
-  private lastTutorDocLoaded = signal<string | null>(null);
 
   // --- MÉTODO PRIVADO - INICIALIZAR FORMULARIO
-
   private initializeForm(): FormGroup<ClaimForm> {
     return this.fb.group<ClaimForm>({
       document_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
@@ -151,12 +135,9 @@ export class FormComponent {
   }
 
   // --- CICLO DE VIDA - ANGULAR LIFECYCLE HOOKS
-
   constructor() {
     this.loadInitialData();
     this.setupYoungerValidation();
-    this.setupCustomerLookupByDocument();
-    this.setupTutorLookupByDocument();
   }
 
   // --- MÉTODOS PÚBLICOS - GETTERS Y UTILIDAD
@@ -362,7 +343,6 @@ export class FormComponent {
   }
 
   // --- MÉTODOS PRIVADOS - INICIALIZACIÓN
-
   private loadInitialData(): void {
     forkJoin({
       documentTypes: this.claimsService.getDocumentTypes(),
@@ -415,30 +395,9 @@ export class FormComponent {
       });
   }
 
-  private setupCustomerLookupByDocument(): void {
-    this.claimForm.controls.document_number.valueChanges.pipe(
-      debounceTime(600),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe((docNumber: any) => {
-      this.performCustomerLookup(docNumber);
-    });
-  }
 
-  private setupTutorLookupByDocument(): void {
-    this.claimForm.controls.document_number_tutor.valueChanges.pipe(
-      debounceTime(600),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe((docNumber: any) => {
-      if (this.claimForm.controls.is_younger.value) {
-        this.performTutorLookup(docNumber);
-      }
-    });
-  }
 
   // --- MÉTODOS PRIVADOS - VALIDACIÓN DE DOCUMENTOS
-
   private getDocRuleByTypeControl(typeControlName: string, typeIdOverride?: number) {
     const typeId = typeIdOverride ?? this.claimForm.get(typeControlName)?.value;
 
@@ -472,7 +431,6 @@ export class FormComponent {
   }
 
   // --- MÉTODOS PRIVADOS - PASOS Y TUTORES
-
   private getStepControls(step: number): string[] {
     const baseCustomer = ['document_type_id', 'document_number', 'first_name', 'last_name', 'celphone', 'email', 'address'];
     const tutorFields = ['document_type_tutor_id', 'document_number_tutor', 'first_name_tutor', 'last_name_tutor', 'celphone_tutor', 'email_tutor'];
@@ -533,84 +491,6 @@ export class FormComponent {
   }
 
   // --- MÉTODOS PRIVADOS - AUTOCOMPLETADO
-
-  private performCustomerLookup(docNumber: string): void {
-    const value = String(docNumber ?? '').trim();
-    if (!value || this.lastCustomerDocLoaded() === value) return;
-
-    const rule = this.getDocRuleByTypeControl('document_type_id');
-    const isValidFormat = value.length >= rule.min && value.length <= rule.max && rule.pattern.test(value) && /^[0-9]+$/.test(value);
-
-    if (isValidFormat) {
-      this.claimsService.getCustomerByDocument(this.tenantService.tenantSlug(), value).pipe(
-        catchError((err: any) => {
-          if (err?.status !== 404) {
-            this.toast.showWarning('No pudimos cargar los datos del cliente');
-          }
-          return EMPTY;
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe((customer: any) => {
-        if (customer) {
-          this.populateCustomerForm(customer as Customer);
-        }
-      });
-    }
-  }
-
-  private performTutorLookup(docNumber: string): void {
-    const value = String(docNumber ?? '').trim();
-    if (!value || this.lastTutorDocLoaded() === value) return;
-
-    const rule = this.getDocRuleByTypeControl('document_type_tutor_id');
-    const isValidFormat = value.length >= rule.min && value.length <= rule.max && rule.pattern.test(value) && /^[0-9]+$/.test(value);
-
-    if (isValidFormat) {
-      this.claimsService.getTutorByDocument(this.tenantService.tenantSlug(), value).pipe(
-        catchError((err: any) => {
-          if (err?.status !== 404) {
-            this.toast.showWarning('No pudimos cargar los datos del tutor');
-          }
-          return EMPTY;
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe((tutor: any) => {
-        if (tutor) {
-          this.populateTutorForm(tutor as Tutor);
-        }
-      });
-    }
-  }
-
-  private populateCustomerForm(customer: Customer): void {
-    this.claimForm.patchValue({
-      document_type_id: String(customer.document_type_id),
-      first_name: customer.first_name,
-      last_name: customer.last_name,
-      email: customer.email,
-      celphone: customer.phone,
-      address: customer.address,
-      is_younger: customer.is_younger ?? false,
-    }, { emitEvent: false });
-    this.lastCustomerDocLoaded.set(String(customer.document_number));
-    this.customerAutoFilled.set(true);
-    this.toast.showSuccess('Cliente encontrado. Datos cargados automáticamente');
-  }
-
-  private populateTutorForm(tutor: Tutor): void {
-    this.claimForm.patchValue({
-      document_type_tutor_id: String(tutor.document_type_id),
-      document_number_tutor: String(tutor.document_number),
-      first_name_tutor: tutor.first_name,
-      last_name_tutor: tutor.last_name,
-      email_tutor: tutor.email,
-      celphone_tutor: tutor.phone,
-    }, { emitEvent: false });
-    this.lastTutorDocLoaded.set(String(tutor.document_number));
-    this.tutorAutoFilled.set(true);
-    this.toast.showSuccess('Tutor encontrado. Datos cargados automáticamente');
-  }
-
   private resetCustomerFields(): void {
     this.claimForm.patchValue({
       document_number: '',
@@ -627,9 +507,6 @@ export class FormComponent {
       email_tutor: '',
       celphone_tutor: ''
     }, { emitEvent: false });
-    this.lastCustomerDocLoaded.set(null);
-    this.customerAutoFilled.set(false);
-    this.tutorAutoFilled.set(false);
   }
 
   private resetTutorFields(): void {
@@ -640,12 +517,9 @@ export class FormComponent {
       email_tutor: '',
       celphone_tutor: ''
     }, { emitEvent: false });
-    this.lastTutorDocLoaded.set(null);
-    this.tutorAutoFilled.set(false);
   }
 
   // --- MÉTODOS PRIVADOS - ARCHIVO
-
   private validateFile(file: File): boolean {
     if (file.size > this.MAX_FILE_SIZE) {
       this.toast.showWarning('El archivo es demasiado pesado. Máximo permitido: 150KB');
@@ -667,7 +541,6 @@ export class FormComponent {
   }
 
   // --- MÉTODOS PRIVADOS - ENVÍO
-
   private async submitClaim(): Promise<void> {
     try {
       const publicPayload = this.buildPublicClaimPayload();
@@ -678,23 +551,18 @@ export class FormComponent {
           this.resetForm();
         }),
         catchError((error: any) => {
-          console.error('❌ Error del servidor:', error);
           this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
           throw error;
         })
       );
 
-      console.log('⏳ Esperando respuesta del servidor...');
       await firstValueFrom(result$);
-      console.log('✅ Proceso completado');
     } catch (error) {
-      console.error('❌ Error en submitClaim:', error);
       throw error;
     }
   }
 
   // --- MÉTODOS PRIVADOS - UTILIDAD
-
   private buildErrorMessage(field: string, errorKey: string, errors: Record<string, any>): string {
     if (field === 'document_number' || field === 'document_number_tutor') {
       const typeControlName = field === 'document_number' ? 'document_type_id' : 'document_type_tutor_id';
@@ -787,32 +655,18 @@ export class FormComponent {
   }
 
   private createClaim(claimData: any) {
-    console.log('🔧 Construyendo FormData desde claimData...');
     const formData = this.buildFormDataPayload(claimData);
-    console.log('✅ FormData construido, enviando a API:', `${this.tenantService.tenantSlug()}`);
     return this.claimsService.createPublicClaim(this.tenantService.tenantSlug(), formData);
   }
 
   private buildFormDataPayload(claimData: any): FormData {
-    console.log('📋 Datos del claim antes de FormData:', claimData);
     const formData = new FormData();
     Object.entries(claimData).forEach(([key, value]) => {
       if (value === undefined || value === null || value === '') return;
       if (key === 'attachment' && value instanceof File) {
-        console.log(`📎 Adjuntando archivo: ${value.name} (${value.size} bytes)`);
         formData.append('attachment', value);
       } else {
         formData.append(key, String(value));
-      }
-    });
-
-    // Log de campos en FormData
-    console.log('📦 Campos en FormData:');
-    formData.forEach((value, key) => {
-      if (value instanceof File) {
-        console.log(`  - ${key}: [File] ${value.name}`);
-      } else {
-        console.log(`  - ${key}: ${value}`);
       }
     });
 
@@ -821,12 +675,9 @@ export class FormComponent {
 
   private async executeRecaptchaWithFallback(): Promise<string> {
     try {
-      console.log('🔐 Ejecutando reCAPTCHA...');
       const token = await this.executeRecaptcha();
-      console.log('✅ Token reCAPTCHA generado correctamente');
       return token;
     } catch (error) {
-      console.error('❌ Error en reCAPTCHA:', error);
       this.toast.showError('No pudimos validar reCAPTCHA. Intenta de nuevo.');
       throw error;
     }
@@ -840,7 +691,6 @@ export class FormComponent {
       }
       return token;
     } catch (error) {
-      console.error('Error en executeRecaptcha:', error);
       throw error;
     }
   }
@@ -860,10 +710,6 @@ export class FormComponent {
     this.selectedFileName.set(null);
     this.attachedFile.set(null);
     this.currentStep.set(1);
-    this.lastCustomerDocLoaded.set(null);
-    this.lastTutorDocLoaded.set(null);
-    this.customerAutoFilled.set(false);
-    this.tutorAutoFilled.set(false);
     this.claimForm.markAsPristine();
     this.claimForm.markAsUntouched();
   }
