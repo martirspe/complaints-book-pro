@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 // --- IMPORTS - INTERFACES
@@ -86,12 +87,11 @@ export class ClaimsService {
   }
 
   /**
-   * Create claim from public complaint book (no authentication required)
-   * Uses the public endpoint that doesn't require API key or JWT
+   * Public complaint form (no authentication)
    */
   createPublicClaim(tenantSlug: string, payload: FormData): Observable<Claim> {
     return this.http.post<Claim>(
-      `${this.api}/libro-reclamaciones/${tenantSlug}/claims`,
+      `${this.api}/public/${tenantSlug}/claims`,
       payload
     );
   }

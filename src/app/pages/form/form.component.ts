@@ -1,10 +1,11 @@
 // --- IMPORTS - ANGULAR
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef, signal, computed, effect } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // --- IMPORTS - RXJS
-import { forkJoin, switchMap, catchError, throwError, of, debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, tap, catchError, firstValueFrom, forkJoin, EMPTY } from 'rxjs';
 
 // --- IMPORTS - SHARED
 import { ToastService } from '../../shared/toast/toast.service';
@@ -28,9 +29,19 @@ import { ClaimForm } from '../../interfaces/claim-form.interface';
   selector: 'app-form',
   imports: [ReactiveFormsModule, SkeletonBlockComponent, RouterLink],
   templateUrl: './form.component.html',
-  styleUrls: ['./form.component.css']
+  styleUrls: ['./form.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FormComponent implements OnInit, OnDestroy {
+export class FormComponent {
+
+  // --- CONSTRUCTOR E INYECCIÓN (PRIMERO)
+
+  private readonly fb = inject(FormBuilder);
+  private readonly claimsService = inject(ClaimsService);
+  private readonly toast = inject(ToastService);
+  readonly tenantService = inject(TenantService);
+  private readonly recaptchaService = inject(RecaptchaService);
+  private readonly destroyRef = inject(DestroyRef);
 
   // --- CONSTANTES PRIVADAS - VALIDACIÓN
 
@@ -63,21 +74,21 @@ export class FormComponent implements OnInit, OnDestroy {
 
   // --- PROPIEDADES PÚBLICAS - ESTADO DE CARGA
 
-  public isDataReady = false;
+  public isDataReady = signal(false);
 
   // --- PROPIEDADES PÚBLICAS - DATOS CARGADOS
 
-  public documentTypes: DocumentType[] = [];
-  public consumptionTypes: ConsumptionType[] = [];
-  public claimTypes: ClaimType[] = [];
-  public currencies: Currency[] = [];
+  public documentTypes = signal<DocumentType[]>([]);
+  public consumptionTypes = signal<ConsumptionType[]>([]);
+  public claimTypes = signal<ClaimType[]>([]);
+  public currencies = signal<Currency[]>([]);
 
   // --- PROPIEDADES PÚBLICAS - CONFIGURACIÓN DE PASOS
 
   readonly totalSteps = 4;
-  public currentStep = 1;
-  public progressWidth = (1 / this.totalSteps) * 100;
-  public progressIndicatorPosition = ((this.currentStep - 0.5) / this.totalSteps) * 100;
+  public currentStep = signal(1);
+  public progressWidth = computed(() => (this.currentStep() / this.totalSteps) * 100);
+  public progressIndicatorPosition = computed(() => ((this.currentStep() - 0.5) / this.totalSteps) * 100);
 
   readonly stepLabels = [
     'Datos Personales',
@@ -88,74 +99,64 @@ export class FormComponent implements OnInit, OnDestroy {
 
   // --- PROPIEDADES PÚBLICAS - FORMULARIO TIPADO
 
-  public claimForm: FormGroup<ClaimForm> = this.fb.group<ClaimForm>({
-    document_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-    document_number: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-    first_name: this.fb.control('', { validators: [Validators.required, Validators.pattern(this.namePattern)], nonNullable: true }),
-    last_name: this.fb.control('', { validators: [Validators.required, Validators.pattern(this.namePattern)], nonNullable: true }),
-    celphone: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.PHONE_LENGTH), Validators.maxLength(this.PHONE_LENGTH), Validators.pattern('[0-9]+')], nonNullable: true }),
-    email: this.fb.control('', { validators: [Validators.required, Validators.email, Validators.pattern(this.emailPattern)], nonNullable: true }),
-    address: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_ADDRESS_LENGTH)], nonNullable: true }),
-    is_younger: this.fb.control(false, { nonNullable: true }),
-    document_type_tutor_id: this.fb.control('', { nonNullable: true }),
-    document_number_tutor: this.fb.control('', { nonNullable: true }),
-    first_name_tutor: this.fb.control('', { validators: [Validators.pattern(this.namePattern)], nonNullable: true }),
-    last_name_tutor: this.fb.control('', { validators: [Validators.pattern(this.namePattern)], nonNullable: true }),
-    celphone_tutor: this.fb.control('', { validators: [Validators.minLength(this.PHONE_LENGTH), Validators.maxLength(this.PHONE_LENGTH), Validators.pattern('[0-9]+')], nonNullable: true }),
-    email_tutor: this.fb.control('', { validators: [Validators.email, Validators.pattern(this.emailPattern)], nonNullable: true }),
-    claim_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-    order_number: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-    claimed_amount: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-    currency_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-    description: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)], nonNullable: true }),
-    consumption_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-    detail: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DETAIL_LENGTH)], nonNullable: true }),
-    request: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)], nonNullable: true }),
-    attachment: this.fb.control<File | null>(null),
-    recaptcha: this.fb.control('', { nonNullable: true })
-  });
+  public claimForm: FormGroup<ClaimForm> = this.initializeForm();
 
   // --- PROPIEDADES PÚBLICAS - ESTADO DEL CLIENTE
 
-  public customerAutoFilled = false;
-  public tutorAutoFilled = false;
-  public isSubmitting = false;
+  public customerAutoFilled = signal(false);
+  public tutorAutoFilled = signal(false);
+  public isSubmitting = signal(false);
 
   // --- PROPIEDADES PÚBLICAS - MENSAJES Y ARCHIVOS
 
-  public docNumberHint = 'Ingresa tu número de documento';
-  public tutorDocNumberHint = 'Ingresa el número de documento del tutor';
-  public selectedFileName: string | null = null;
+  public docNumberHint = signal('Ingresa tu número de documento');
+  public tutorDocNumberHint = signal('Ingresa el número de documento del tutor');
+  public selectedFileName = signal<string | null>(null);
 
   // --- PROPIEDADES PRIVADAS - SUSCRIPCIONES Y ESTADO INTERNO
 
-  private readonly destroy$ = new Subject<void>();
-  private attachedFile: File | null = null;
-  private lastCustomerDocLoaded: string | null = null;
-  private lastTutorDocLoaded: string | null = null;
+  private attachedFile = signal<File | null>(null);
+  private lastCustomerDocLoaded = signal<string | null>(null);
+  private lastTutorDocLoaded = signal<string | null>(null);
 
-  // --- CONSTRUCTOR
+  // --- MÉTODO PRIVADO - INICIALIZAR FORMULARIO
 
-  constructor(
-    private fb: FormBuilder,
-    private claimsService: ClaimsService,
-    private toast: ToastService,
-    private tenantService: TenantService,
-    private recaptchaService: RecaptchaService
-  ) { }
+  private initializeForm(): FormGroup<ClaimForm> {
+    return this.fb.group<ClaimForm>({
+      document_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+      document_number: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+      first_name: this.fb.control('', { validators: [Validators.required, Validators.pattern(this.namePattern)], nonNullable: true }),
+      last_name: this.fb.control('', { validators: [Validators.required, Validators.pattern(this.namePattern)], nonNullable: true }),
+      celphone: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.PHONE_LENGTH), Validators.maxLength(this.PHONE_LENGTH), Validators.pattern('[0-9]+')], nonNullable: true }),
+      email: this.fb.control('', { validators: [Validators.required, Validators.email, Validators.pattern(this.emailPattern)], nonNullable: true }),
+      address: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_ADDRESS_LENGTH)], nonNullable: true }),
+      is_younger: this.fb.control(false, { nonNullable: true }),
+      document_type_tutor_id: this.fb.control('', { nonNullable: true }),
+      document_number_tutor: this.fb.control('', { nonNullable: true }),
+      first_name_tutor: this.fb.control('', { validators: [Validators.pattern(this.namePattern)], nonNullable: true }),
+      last_name_tutor: this.fb.control('', { validators: [Validators.pattern(this.namePattern)], nonNullable: true }),
+      celphone_tutor: this.fb.control('', { validators: [Validators.minLength(this.PHONE_LENGTH), Validators.maxLength(this.PHONE_LENGTH), Validators.pattern('[0-9]+')], nonNullable: true }),
+      email_tutor: this.fb.control('', { validators: [Validators.email, Validators.pattern(this.emailPattern)], nonNullable: true }),
+      claim_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+      order_number: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+      claimed_amount: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+      currency_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+      description: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)], nonNullable: true }),
+      consumption_type_id: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
+      detail: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DETAIL_LENGTH)], nonNullable: true }),
+      request: this.fb.control('', { validators: [Validators.required, Validators.minLength(this.MIN_DESC_LENGTH)], nonNullable: true }),
+      attachment: this.fb.control<File | null>(null),
+      recaptcha: this.fb.control('', { nonNullable: true })
+    });
+  }
 
   // --- CICLO DE VIDA - ANGULAR LIFECYCLE HOOKS
 
-  ngOnInit(): void {
+  constructor() {
     this.loadInitialData();
     this.setupYoungerValidation();
     this.setupCustomerLookupByDocument();
     this.setupTutorLookupByDocument();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   // --- MÉTODOS PÚBLICOS - GETTERS Y UTILIDAD
@@ -164,7 +165,7 @@ export class FormComponent implements OnInit, OnDestroy {
    * Obtiene la etiqueta del paso actual
    */
   public getCurrentStepLabel(): string {
-    return this.stepLabels[this.currentStep - 1] || '';
+    return this.stepLabels[this.currentStep() - 1] || '';
   }
 
   /**
@@ -172,7 +173,7 @@ export class FormComponent implements OnInit, OnDestroy {
    */
   public getCurrencySymbol(): string {
     const currencyId = this.claimForm.controls.currency_id.value;
-    const currency = this.currencies.find(c => Number(c.id) === Number(currencyId));
+    const currency = this.currencies().find(c => Number(c.id) === Number(currencyId));
     return currency ? currency.symbol : '';
   }
 
@@ -229,7 +230,7 @@ export class FormComponent implements OnInit, OnDestroy {
    * Verifica si es posible navegar a un paso específico
    */
   public canNavigateTo(step: number): boolean {
-    if (step <= this.currentStep) return true;
+    if (step <= this.currentStep()) return true;
     return this.allStepsValidUpTo(step);
   }
 
@@ -237,13 +238,12 @@ export class FormComponent implements OnInit, OnDestroy {
    * Navega a un paso específico si es permitido
    */
   public onStepClick(step: number): void {
-    if (step === this.currentStep) return;
+    if (step === this.currentStep()) return;
     if (!this.canNavigateTo(step)) {
       this.toast.showWarning('Por favor completa los pasos anteriores primero');
       return;
     }
-    this.currentStep = step;
-    this.updateProgressAndVisibility();
+    this.currentStep.set(step);
   }
 
   /**
@@ -262,9 +262,8 @@ export class FormComponent implements OnInit, OnDestroy {
    * Avanza al siguiente paso
    */
   public nextStep(): void {
-    if (this.currentStep < this.totalSteps) {
-      this.currentStep++;
-      this.updateProgressAndVisibility();
+    if (this.currentStep() < this.totalSteps) {
+      this.currentStep.set(this.currentStep() + 1);
     }
   }
 
@@ -272,9 +271,8 @@ export class FormComponent implements OnInit, OnDestroy {
    * Retrocede al paso anterior
    */
   public prevStep(): void {
-    if (this.currentStep > 1) {
-      this.currentStep--;
-      this.updateProgressAndVisibility();
+    if (this.currentStep() > 1) {
+      this.currentStep.set(this.currentStep() - 1);
     }
   }
 
@@ -282,12 +280,11 @@ export class FormComponent implements OnInit, OnDestroy {
    * Actualiza el progreso en dirección especificada
    */
   public updateProgress(direction: 'next' | 'prev'): void {
-    if (direction === 'next' && this.currentStep < this.totalSteps) {
-      this.currentStep++;
-    } else if (direction === 'prev' && this.currentStep > 1) {
-      this.currentStep--;
+    if (direction === 'next' && this.currentStep() < this.totalSteps) {
+      this.currentStep.set(this.currentStep() + 1);
+    } else if (direction === 'prev' && this.currentStep() > 1) {
+      this.currentStep.set(this.currentStep() - 1);
     }
-    this.updateProgressAndVisibility();
   }
 
   // --- MÉTODOS PÚBLICOS - ESTADO DEL CLIENTE
@@ -313,8 +310,8 @@ export class FormComponent implements OnInit, OnDestroy {
         input.value = '';
         return;
       }
-      this.selectedFileName = file.name;
-      this.attachedFile = file;
+      this.selectedFileName.set(file.name);
+      this.attachedFile.set(file);
       this.claimForm.controls.attachment.setValue(file);
     } else {
       this.clearFileSelection(input);
@@ -325,8 +322,8 @@ export class FormComponent implements OnInit, OnDestroy {
    * Elimina el archivo adjunto seleccionado
    */
   public removeAttachment(): void {
-    this.selectedFileName = null;
-    this.attachedFile = null;
+    this.selectedFileName.set(null);
+    this.attachedFile.set(null);
     this.claimForm.controls.attachment.setValue(null);
   }
 
@@ -338,11 +335,12 @@ export class FormComponent implements OnInit, OnDestroy {
    */
   public async onSave(): Promise<void> {
     try {
-      this.isSubmitting = true;
+      this.isSubmitting.set(true);
+
       const recaptchaToken = await this.executeRecaptchaWithFallback();
 
       if (!recaptchaToken) {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
         this.toast.showError('No pudimos validar reCAPTCHA. Intenta de nuevo.');
         return;
       }
@@ -350,14 +348,16 @@ export class FormComponent implements OnInit, OnDestroy {
       this.claimForm.controls.recaptcha.setValue(recaptchaToken);
       if (this.claimForm.invalid) {
         this.claimForm.markAllAsTouched();
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
         return;
       }
+
       await this.submitClaim();
     } catch (error) {
-      this.toast.showError('No pudimos enviar tu reclamo. Intenta nuevamente.');
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      this.toast.showError(`Error: ${errorMessage}`);
     } finally {
-      this.isSubmitting = false;
+      this.isSubmitting.set(false);
     }
   }
 
@@ -370,23 +370,23 @@ export class FormComponent implements OnInit, OnDestroy {
       claimTypes: this.claimsService.getClaimTypes(),
       currencies: this.claimsService.getCurrencies()
     }).subscribe({
-      next: (data) => {
-        this.documentTypes = data.documentTypes;
-        this.consumptionTypes = data.consumptionTypes;
-        this.claimTypes = data.claimTypes;
-        this.currencies = data.currencies;
+      next: (data: any) => {
+        this.documentTypes.set(data.documentTypes);
+        this.consumptionTypes.set(data.consumptionTypes);
+        this.claimTypes.set(data.claimTypes);
+        this.currencies.set(data.currencies);
         this.setupDocumentTypeValidation();
-        this.isDataReady = true;
+        this.isDataReady.set(true);
       },
       error: (error: any) => {
-        this.isDataReady = true;
+        this.isDataReady.set(true);
       }
     });
   }
 
   private setupDocumentTypeValidation(): void {
     this.claimForm.controls.document_type_id.valueChanges
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((typeId) => {
         if (!typeId) return;
         this.applyDocumentValidators('document_type_id', 'document_number', 'docNumberHint', true, Number(typeId));
@@ -394,7 +394,7 @@ export class FormComponent implements OnInit, OnDestroy {
       });
 
     this.claimForm.controls.document_type_tutor_id.valueChanges
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((typeId) => {
         if (!this.claimForm.controls.is_younger.value || !typeId) return;
         this.applyDocumentValidators('document_type_tutor_id', 'document_number_tutor', 'tutorDocNumberHint', true, Number(typeId));
@@ -404,8 +404,8 @@ export class FormComponent implements OnInit, OnDestroy {
 
   private setupYoungerValidation(): void {
     this.claimForm.controls.is_younger.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((isYounger: boolean) => {
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((isYounger: any) => {
         if (isYounger) {
           this.enableTutorValidators();
         } else {
@@ -419,8 +419,8 @@ export class FormComponent implements OnInit, OnDestroy {
     this.claimForm.controls.document_number.valueChanges.pipe(
       debounceTime(600),
       distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe((docNumber) => {
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((docNumber: any) => {
       this.performCustomerLookup(docNumber);
     });
   }
@@ -429,8 +429,8 @@ export class FormComponent implements OnInit, OnDestroy {
     this.claimForm.controls.document_number_tutor.valueChanges.pipe(
       debounceTime(600),
       distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe((docNumber) => {
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((docNumber: any) => {
       if (this.claimForm.controls.is_younger.value) {
         this.performTutorLookup(docNumber);
       }
@@ -440,21 +440,19 @@ export class FormComponent implements OnInit, OnDestroy {
   // --- MÉTODOS PRIVADOS - VALIDACIÓN DE DOCUMENTOS
 
   private getDocRuleByTypeControl(typeControlName: string, typeIdOverride?: number) {
-    const typeId = typeIdOverride !== undefined ? typeIdOverride : this.claimForm.get(typeControlName)?.value;
+    const typeId = typeIdOverride ?? this.claimForm.get(typeControlName)?.value;
 
     if (!typeId) {
       return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Selecciona primero un tipo de documento' };
     }
 
-    const numericTypeId = Number(typeId);
-    const docType = this.documentTypes.find(t => Number(t.id) === numericTypeId);
-
+    const docType = this.documentTypes().find(t => Number(t.id) === Number(typeId));
     if (!docType) {
       return { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Selecciona primero un tipo de documento' };
     }
 
     const typeName = docType.name.trim().toUpperCase();
-    return this.DOCUMENT_RULES[typeName] || { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Número de documento' };
+    return this.DOCUMENT_RULES[typeName] ?? { min: 6, max: 20, pattern: /^[A-Za-z0-9]+$/, hint: 'Número de documento' };
   }
 
   private applyDocumentValidators(typeControlName: string, numberControlName: string, hintField: 'docNumberHint' | 'tutorDocNumberHint', isRequired: boolean, typeIdOverride?: number): void {
@@ -469,8 +467,8 @@ export class FormComponent implements OnInit, OnDestroy {
     control.setValidators(validators);
     control.updateValueAndValidity({ emitEvent: false });
 
-    if (hintField === 'docNumberHint') this.docNumberHint = rule.hint;
-    if (hintField === 'tutorDocNumberHint') this.tutorDocNumberHint = rule.hint;
+    if (hintField === 'docNumberHint') this.docNumberHint.set(rule.hint);
+    if (hintField === 'tutorDocNumberHint') this.tutorDocNumberHint.set(rule.hint);
   }
 
   // --- MÉTODOS PRIVADOS - PASOS Y TUTORES
@@ -537,38 +535,48 @@ export class FormComponent implements OnInit, OnDestroy {
   // --- MÉTODOS PRIVADOS - AUTOCOMPLETADO
 
   private performCustomerLookup(docNumber: string): void {
-    const value = String(docNumber || '').trim();
-    if (!value || this.lastCustomerDocLoaded === value) return;
+    const value = String(docNumber ?? '').trim();
+    if (!value || this.lastCustomerDocLoaded() === value) return;
 
     const rule = this.getDocRuleByTypeControl('document_type_id');
     const isValidFormat = value.length >= rule.min && value.length <= rule.max && rule.pattern.test(value) && /^[0-9]+$/.test(value);
 
     if (isValidFormat) {
-      this.claimsService.getCustomerByDocument(this.tenantService.tenantSlug(), value).subscribe({
-        next: (customer) => this.populateCustomerForm(customer),
-        error: (err: any) => {
+      this.claimsService.getCustomerByDocument(this.tenantService.tenantSlug(), value).pipe(
+        catchError((err: any) => {
           if (err?.status !== 404) {
             this.toast.showWarning('No pudimos cargar los datos del cliente');
           }
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe((customer: any) => {
+        if (customer) {
+          this.populateCustomerForm(customer as Customer);
         }
       });
     }
   }
 
   private performTutorLookup(docNumber: string): void {
-    const value = String(docNumber || '').trim();
-    if (!value || this.lastTutorDocLoaded === value) return;
+    const value = String(docNumber ?? '').trim();
+    if (!value || this.lastTutorDocLoaded() === value) return;
 
     const rule = this.getDocRuleByTypeControl('document_type_tutor_id');
     const isValidFormat = value.length >= rule.min && value.length <= rule.max && rule.pattern.test(value) && /^[0-9]+$/.test(value);
 
     if (isValidFormat) {
-      this.claimsService.getTutorByDocument(this.tenantService.tenantSlug(), value).subscribe({
-        next: (tutor) => this.populateTutorForm(tutor),
-        error: (err: any) => {
+      this.claimsService.getTutorByDocument(this.tenantService.tenantSlug(), value).pipe(
+        catchError((err: any) => {
           if (err?.status !== 404) {
             this.toast.showWarning('No pudimos cargar los datos del tutor');
           }
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe((tutor: any) => {
+        if (tutor) {
+          this.populateTutorForm(tutor as Tutor);
         }
       });
     }
@@ -584,8 +592,8 @@ export class FormComponent implements OnInit, OnDestroy {
       address: customer.address,
       is_younger: customer.is_younger ?? false,
     }, { emitEvent: false });
-    this.lastCustomerDocLoaded = String(customer.document_number);
-    this.customerAutoFilled = true;
+    this.lastCustomerDocLoaded.set(String(customer.document_number));
+    this.customerAutoFilled.set(true);
     this.toast.showSuccess('Cliente encontrado. Datos cargados automáticamente');
   }
 
@@ -598,8 +606,8 @@ export class FormComponent implements OnInit, OnDestroy {
       email_tutor: tutor.email,
       celphone_tutor: tutor.phone,
     }, { emitEvent: false });
-    this.lastTutorDocLoaded = String(tutor.document_number);
-    this.tutorAutoFilled = true;
+    this.lastTutorDocLoaded.set(String(tutor.document_number));
+    this.tutorAutoFilled.set(true);
     this.toast.showSuccess('Tutor encontrado. Datos cargados automáticamente');
   }
 
@@ -619,9 +627,9 @@ export class FormComponent implements OnInit, OnDestroy {
       email_tutor: '',
       celphone_tutor: ''
     }, { emitEvent: false });
-    this.lastCustomerDocLoaded = null;
-    this.customerAutoFilled = false;
-    this.tutorAutoFilled = false;
+    this.lastCustomerDocLoaded.set(null);
+    this.customerAutoFilled.set(false);
+    this.tutorAutoFilled.set(false);
   }
 
   private resetTutorFields(): void {
@@ -632,8 +640,8 @@ export class FormComponent implements OnInit, OnDestroy {
       email_tutor: '',
       celphone_tutor: ''
     }, { emitEvent: false });
-    this.lastTutorDocLoaded = null;
-    this.tutorAutoFilled = false;
+    this.lastTutorDocLoaded.set(null);
+    this.tutorAutoFilled.set(false);
   }
 
   // --- MÉTODOS PRIVADOS - ARCHIVO
@@ -653,8 +661,8 @@ export class FormComponent implements OnInit, OnDestroy {
   }
 
   private clearFileSelection(input: HTMLInputElement | null): void {
-    this.selectedFileName = null;
-    this.attachedFile = null;
+    this.selectedFileName.set(null);
+    this.attachedFile.set(null);
     if (input) input.value = '';
   }
 
@@ -662,102 +670,30 @@ export class FormComponent implements OnInit, OnDestroy {
 
   private async submitClaim(): Promise<void> {
     try {
-      const customerData = this.buildCustomerData();
-      const customerObservable = this.getOrCreateCustomer(customerData);
+      const publicPayload = this.buildPublicClaimPayload();
 
-      if (this.claimForm.controls.is_younger.value) {
-        const tutorData = this.buildTutorData();
-        const tutorObservable = this.getOrCreateTutor(tutorData);
-        const result = await firstValueFrom(this.submitWithTutor(customerObservable, tutorObservable));
-      } else {
-        const result = await firstValueFrom(this.submitWithoutTutor(customerObservable));
-      }
+      const result$ = this.createClaim(publicPayload).pipe(
+        tap((response: any) => {
+          this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
+          this.resetForm();
+        }),
+        catchError((error: any) => {
+          console.error('❌ Error del servidor:', error);
+          this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
+          throw error;
+        })
+      );
+
+      console.log('⏳ Esperando respuesta del servidor...');
+      await firstValueFrom(result$);
+      console.log('✅ Proceso completado');
     } catch (error) {
+      console.error('❌ Error en submitClaim:', error);
       throw error;
     }
   }
 
-  private buildCustomerData(): Customer {
-    return {
-      document_type_id: Number(this.claimForm.controls.document_type_id.value),
-      document_number: String(this.claimForm.controls.document_number.value || '').trim(),
-      first_name: this.claimForm.controls.first_name.value,
-      last_name: this.claimForm.controls.last_name.value,
-      email: this.claimForm.controls.email.value,
-      phone: this.claimForm.controls.celphone.value,
-      address: this.claimForm.controls.address.value,
-      is_younger: this.claimForm.controls.is_younger.value
-    };
-  }
-
-  private buildTutorData(): Tutor {
-    return {
-      document_type_id: Number(this.claimForm.controls.document_type_tutor_id.value),
-      document_number: String(this.claimForm.controls.document_number_tutor.value || '').trim(),
-      first_name: this.claimForm.controls.first_name_tutor.value,
-      last_name: this.claimForm.controls.last_name_tutor.value,
-      email: this.claimForm.controls.email_tutor.value,
-      phone: this.claimForm.controls.celphone_tutor.value
-    };
-  }
-
-  private getOrCreateCustomer(customerData: Customer) {
-    return this.claimsService.getCustomerByDocument(this.tenantService.tenantSlug(), customerData.document_number as string).pipe(
-      catchError((err: any) => err?.status === 404 ? of(null) : throwError(() => err)),
-      switchMap((found) => found && found.id ? of(found) : this.claimsService.createCustomer(this.tenantService.tenantSlug(), customerData))
-    );
-  }
-
-  private getOrCreateTutor(tutorData: Tutor) {
-    return this.claimsService.getTutorByDocument(this.tenantService.tenantSlug(), String(tutorData.document_number)).pipe(
-      catchError((err: any) => err?.status === 404 ? of(null) : throwError(() => err)),
-      switchMap((found) => found && (found as any).id ? of(found) : this.claimsService.createTutor(this.tenantService.tenantSlug(), tutorData))
-    );
-  }
-
-  private submitWithTutor(customerObservable: any, tutorObservable: any) {
-    return forkJoin({ customer: customerObservable, tutor: tutorObservable }).pipe(
-      switchMap(({ customer, tutor }) => {
-        const claimData = this.buildClaimPayload({
-          customer_id: this.extractId(customer),
-          tutor_id: this.extractId(tutor)
-        });
-        return this.createClaim(claimData);
-      }),
-      tap((response: any) => {
-        this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
-        this.resetForm();
-      }),
-      catchError((error: any) => {
-        this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
-        return throwError(() => error);
-      })
-    );
-  }
-
-  private submitWithoutTutor(customerObservable: any) {
-    return customerObservable.pipe(
-      switchMap(customer => {
-        const claimData = this.buildClaimPayload({ customer_id: this.extractId(customer) });
-        return this.createClaim(claimData);
-      }),
-      tap((response: any) => {
-        this.toast.showSuccess((response as any)?.message || 'Tu reclamo fue enviado correctamente');
-        this.resetForm();
-      }),
-      catchError((error: any) => {
-        this.handleErrorToast(error, 'Hubo un problema al procesar tu reclamo');
-        return throwError(() => error);
-      })
-    );
-  }
-
   // --- MÉTODOS PRIVADOS - UTILIDAD
-
-  private updateProgressAndVisibility(): void {
-    this.progressWidth = (this.currentStep / this.totalSteps) * 100;
-    this.progressIndicatorPosition = ((this.currentStep - 0.5) / this.totalSteps) * 100;
-  }
 
   private buildErrorMessage(field: string, errorKey: string, errors: Record<string, any>): string {
     if (field === 'document_number' || field === 'document_number_tutor') {
@@ -815,75 +751,83 @@ export class FormComponent implements OnInit, OnDestroy {
     }
   }
 
-  private extractId(entity: any): number | undefined {
-    return entity ? (entity.id ?? entity?.data?.id ?? entity?.customer?.id) : undefined;
-  }
-
-  private buildClaimPayload(base: { customer_id?: number; tutor_id?: number }): any {
+  private buildPublicClaimPayload(): any {
     const fv = this.claimForm.getRawValue();
-    return {
-      customer_id: base.customer_id,
-      tutor_id: base.tutor_id,
+    const payload: any = {
+      document_type_id: Number(fv.document_type_id),
+      document_number: String(fv.document_number || '').trim(),
+      first_name: fv.first_name,
+      last_name: fv.last_name,
+      email: fv.email,
+      celphone: fv.celphone,
+      address: fv.address,
+      is_younger: fv.is_younger,
       claim_type_id: Number(fv.claim_type_id),
       consumption_type_id: Number(fv.consumption_type_id),
       currency_id: Number(fv.currency_id),
-      order_number: Number(fv.order_number),
-      claimed_amount: Number(fv.claimed_amount),
+      order_number: fv.order_number ? Number(fv.order_number) : undefined,
+      claimed_amount: fv.claimed_amount ? Number(fv.claimed_amount) : undefined,
       description: fv.description,
       detail: fv.detail,
       request: fv.request,
-      attachment: this.attachedFile,
+      attachment: this.attachedFile(),
       recaptcha: fv.recaptcha
     };
+
+    if (fv.is_younger) {
+      payload.document_type_tutor_id = fv.document_type_tutor_id ? Number(fv.document_type_tutor_id) : undefined;
+      payload.document_number_tutor = fv.document_number_tutor ? String(fv.document_number_tutor).trim() : undefined;
+      payload.first_name_tutor = fv.first_name_tutor || undefined;
+      payload.last_name_tutor = fv.last_name_tutor || undefined;
+      payload.email_tutor = fv.email_tutor || undefined;
+      payload.celphone_tutor = fv.celphone_tutor || undefined;
+    }
+
+    return payload;
   }
 
   private createClaim(claimData: any) {
-    const hasAttachment = claimData.attachment instanceof File;
-
-    if (!hasAttachment) {
-      // Use public endpoint (no authentication required)
-      return this.claimsService.createPublicClaim(this.tenantService.tenantSlug(), this.buildFormDataPayload(claimData));
-    }
-
-    return this.claimsService.createPublicClaim(this.tenantService.tenantSlug(), this.buildFormDataPayload(claimData));
-  }
-
-  private buildJsonPayload(claimData: any) {
-    return {
-      customer_id: Number(claimData.customer_id),
-      tutor_id: claimData.tutor_id ? Number(claimData.tutor_id) : undefined,
-      claim_type_id: Number(claimData.claim_type_id),
-      consumption_type_id: Number(claimData.consumption_type_id),
-      currency_id: Number(claimData.currency_id),
-      order_number: Number(claimData.order_number),
-      claimed_amount: Number(claimData.claimed_amount),
-      description: claimData.description,
-      detail: claimData.detail,
-      request: claimData.request,
-      recaptcha: claimData.recaptcha
-    };
+    console.log('🔧 Construyendo FormData desde claimData...');
+    const formData = this.buildFormDataPayload(claimData);
+    console.log('✅ FormData construido, enviando a API:', `${this.tenantService.tenantSlug()}`);
+    return this.claimsService.createPublicClaim(this.tenantService.tenantSlug(), formData);
   }
 
   private buildFormDataPayload(claimData: any): FormData {
+    console.log('📋 Datos del claim antes de FormData:', claimData);
     const formData = new FormData();
     Object.entries(claimData).forEach(([key, value]) => {
       if (value === undefined || value === null || value === '') return;
       if (key === 'attachment' && value instanceof File) {
+        console.log(`📎 Adjuntando archivo: ${value.name} (${value.size} bytes)`);
         formData.append('attachment', value);
       } else {
         formData.append(key, String(value));
       }
     });
+
+    // Log de campos en FormData
+    console.log('📦 Campos en FormData:');
+    formData.forEach((value, key) => {
+      if (value instanceof File) {
+        console.log(`  - ${key}: [File] ${value.name}`);
+      } else {
+        console.log(`  - ${key}: ${value}`);
+      }
+    });
+
     return formData;
   }
 
   private async executeRecaptchaWithFallback(): Promise<string> {
     try {
+      console.log('🔐 Ejecutando reCAPTCHA...');
       const token = await this.executeRecaptcha();
+      console.log('✅ Token reCAPTCHA generado correctamente');
       return token;
     } catch (error) {
+      console.error('❌ Error en reCAPTCHA:', error);
       this.toast.showError('No pudimos validar reCAPTCHA. Intenta de nuevo.');
-      this.isSubmitting = false;
       throw error;
     }
   }
@@ -891,8 +835,12 @@ export class FormComponent implements OnInit, OnDestroy {
   private async executeRecaptcha(): Promise<string> {
     try {
       const token = await this.recaptchaService.execute(this.recaptchaAction);
+      if (!token) {
+        throw new Error('reCAPTCHA no devolvió un token válido');
+      }
       return token;
     } catch (error) {
+      console.error('Error en executeRecaptcha:', error);
       throw error;
     }
   }
@@ -909,14 +857,13 @@ export class FormComponent implements OnInit, OnDestroy {
       recaptcha: ''
     });
 
-    this.selectedFileName = null;
-    this.attachedFile = null;
-    this.currentStep = 1;
-    this.updateProgressAndVisibility();
-    this.lastCustomerDocLoaded = null;
-    this.lastTutorDocLoaded = null;
-    this.customerAutoFilled = false;
-    this.tutorAutoFilled = false;
+    this.selectedFileName.set(null);
+    this.attachedFile.set(null);
+    this.currentStep.set(1);
+    this.lastCustomerDocLoaded.set(null);
+    this.lastTutorDocLoaded.set(null);
+    this.customerAutoFilled.set(false);
+    this.tutorAutoFilled.set(false);
     this.claimForm.markAsPristine();
     this.claimForm.markAsUntouched();
   }

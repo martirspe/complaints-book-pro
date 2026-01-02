@@ -44,32 +44,32 @@
         <div class="row">
           <div class="col-lg-5 offset-lg-7 p-sm-0">
             <div class="ufg-job-application-wrapper">
-              @if (isDataReady) {
+              @if (isDataReady()) {
               <!-- Progress Stepper -->
               <nav class="stepper-container" aria-label="Progreso del formulario" role="navigation">
-                <div class="stepper-line-track" role="progressbar" [attr.aria-valuenow]="currentStep"
+                <div class="stepper-line-track" role="progressbar" [attr.aria-valuenow]="currentStep()"
                   [attr.aria-valuemin]="1" [attr.aria-valuemax]="totalSteps"
-                  [attr.aria-label]="'Paso ' + currentStep + ' de ' + totalSteps">
-                  <div class="stepper-line-progress" [style.width.%]="progressWidth"></div>
-                  <div class="stepper-indicator" [style.left.%]="progressIndicatorPosition"></div>
+                  [attr.aria-label]="'Paso ' + currentStep() + ' de ' + totalSteps">
+                  <div class="stepper-line-progress" [style.width.%]="progressWidth()"></div>
+                  <div class="stepper-indicator" [style.left.%]="progressIndicatorPosition()"></div>
                 </div>
                 <ol class="stepper-labels" role="list">
                   @for (label of stepLabels; track label; let i = $index) {
-                  <li class="step-label-item" [class.active]="currentStep === i + 1"
-                    [class.completed]="currentStep > i + 1" [class.disabled]="!canNavigateTo(i + 1)"
+                  <li class="step-label-item" [class.active]="currentStep() === i + 1"
+                    [class.completed]="currentStep() > i + 1" [class.disabled]="!canNavigateTo(i + 1)"
                     (click)="canNavigateTo(i + 1) && onStepClick(i + 1)"
                     (keydown.enter)="canNavigateTo(i + 1) && onStepClick(i + 1)"
                     (keydown.space)="canNavigateTo(i + 1) && onStepClick(i + 1); $event.preventDefault()"
                     [attr.role]="canNavigateTo(i + 1) ? 'button' : 'status'"
                     [attr.tabindex]="canNavigateTo(i + 1) ? 0 : -1"
-                    [attr.aria-current]="currentStep === i + 1 ? 'step' : null">
+                    [attr.aria-current]="currentStep() === i + 1 ? 'step' : null">
                     <span class="label-text">{{ label }}</span>
                   </li>
                   }
                 </ol>
               </nav>
               <form [formGroup]="claimForm" class="job-application-form" autocomplete="off">
-                <section class="form-steps" [class.active]="currentStep === 1" aria-labelledby="step1-title">
+                <section class="form-steps" [class.active]="currentStep() === 1" aria-labelledby="step1-title">
                   <h3 id="step1-title">
                     <i class="las la-user-circle" aria-hidden="true"></i>
                     Identificación del Consumidor Reclamante
@@ -83,7 +83,7 @@
                             [class.is-invalid]="isFieldInvalid('document_type_id')"
                             [class.is-valid]="isFieldValid('document_type_id')">
                             <option value="">Elija tipo de documento</option>
-                            @for (type of documentTypes; track type) {
+                            @for (type of documentTypes(); track type) {
                             <option [value]="type.id">
                               {{type.name}}
                             </option>
@@ -101,10 +101,10 @@
                           id="document_number" [class.is-invalid]="isFieldInvalid('document_number')"
                           [class.is-valid]="isFieldValid('document_number')" required aria-describedby="doc-help">
                         <label for="document_number">No. documento</label>
-                        @if (customerAutoFilled) {
+                        @if (customerAutoFilled()) {
                         <span class="autofill-badge">Encontrado</span>
                         }
-                        <small id="doc-help" class="form-text text-muted">{{ docNumberHint }}</small>
+                        <small id="doc-help" class="form-text text-muted">{{ docNumberHint() }}</small>
                         <div class="invalid-feedback">
                           <span>{{ getFieldError('document_number') }}</span>
                         </div>
@@ -199,7 +199,7 @@
                               class="form-control" [class.is-invalid]="isFieldInvalid('document_type_tutor_id')"
                               [class.is-valid]="isFieldValid('document_type_tutor_id')">
                               <option value="">Elija tipo de documento</option>
-                              @for (type of documentTypes; track type) {
+                              @for (type of documentTypes(); track type) {
                               <option [value]="type.id">
                                 {{type.name}}
                               </option>
@@ -218,10 +218,10 @@
                             [class.is-invalid]="isFieldInvalid('document_number_tutor')"
                             [class.is-valid]="isFieldValid('document_number_tutor')" required>
                           <label for="document_number_tutor">No. documento</label>
-                          @if (tutorAutoFilled) {
+                          @if (tutorAutoFilled()) {
                           <span class="autofill-badge">Encontrado</span>
                           }
-                          <small class="form-text text-muted">{{ tutorDocNumberHint }}</small>
+                          <small class="form-text text-muted">{{ tutorDocNumberHint() }}</small>
                           <div class="invalid-feedback">
                             <span>{{ getFieldError('document_number_tutor') }}</span>
                           </div>
@@ -285,7 +285,7 @@
                     <span>Siguiente</span>
                   </button>
                 </section>
-                <section class="form-steps" [class.active]="currentStep === 2" aria-labelledby="step2-title">
+                <section class="form-steps" [class.active]="currentStep() === 2" aria-labelledby="step2-title">
                   <h3 id="step2-title">
                     <i class="las la-shopping-cart" aria-hidden="true"></i>
                     Identificación del Bien Contratado
@@ -300,7 +300,7 @@
                             [class.is-invalid]="isFieldInvalid('consumption_type_id')"
                             [class.is-valid]="isFieldValid('consumption_type_id')">
                             <option value="">Elija tipo de consumo</option>
-                            @for (type of consumptionTypes; track type) {
+                            @for (type of consumptionTypes(); track type) {
                             <option [value]="type.id">
                               {{type.name}}
                             </option>
@@ -346,7 +346,7 @@
                             [class.is-invalid]="isFieldInvalid('currency_id')"
                             [class.is-valid]="isFieldValid('currency_id')" required>
                             <option value="">Seleccione moneda</option>
-                            @for (currency of currencies; track currency) {
+                            @for (currency of currencies(); track currency) {
                             <option [value]="currency.id">
                               {{ currency.symbol }} - {{ currency.name }}
                             </option>
@@ -382,7 +382,7 @@
                     <span>Siguiente</span>
                   </button>
                 </section>
-                <section class="form-steps" [class.active]="currentStep === 3" aria-labelledby="step3-title">
+                <section class="form-steps" [class.active]="currentStep() === 3" aria-labelledby="step3-title">
                   <h3 id="step3-title">
                     <i class="las la-comment-alt" aria-hidden="true"></i>
                     Detalle de Reclamación y Pedido del Consumidor
@@ -396,7 +396,7 @@
                             [class.is-invalid]="isFieldInvalid('claim_type_id')"
                             [class.is-valid]="isFieldValid('claim_type_id')">
                             <option value="">Seleccione tipo de reclamo</option>
-                            @for (type of claimTypes; track type) {
+                            @for (type of claimTypes(); track type) {
                             <option [value]="type.id">
                               {{type.name}}
                             </option>
@@ -449,7 +449,7 @@
                     <div class="col-sm-12 p-sm-0">
                       <div class="form-group">
                         <div class="file-upload-wrapper">
-                          @if (!selectedFileName) {
+                          @if (!selectedFileName()) {
                           <div class="custom-file">
                             <input type="file" class="custom-file-input form-control" id="attachment"
                               (change)="onFileSelected($event)" accept=".pdf,.doc,.docx">
@@ -461,11 +461,11 @@
                             </label>
                           </div>
                           }
-                          @if (selectedFileName) {
+                          @if (selectedFileName()) {
                           <div class="file-preview">
                             <div class="file-info">
                               <i class="las la-file-alt file-icon"></i>
-                              <span class="file-name">{{ selectedFileName }}</span>
+                              <span class="file-name">{{ selectedFileName() }}</span>
                             </div>
                             <button type="button" class="btn-remove" (click)="removeAttachment()"
                               aria-label="Eliminar archivo">
@@ -486,7 +486,7 @@
                     <span>Revisar antes de enviar</span>
                   </button>
                 </section>
-                <section class="form-steps review-step" [class.active]="currentStep === 4"
+                <section class="form-steps review-step" [class.active]="currentStep() === 4"
                   aria-labelledby="step4-title">
                   <h3 id="step4-title">
                     <i class="las la-check-circle" aria-hidden="true"></i>
@@ -557,10 +557,10 @@
                       <span class="review-label">Solicitud:</span>
                       <span class="review-value">{{ claimForm.get('request')?.value }}</span>
                     </div>
-                    @if (selectedFileName) {
+                    @if (selectedFileName()) {
                     <div class="review-item">
                       <span class="review-label">Archivo adjunto:</span>
-                      <span class="review-value"><i class="las la-file-alt"></i> {{ selectedFileName }}</span>
+                      <span class="review-value"><i class="las la-file-alt"></i> {{ selectedFileName() }}</span>
                     </div>
                     }
                   </div>
@@ -583,15 +583,15 @@
                     <div class="col-sm-12 p-sm-0">
                       <p class="recaptcha-hint">Protegido por reCAPTCHA v3. Se aplican la Política de Privacidad y
                         las Condiciones de Google.</p>
-                      <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="btn btn-submit"
-                        (click)="onSave()" [attr.aria-busy]="isSubmitting">
-                        @if (!isSubmitting) {
+                      <button type="submit" [disabled]="claimForm.invalid || isSubmitting()" class="btn btn-submit"
+                        (click)="onSave()" [attr.aria-busy]="isSubmitting()">
+                        @if (!isSubmitting()) {
                         <span>
                           <i class="las la-paper-plane" aria-hidden="true"></i>
                           Enviar Reclamo
                         </span>
                         }
-                        @if (isSubmitting) {
+                        @if (isSubmitting()) {
                         <span>
                           <span class="spinner-border spinner-sm" role="status" aria-label="Enviando"></span>
                           Enviando...
