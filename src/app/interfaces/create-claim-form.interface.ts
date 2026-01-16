@@ -1,0 +1,37 @@
+export interface CreateClaimForm {
+  personType: 'natural' | 'legal';
+  documentType: string;
+  documentNumber: string;
+  firstName: string;
+  lastName: string;
+  minor: boolean;
+  tutorDocumentType: string;
+  tutorDocumentNumber: string;
+  tutorFirstName: string;
+  tutorLastName: string;
+  companyDocument: string;
+  companyName: string;
+  legalRepDocumentType: string;
+  legalRepDocumentNumber: string;
+  legalRepFirstName: string;
+  legalRepLastName: string;
+  district: string;
+  province: string;
+  address: string;
+  email: string;
+  phone: string;
+  goodType: string;
+  goodDescription: string;
+  receipt: boolean;
+  receiptType: string;
+  receiptNumber: string;
+  money: boolean;
+  currency: string;
+  claimAmount: string;
+  claimType: string;
+  claimDescription: string;
+  request: string;
+  attachments: File[];
+  recaptcha: string;
+  confirm: boolean;
+}

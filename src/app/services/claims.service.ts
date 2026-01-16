@@ -84,6 +84,16 @@ export class ClaimsService {
     );
   }
 
+  /**
+   * Public: Get claim by code for tracking
+   * Code pattern: REC-YYYY-###### or QUE-YYYY-######
+   */
+  getPublicClaimByCode(tenantSlug: string, code: string): Observable<any> {
+    return this.http.get<any>(
+      `${this.api}/public/${tenantSlug}/claims/${encodeURIComponent(code)}`
+    );
+  }
+
   updateClaim(tenantSlug: string, claimId: number, payload: Partial<Claim>): Observable<Claim> {
     return this.http.put<Claim>(
       `${this.api}/tenants/${tenantSlug}/claims/${claimId}`, payload

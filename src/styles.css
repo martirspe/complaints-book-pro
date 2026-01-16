@@ -1,279 +1,41 @@
-/*=============================================================================
-  DESIGN TOKENS & CSS VARIABLES
-=============================================================================*/
-:root {
-  --brand-primary: #1a1a1a;
-  --brand-accent: #3a3a3a;
-  --brand-primary-rgb: 26, 26, 26;
-  --brand-accent-rgb: 58, 58, 58;
+@import "tailwindcss";
 
-  /* Text & Color */
-  --text-primary: #1c2437;
-  --text-secondary: #546274;
-  --text-muted: #97a2ae;
-
-  /* Background & Borders */
-  --bg-light: #f8f9fa;
-  --border-light: rgba(0, 0, 0, 0.12);
-  --border-subtle: #e1e7ee;
-
-  /* Shadows */
-  --panel-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-  /* Status & Alert Colors */
-  --info-bg: #e7f3ff;
-  --success: #28a745;
-  --success-rgb: 40, 167, 69;
-  --danger: #dc3545;
-  --danger-hover: #c82333;
-  --danger-rgb: 220, 53, 69;
-  --warning: #f59e0b;
-  --warning-rgb: 245, 158, 11;
-
-  /* Sizing & Spacing */
-  --focus-ring: 3px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-
-  /* Bootstrap Theme Bridge */
-  --bs-primary: var(--brand-primary);
-  --bs-link-color: var(--brand-accent);
-
-  /* Scrollbar (Firefox) */
-  scrollbar-color: var(--brand-primary) transparent;
-  scrollbar-width: thin;
+/* Professional form styles */
+input[type="radio"]:checked {
+  background-color: #f97316;
+  border-color: #f97316;
 }
 
-/*=============================================================================
-  BASE ELEMENTS
-=============================================================================*/
-/* Typography */
-html {
-  font-size: 62.5%;
-  scroll-behavior: smooth;
+input[type="checkbox"]:checked {
+  background-color: #f97316;
+  border-color: #f97316;
 }
 
-body {
-  padding: 0;
-  margin: 0;
-  font-family: "Roboto", sans-serif;
-  font-size: 1.4rem;
-  line-height: 1.85;
-  color: var(--text-secondary);
-}
-
-/* Scrollbar (WebKit) */
-body::-webkit-scrollbar {
-  width: 10px;
-}
-
-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-body::-webkit-scrollbar-thumb {
-  background: var(--brand-primary);
-  border-radius: 12px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-body::-webkit-scrollbar-thumb:hover {
-  background: var(--brand-accent);
-  background-clip: padding-box;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Roboto", sans-serif;
-  font-weight: 700;
-  line-height: 1.3;
-  margin: 0;
-  color: inherit;
-}
-
-h1 { font-size: 6.4rem; }
-h2 { font-size: 4.8rem; }
-h3 { font-size: 3.6rem; }
-h4 { font-size: 2.8rem; }
-h5 { font-size: 2.2rem; }
-h6 { font-size: 1.8rem; }
-
-h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: inherit; }
-h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover { color: inherit; }
-
-p {
-  line-height: 1.85;
-  font-size: 1.4rem;
-  color: var(--text-secondary);
-  margin: 0;
-  padding: 0;
-}
-
-/* Links */
-a {
-  transition: all 0.3s ease;
+/* Disable all focus styles */
+input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus,
+button:focus {
   outline: none;
-  text-decoration: none;
+  box-shadow: none;
+  border-color: inherit;
+}
+
+.material-icons-outlined {
+  font-family: 'Material Icons Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
   display: inline-block;
-  color: inherit;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
-
-a:hover, a:focus { text-decoration: none; }
-
-input::-webkit-input-placeholder,
-.form-control::-webkit-input-placeholder,
-input:-moz-placeholder,
-.form-control:-moz-placeholder,
-input::-moz-placeholder,
-.form-control::-moz-placeholder,
-input:-ms-input-placeholder,
-.form-control:-ms-input-placeholder {
-  color: var(--text-secondary);
-}
-
-/*=============================================================================
-  BUTTONS & CONTROLS
-=============================================================================*/
-/* Primary Button Styles */
-.btn,
-.step-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 20px;
-  font-weight: 700;
-  font-size: 1.5rem;
-  line-height: 1.1;
-  border-radius: var(--radius-md);
-  border: none !important;
-  background: var(--brand-primary);
-  color: #ffffff;
-  box-shadow: 0 2px 6px rgba(var(--brand-primary-rgb), 0.15) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-  cursor: pointer;
-}
-
-.btn:hover:not(:disabled),
-.step-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(var(--brand-primary-rgb), 0.2) !important;
-}
-
-.btn:active:not(:disabled),
-.step-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(var(--brand-primary-rgb), 0.1) !important;
-}
-
-.btn:disabled,
-.step-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn i,
-.step-btn i {
-  display: inline-block;
-  vertical-align: middle;
-  font-size: 1.4rem;
-  margin: 0;
-}
-
-/* Spinner Animation */
-.spinner-border {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  vertical-align: middle;
-  border: 0.25em solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: spinner-border 0.75s linear infinite;
-}
-
-.spinner-border-sm,
-.spinner-sm {
-  width: 1rem;
-  height: 1rem;
-  border-width: 0.2em;
-}
-
-.spinner-sm { margin-right: 8px; }
-
-@keyframes spinner-border {
-  to { transform: rotate(360deg); }
-}
-
-/* Bootstrap Form Overrides */
-.form-check-input:checked {
-  background-color: var(--brand-primary);
-  border-color: var(--brand-primary);
-}
-
-.form-check-input:focus {
-  border-color: rgba(var(--brand-primary-rgb), 0.5);
-  box-shadow: 0 0 0 0.25rem rgba(var(--brand-primary-rgb), 0.25);
-}
-
-/*=============================================================================
-  COMPONENTS
-=============================================================================*/
-/* Progress Bar */
-.progress .progress-bar {
-  background-color: var(--brand-primary);
-}
-
-/* Utility Color Classes */
-.text-muted { color: var(--text-muted) !important; }
-
-/*=============================================================================
-  ACCESSIBILITY
-=============================================================================*/
-/* Keyboard Navigation */
-*:focus-visible {
-  outline: 3px solid var(--brand-primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-*:focus:not(:focus-visible) { outline: none; }
-
-/* Screen Reader Skip Link */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--brand-primary);
-  color: white;
-  padding: 8px;
-  text-decoration: none;
-  z-index: 100;
-}
-
-.skip-link:focus { top: 0; }
-
-/* Minimum Touch Target Size */
-button, a, input[type="radio"], input[type="checkbox"], select {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-
