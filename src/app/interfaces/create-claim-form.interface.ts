@@ -1,3 +1,4 @@
+// DTO principal para el formulario público de reclamos (frontend)
 export interface CreateClaimForm {
   personType: 'natural' | 'legal';
   documentType: string;

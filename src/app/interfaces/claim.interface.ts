@@ -1,5 +1,4 @@
-import { Customer } from './customer.interface';
-import { Tutor } from './tutor.interface';
+import { Persona } from './persona.interface';
 import { ConsumptionType } from './consumption-type.interface';
 import { ClaimType } from './claim-type.interface';
 import { Currency } from './currency.interface';
@@ -28,8 +27,8 @@ export interface Claim {
   assignment_date: string | null;
   response_date: string | null;
   update_date: string;
-  Customer: Customer;
-  Tutor: Tutor;
+  Customer: Persona;
+  Tutor: Persona;
   ConsumptionType: ConsumptionType;
   ClaimType: ClaimType;
   Currency: Currency;

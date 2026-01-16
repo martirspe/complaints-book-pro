@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 // --- IMPORTS - INTERFACES
@@ -9,10 +8,8 @@ import { DocumentType } from '../interfaces/document-type.interface';
 import { Claim } from '../interfaces/claim.interface';
 import { ConsumptionType } from '../interfaces/consumption-type.interface';
 import { ClaimType } from '../interfaces/claim-type.interface';
-import { Customer } from '../interfaces/customer.interface';
-import { Tutor } from '../interfaces/tutor.interface';
+import { Persona } from '../interfaces/persona.interface';
 import { Currency } from '../interfaces/currency.interface';
-import { CreateClaimPayload } from '../interfaces/create-claim.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ClaimsService {
@@ -22,16 +19,16 @@ export class ClaimsService {
   constructor(private http: HttpClient) { }
 
   // --- CUSTOMERS
-  createCustomer(tenantSlug: string, customer: Customer): Observable<Customer> {
-    return this.http.post<Customer>(`${this.api}/tenants/${tenantSlug}/customers`, customer);
+  createCustomer(tenantSlug: string, customer: Persona): Observable<Persona> {
+    return this.http.post<Persona>(`${this.api}/tenants/${tenantSlug}/customers`, customer);
   }
 
-  getCustomer(tenantSlug: string, id: number): Observable<Customer> {
-    return this.http.get<Customer>(`${this.api}/tenants/${tenantSlug}/customers/${id}`);
+  getCustomer(tenantSlug: string, id: number): Observable<Persona> {
+    return this.http.get<Persona>(`${this.api}/tenants/${tenantSlug}/customers/${id}`);
   }
 
-  updateCustomer(tenantSlug: string, id: number, payload: Partial<Customer>): Observable<Customer> {
-    return this.http.put<Customer>(`${this.api}/tenants/${tenantSlug}/customers/${id}`, payload);
+  updateCustomer(tenantSlug: string, id: number, payload: Partial<Persona>): Observable<Persona> {
+    return this.http.put<Persona>(`${this.api}/tenants/${tenantSlug}/customers/${id}`, payload);
   }
 
   deleteCustomer(tenantSlug: string, id: number): Observable<void> {
@@ -39,16 +36,16 @@ export class ClaimsService {
   }
 
   // --- TUTORS
-  createTutor(tenantSlug: string, tutor: Tutor): Observable<Tutor> {
-    return this.http.post<Tutor>(`${this.api}/tenants/${tenantSlug}/tutors`, tutor);
+  createTutor(tenantSlug: string, tutor: Persona): Observable<Persona> {
+    return this.http.post<Persona>(`${this.api}/tenants/${tenantSlug}/tutors`, tutor);
   }
 
-  getTutor(tenantSlug: string, id: number): Observable<Tutor> {
-    return this.http.get<Tutor>(`${this.api}/tenants/${tenantSlug}/tutors/${id}`);
+  getTutor(tenantSlug: string, id: number): Observable<Persona> {
+    return this.http.get<Persona>(`${this.api}/tenants/${tenantSlug}/tutors/${id}`);
   }
 
-  updateTutor(tenantSlug: string, id: number, payload: Partial<Tutor>): Observable<Tutor> {
-    return this.http.put<Tutor>(`${this.api}/tenants/${tenantSlug}/tutors/${id}`, payload);
+  updateTutor(tenantSlug: string, id: number, payload: Partial<Persona>): Observable<Persona> {
+    return this.http.put<Persona>(`${this.api}/tenants/${tenantSlug}/tutors/${id}`, payload);
   }
 
   deleteTutor(tenantSlug: string, id: number): Observable<void> {
@@ -68,7 +65,7 @@ export class ClaimsService {
     );
   }
 
-  createClaim(tenantSlug: string, payload: CreateClaimPayload | FormData): Observable<Claim> {
+  createClaim(tenantSlug: string, payload: FormData): Observable<Claim> {
     return this.http.post<Claim>(
       `${this.api}/integrations/${tenantSlug}/claims`, payload
     );

@@ -2,26 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-
-export interface Location {
-  id: number;
-  ubigeo: string;
-  district: string;
-  province: string;
-  department: string;
-  displayName: string;
-  active: boolean;
-}
-
-export interface Department {
-  name: string;
-  count: number;
-}
-
-export interface Province {
-  name: string;
-  count: number;
-}
+import { Location, Department, Province } from '../interfaces/location.interface';
 
 @Injectable({
   providedIn: 'root'

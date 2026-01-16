@@ -7,7 +7,7 @@
 
     <!-- Header Real -->
     @if (isDataReady()) {
-    <header class="relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm mb-6">
+    <header class="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm mb-6">
       <!-- Decorative accent -->
       <div class="absolute inset-x-0 top-0 h-0.5 bg-gray-700"></div>
 
@@ -28,11 +28,11 @@
               <h1 class="text-2xl font-bold text-gray-900 tracking-tight leading-tight">Libro de Reclamaciones</h1>
             </div>
 
-            <!-- Company Info - Compact Grid -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-sm"
+            <!-- Primera fila: RUC, Razón Social, ID del Libro -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-sm mb-2"
               aria-labelledby="company-info-title">
               <h2 id="company-info-title" class="sr-only">Información de la Empresa</h2>
-
+              <!-- RUC -->
               <div class="flex items-center gap-3">
                 <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">badge</span>
                 <div class="min-w-0">
@@ -40,36 +40,50 @@
                   <span class="font-semibold text-gray-900 text-sm">{{tenant()?.tax_id}}</span>
                 </div>
               </div>
-
+              <!-- Razón Social -->
               <div class="flex items-center gap-3">
-                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">apartment</span>
+                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0"
+                  aria-hidden="true">apartment</span>
                 <div class="min-w-0">
                   <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">Razón Social</span>
                   <span class="font-medium text-gray-700 text-sm truncate block">{{tenant()?.legal_name}}</span>
                 </div>
               </div>
-
-              <div class="flex items-center gap-3 lg:col-span-2">
-                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">location_on</span>
+              <!-- ID del Libro -->
+              <div class="flex items-center gap-3">
+                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">book</span>
                 <div class="min-w-0">
-                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">Dirección</span>
-                  <span class="text-gray-600 text-sm line-clamp-2"
-                    [title]="tenant()?.address">{{tenant()?.address}}</span>
+                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">ID del Libro</span>
+                  <span class="font-semibold text-gray-900 text-sm">{{'—'}}</span>
                 </div>
               </div>
             </section>
 
-            <!-- Website - Separate Row -->
-            <div class="flex items-center gap-3 mt-6 text-sm">
-              <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">public</span>
-              <div class="min-w-0">
-                <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">Sitio Web</span>
-                <a [href]="tenant()?.website" target="_blank" rel="noopener noreferrer"
-                  class="text-gray-700 hover:text-gray-800 font-medium text-sm truncate inline-flex items-center gap-1">
-                  {{tenant()?.website}}
-                </a>
+            <!-- Segunda fila: Dirección y Sitio Web -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+              <!-- Dirección -->
+              <div class="flex items-center gap-3">
+                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0"
+                  aria-hidden="true">location_on</span>
+                <div class="min-w-0">
+                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">Dirección</span>
+                  <span class="text-gray-600 text-sm truncate block max-w-xs md:max-w-md lg:max-w-lg"
+                    [title]="tenant()?.address">{{tenant()?.address}}</span>
+                </div>
               </div>
-            </div>
+              <!-- Sitio Web -->
+              <div class="flex items-center gap-3">
+                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0"
+                  aria-hidden="true">public</span>
+                <div class="min-w-0">
+                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">Sitio Web</span>
+                  <a [href]="tenant()?.website" target="_blank" rel="noopener noreferrer"
+                    class="text-gray-700 hover:text-gray-800 font-medium text-sm truncate inline-flex items-center gap-1">
+                    {{tenant()?.website}}
+                  </a>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
       </div>
@@ -78,21 +92,25 @@
 
     <!-- Tabs Navigation Real -->
     @if (isDataReady()) {
-    <nav class="mb-6 flex gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm"
-      aria-label="Navegación principal">
-      <button type="button" role="tab" [attr.aria-selected]="activeTab === 'create'"
-        [attr.aria-controls]="'create-panel'"
-        class="flex-1 rounded-md px-4 py-2 text-sm font-semibold transition-colors duration-200"
-        [class]="activeTab === 'create' ? 'bg-gray-700 text-white shadow-sm hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
-        (click)="setTab('create')">
-        Nuevo reclamo
-      </button>
-      <button type="button" role="tab" [attr.aria-selected]="activeTab === 'track'" [attr.aria-controls]="'track-panel'"
-        class="flex-1 rounded-md px-4 py-2 text-sm font-semibold transition-colors duration-200"
-        [class]="activeTab === 'track' ? 'bg-gray-700 text-white shadow-sm hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
-        (click)="setTab('track')">
-        Seguimiento de reclamo
-      </button>
+    <nav class="mb-6 flex justify-center" aria-label="Navegación principal">
+      <div class="flex gap-2 max-w-max rounded-xl bg-white p-1 border border-gray-200 shadow-sm">
+        <button type="button" role="tab" [attr.aria-selected]="activeTab === 'create'"
+          [attr.aria-controls]="'create-panel'"
+          class="min-w-35 max-w-45 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors duration-200 border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-700"
+          [class]="activeTab === 'create' ? 'bg-gray-700 text-white shadow-sm hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+          (click)="setTab('create')">
+          <span class="material-icons-outlined text-base align-middle mr-1">note_add</span>
+          Nuevo reclamo
+        </button>
+        <button type="button" role="tab" [attr.aria-selected]="activeTab === 'track'"
+          [attr.aria-controls]="'track-panel'"
+          class="min-w-35 max-w-45 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors duration-200 border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-700"
+          [class]="activeTab === 'track' ? 'bg-gray-700 text-white shadow-sm hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+          (click)="setTab('track')">
+          <span class="material-icons-outlined text-base align-middle mr-1">search</span>
+          Seguimiento
+        </button>
+      </div>
     </nav>
     }
 
@@ -102,7 +120,7 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()" id="create-panel" class="space-y-6 fade-in" novalidate>
 
       <!-- Sección 1: Información del consumidor -->
-      <section class="bg-white border border-gray-200 rounded-lg p-8 shadow-sm" aria-labelledby="consumer-info-heading">
+      <section class="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" aria-labelledby="consumer-info-heading">
         <h2 id="consumer-info-heading" class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-6">
           <span class="material-icons-outlined text-2xl">person</span>
           Información del consumidor
@@ -114,14 +132,14 @@
             <div class="flex gap-3">
               <label
                 class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50">
-                <input checked formControlName="personType" value="natural"
+                <input id="personType-natural" name="personType" checked formControlName="personType" value="natural"
                   class="size-5 cursor-pointer accent-gray-700 transition-all hover:scale-110" type="radio"
                   aria-label="Tipo de persona: Persona Natural" />
                 <span class="select-none text-sm font-medium text-gray-800">Persona Natural</span>
               </label>
               <label
                 class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50">
-                <input formControlName="personType" value="legal"
+                <input id="personType-legal" name="personType" formControlName="personType" value="legal"
                   class="size-5 cursor-pointer accent-gray-700 transition-all hover:scale-110" type="radio"
                   aria-label="Tipo de persona: Persona Jurídica" />
                 <span class="select-none text-sm font-medium text-gray-800">Persona Jurídica</span>
@@ -134,46 +152,41 @@
           <div class="space-y-5 fade-in">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div data-dropdown="documentType">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento</label>
-                <div class="relative">
-                  <button type="button" (click)="toggleDocumentTypeDropdown()"
-                    [class.border-red-500]="isFieldInvalid('documentType')"
-                    [class.ring-red-200]="isFieldInvalid('documentType')"
-                    class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
-                    style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;"
-                    [attr.aria-invalid]="isFieldInvalid('documentType')"
-                    [attr.aria-describedby]="isFieldInvalid('documentType') ? 'doctype-error' : null">
-                    {{getDocumentTypeName(form.get('documentType')?.value)}}
-                  </button>
+                <span class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento</span>
+                <!-- Persona Natural: Tipo de Documento -->
+                <button type="button" (click)="toggleDropdown('documentType')"
+                  [class.border-red-500]="isFieldInvalid('documentType')"
+                  [class.ring-red-200]="isFieldInvalid('documentType')"
+                  class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
+                  [attr.aria-invalid]="isFieldInvalid('documentType')"
+                  [attr.aria-describedby]="isFieldInvalid('documentType') ? 'doctype-error' : null">
+                  {{getDocumentTypeName(form.get('documentType')?.value)}}
+                </button>
 
-                  @if (documentTypeDropdownOpen()) {
-                  <div
-                    class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-                    <div class="max-h-72 overflow-y-auto">
-                      @for (type of documentTypes(); track type.id) {
-                      <button type="button" (click)="selectDocumentType(type.id)"
-                        class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-                        [class.bg-blue-50]="form.get('documentType')?.value === type.id">
-                        <div class="text-sm font-semibold text-gray-900 uppercase tracking-tight"
-                          [class.text-blue-600]="form.get('documentType')?.value === type.id">{{type.name}}</div>
-                        @if (form.get('documentType')?.value === type.id) {
-                        <span class="material-icons-outlined text-xl text-blue-600">check</span>
-                        }
-                      </button>
-                      }
-                    </div>
+                @if (documentTypeDropdownOpen()) {
+                <div
+                  class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+                  <div class="max-h-72 overflow-y-auto">
+                    <!-- Persona Natural: Tipo de Documento Dropdown Items -->
+                    @for (type of documentTypes(); track type.id) {
+                    <button type="button"
+                      (click)="selectDocumentType(type.id, 'documentType', 'documentNumber', 'docNumberHint')"
+                      class="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700"
+                      [class.font-bold]="form.get('documentType')?.value === type.id">
+                      {{type.name}}
+                    </button>
+                    }
                   </div>
-                  }
                 </div>
-                @if (isFieldInvalid('documentType')) {
-                <p id="doctype-error" class="text-sm text-red-600 mt-1" role="alert">{{ getFieldError('documentType') }}
-                </p>
                 }
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Documento</label>
-                <input formControlName="documentNumber" placeholder="Número de documento"
-                  (input)="onDocumentNumberInput($event)" [class.border-red-500]="isFieldInvalid('documentNumber')"
+                <label class="block text-sm font-semibold text-gray-700 mb-2" for="documentNumber">Número de
+                  Documento</label>
+                <input id="documentNumber" name="documentNumber" formControlName="documentNumber"
+                  placeholder="Ej: 12345678, 87654321"
+                  (input)="onDocumentInput($event, 'documentType', 'documentNumber')"
+                  [class.border-red-500]="isFieldInvalid('documentNumber')"
                   [class.ring-red-500/20]="isFieldInvalid('documentNumber')"
                   [attr.aria-invalid]="isFieldInvalid('documentNumber')"
                   [attr.aria-describedby]="isFieldInvalid('documentNumber') ? 'docnum-error' : null"
@@ -189,9 +202,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Nombres</label>
-                <input formControlName="firstName" placeholder="Nombre"
-                  [class.border-red-500]="isFieldInvalid('firstName')"
+                <label class="block text-sm font-semibold text-gray-700 mb-2" for="firstName">Nombres</label>
+                <input id="firstName" name="firstName" formControlName="firstName" placeholder="Nombre"
+                  placeholder="Ej: Juan Carlos" [class.border-red-500]="isFieldInvalid('firstName')"
                   [class.ring-red-500/20]="isFieldInvalid('firstName')"
                   [attr.aria-invalid]="isFieldInvalid('firstName')"
                   [attr.aria-describedby]="isFieldInvalid('firstName') ? 'firstname-error' : null"
@@ -204,9 +217,9 @@
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Apellidos</label>
-                <input formControlName="lastName" placeholder="Apellidos"
-                  [class.border-red-500]="isFieldInvalid('lastName')"
+                <label class="block text-sm font-semibold text-gray-700 mb-2" for="lastName">Apellidos</label>
+                <input id="lastName" name="lastName" formControlName="lastName" placeholder="Apellidos"
+                  placeholder="Ej: Pérez Gómez" [class.border-red-500]="isFieldInvalid('lastName')"
                   [class.ring-red-500/20]="isFieldInvalid('lastName')" [attr.aria-invalid]="isFieldInvalid('lastName')"
                   [attr.aria-describedby]="isFieldInvalid('lastName') ? 'lastname-error' : null"
                   class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
@@ -234,51 +247,46 @@
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div data-dropdown="tutorDocumentType">
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento del Tutor</label>
-                  <div class="relative">
-                    <button type="button" (click)="toggleTutorDocumentTypeDropdown()"
-                      [class.border-red-500]="isFieldInvalid('tutorDocumentType')"
-                      [class.ring-red-500/20]="isFieldInvalid('tutorDocumentType')"
-                      class="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-left text-sm text-gray-900 transition-shadow hover:border-gray-400"
-                      style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;"
-                      [attr.aria-invalid]="isFieldInvalid('tutorDocumentType')"
-                      [attr.aria-describedby]="isFieldInvalid('tutorDocumentType') ? 'tutordoctype-error' : null">
-                      {{getDocumentTypeName(form.get('tutorDocumentType')?.value)}}
-                    </button>
+                  <span class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento del Tutor</span>
+                  <!-- Tutor: Tipo de Documento -->
+                  <button type="button" (click)="toggleDropdown('tutorDocumentType')"
+                    [class.border-red-500]="isFieldInvalid('tutorDocumentType')"
+                    [class.ring-red-200]="isFieldInvalid('tutorDocumentType')"
+                    class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
+                    [attr.aria-invalid]="isFieldInvalid('tutorDocumentType')"
+                    [attr.aria-describedby]="isFieldInvalid('tutorDocumentType') ? 'tutordoctype-error' : null">
+                    {{getDocumentTypeName(form.get('tutorDocumentType')?.value)}}
+                  </button>
 
-                    @if (tutorDocumentTypeDropdownOpen()) {
-                    <div
-                      class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-                      <div class="max-h-72 overflow-y-auto">
-                        @for (type of documentTypes(); track type.id) {
-                        <button type="button" (click)="selectTutorDocumentType(type.id)"
-                          class="w-full text-left px-4 py-2 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-                          [class.bg-blue-50]="form.get('tutorDocumentType')?.value === type.id">
-                          <div class="text-sm font-semibold text-gray-900 uppercase tracking-tight"
-                            [class.text-blue-600]="form.get('tutorDocumentType')?.value === type.id">{{type.name}}</div>
-                          @if (form.get('tutorDocumentType')?.value === type.id) {
-                          <span class="material-icons-outlined text-xl text-blue-600">check</span>
-                          }
-                        </button>
-                        }
-                      </div>
+                  @if (tutorDocumentTypeDropdownOpen()) {
+                  <div
+                    class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+                    <div class="max-h-72 overflow-y-auto">
+                      <!-- Tutor: Tipo de Documento Dropdown Items -->
+                      @for (type of documentTypes(); track type.id) {
+                      <button type="button"
+                        (click)="selectDocumentType(type.id, 'tutorDocumentType', 'tutorDocumentNumber', 'tutorDocNumberHint')"
+                        class="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700"
+                        [class.font-bold]="form.get('tutorDocumentType')?.value === type.id">
+                        {{type.name}}
+                      </button>
+                      }
                     </div>
-                    }
                   </div>
-                  @if (isFieldInvalid('tutorDocumentType')) {
-                  <p id="tutordoctype-error" class="text-sm text-red-600 mt-1" role="alert">{{
-                    getFieldError('tutorDocumentType') }}</p>
                   }
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Documento del Tutor</label>
-                  <input formControlName="tutorDocumentNumber" placeholder="Número de documento"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2" for="tutorDocumentNumber">Número de
+                    Documento del Tutor</label>
+                  <input id="tutorDocumentNumber" name="tutorDocumentNumber" formControlName="tutorDocumentNumber"
+                    placeholder="Ej: 12345678, 87654321"
+                    (input)="onDocumentInput($event, 'tutorDocumentType', 'tutorDocumentNumber')"
                     [class.border-red-500]="isFieldInvalid('tutorDocumentNumber')"
                     [class.ring-red-500/20]="isFieldInvalid('tutorDocumentNumber')"
                     [attr.aria-invalid]="isFieldInvalid('tutorDocumentNumber')"
                     [attr.aria-describedby]="isFieldInvalid('tutorDocumentNumber') ? 'tutordocnum-error' : null"
                     class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
-                    type="text" (input)="onTutorDocumentNumberInput($event)" />
+                    type="text" inputmode="numeric" />
                   @if (isFieldInvalid('tutorDocumentNumber')) {
                   <p id="tutordocnum-error" class="text-sm text-red-600 mt-1" role="alert">{{
                     getFieldError('tutorDocumentNumber') }}</p>
@@ -288,9 +296,10 @@
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Nombres del Tutor</label>
-                  <input formControlName="tutorFirstName" placeholder="Nombre"
-                    [class.border-red-500]="isFieldInvalid('tutorFirstName')"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2" for="tutorFirstName">Nombres del
+                    Tutor</label>
+                  <input id="tutorFirstName" name="tutorFirstName" formControlName="tutorFirstName" placeholder="Nombre"
+                    placeholder="Ej: María Elena" [class.border-red-500]="isFieldInvalid('tutorFirstName')"
                     [class.ring-red-500/20]="isFieldInvalid('tutorFirstName')"
                     [attr.aria-invalid]="isFieldInvalid('tutorFirstName')"
                     [attr.aria-describedby]="isFieldInvalid('tutorFirstName') ? 'tutorfirstname-error' : null"
@@ -302,9 +311,10 @@
                   }
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Apellidos del Tutor</label>
-                  <input formControlName="tutorLastName" placeholder="Apellidos"
-                    [class.border-red-500]="isFieldInvalid('tutorLastName')"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2" for="tutorLastName">Apellidos del
+                    Tutor</label>
+                  <input id="tutorLastName" name="tutorLastName" formControlName="tutorLastName" placeholder="Apellidos"
+                    placeholder="Ej: Rodríguez Salas" [class.border-red-500]="isFieldInvalid('tutorLastName')"
                     [class.ring-red-500/20]="isFieldInvalid('tutorLastName')"
                     [attr.aria-invalid]="isFieldInvalid('tutorLastName')"
                     [attr.aria-describedby]="isFieldInvalid('tutorLastName') ? 'tutorlastname-error' : null"
@@ -326,16 +336,17 @@
           <div class="space-y-5 fade-in">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento</label>
+                <span class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento</span>
                 <div
                   class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 text-sm flex items-center">
                   RUC
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Número de RUC</label>
-                <input formControlName="companyDocument" placeholder="11 dígitos"
-                  [class.border-red-500]="isFieldInvalid('companyDocument')"
+                <label class="block text-sm font-semibold text-gray-700 mb-2" for="companyDocument">Número de
+                  RUC</label>
+                <input id="companyDocument" name="companyDocument" formControlName="companyDocument"
+                  placeholder="Ej: 20123456789" [class.border-red-500]="isFieldInvalid('companyDocument')"
                   [class.ring-red-200]="isFieldInvalid('companyDocument')"
                   [attr.aria-invalid]="isFieldInvalid('companyDocument')"
                   [attr.aria-describedby]="isFieldInvalid('companyDocument') ? 'companydoc-error' : null"
@@ -349,13 +360,13 @@
             </div>
 
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Razón Social</label>
-              <input formControlName="companyName" placeholder="Razón social"
-                [class.border-red-500]="isFieldInvalid('companyName')"
+              <span class="block text-sm font-semibold text-gray-700 mb-2">Razón Social</span>
+              <input id="companyName" name="companyName" formControlName="companyName" placeholder="Razón social"
+                placeholder="Ej: Inversiones SAC" [class.border-red-500]="isFieldInvalid('companyName')"
                 [class.ring-red-200]="isFieldInvalid('companyName')" [attr.aria-invalid]="isFieldInvalid('companyName')"
                 [attr.aria-describedby]="isFieldInvalid('companyName') ? 'companyname-error' : null"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all"
-                type="text" />
+                type="text" autocomplete="organization" />
               @if (isFieldInvalid('companyName')) {
               <p id="companyname-error" class="text-sm text-red-600 mt-1" role="alert">{{ getFieldError('companyName')
                 }}
@@ -368,52 +379,46 @@
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div data-dropdown="legalRepDocumentType">
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento</label>
-                  <div class="relative">
-                    <button type="button" (click)="toggleLegalRepDocumentTypeDropdown()"
-                      [class.border-red-500]="isFieldInvalid('legalRepDocumentType')"
-                      [class.ring-red-200]="isFieldInvalid('legalRepDocumentType')"
-                      class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
-                      style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;"
-                      [attr.aria-invalid]="isFieldInvalid('legalRepDocumentType')"
-                      [attr.aria-describedby]="isFieldInvalid('legalRepDocumentType') ? 'legalrepdoctype-error' : null">
-                      {{getDocumentTypeName(form.get('legalRepDocumentType')?.value)}}
-                    </button>
+                  <span class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento</span>
+                  <!-- Legal Rep: Tipo de Documento -->
+                  <button type="button" (click)="toggleDropdown('legalRepDocumentType')"
+                    [class.border-red-500]="isFieldInvalid('legalRepDocumentType')"
+                    [class.ring-red-200]="isFieldInvalid('legalRepDocumentType')"
+                    class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
+                    [attr.aria-invalid]="isFieldInvalid('legalRepDocumentType')"
+                    [attr.aria-describedby]="isFieldInvalid('legalRepDocumentType') ? 'legalrepdoctype-error' : null">
+                    {{getDocumentTypeName(form.get('legalRepDocumentType')?.value)}}
+                  </button>
 
-                    @if (legalRepDocumentTypeDropdownOpen()) {
-                    <div
-                      class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-                      <div class="max-h-72 overflow-y-auto">
-                        @for (type of documentTypes(); track type.id) {
-                        <button type="button" (click)="selectLegalRepDocumentType(type.id)"
-                          class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-                          [class.bg-blue-50]="form.get('legalRepDocumentType')?.value === type.id">
-                          <div class="text-sm font-semibold text-gray-900 uppercase tracking-tight"
-                            [class.text-blue-600]="form.get('legalRepDocumentType')?.value === type.id">{{type.name}}
-                          </div>
-                          @if (form.get('legalRepDocumentType')?.value === type.id) {
-                          <span class="material-icons-outlined text-xl text-blue-600">check</span>
-                          }
-                        </button>
-                        }
-                      </div>
+                  @if (legalRepDocumentTypeDropdownOpen()) {
+                  <div
+                    class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+                    <div class="max-h-72 overflow-y-auto">
+                      <!-- Legal Rep: Tipo de Documento Dropdown Items -->
+                      @for (type of documentTypes(); track type.id) {
+                      <button type="button"
+                        (click)="selectDocumentType(type.id, 'legalRepDocumentType', 'legalRepDocumentNumber', 'docNumberHint')"
+                        class="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700"
+                        [class.font-bold]="form.get('legalRepDocumentType')?.value === type.id">
+                        {{type.name}}
+                      </button>
+                      }
                     </div>
-                    }
                   </div>
-                  @if (isFieldInvalid('legalRepDocumentType')) {
-                  <p id="legalrepdoctype-error" class="text-sm text-red-600 mt-1" role="alert">{{
-                    getFieldError('legalRepDocumentType') }}</p>
                   }
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Documento</label>
-                  <input formControlName="legalRepDocumentNumber" placeholder="Número de documento"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2" for="legalRepDocumentNumber">Número de
+                    Documento</label>
+                  <input id="legalRepDocumentNumber" name="legalRepDocumentNumber"
+                    formControlName="legalRepDocumentNumber" placeholder="Ej: 12345678, 87654321"
+                    (input)="onDocumentInput($event, 'legalRepDocumentType', 'legalRepDocumentNumber')"
                     [class.border-red-500]="isFieldInvalid('legalRepDocumentNumber')"
-                    [class.ring-red-200]="isFieldInvalid('legalRepDocumentNumber')"
+                    [class.ring-red-500/20]="isFieldInvalid('legalRepDocumentNumber')"
                     [attr.aria-invalid]="isFieldInvalid('legalRepDocumentNumber')"
                     [attr.aria-describedby]="isFieldInvalid('legalRepDocumentNumber') ? 'legalrepdocnum-error' : null"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all"
-                    type="text" (input)="onLegalRepDocumentNumberInput($event)" />
+                    class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
+                    type="text" inputmode="numeric" />
                   @if (isFieldInvalid('legalRepDocumentNumber')) {
                   <p id="legalrepdocnum-error" class="text-sm text-red-600 mt-1" role="alert">{{
                     getFieldError('legalRepDocumentNumber') }}</p>
@@ -423,9 +428,9 @@
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Nombres</label>
-                  <input formControlName="legalRepFirstName" placeholder="Nombre"
-                    [class.border-red-500]="isFieldInvalid('legalRepFirstName')"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2" for="legalRepFirstName">Nombres</label>
+                  <input id="legalRepFirstName" name="legalRepFirstName" formControlName="legalRepFirstName"
+                    placeholder="Ej: Luis Alberto" [class.border-red-500]="isFieldInvalid('legalRepFirstName')"
                     [class.ring-red-500/20]="isFieldInvalid('legalRepFirstName')"
                     [attr.aria-invalid]="isFieldInvalid('legalRepFirstName')"
                     [attr.aria-describedby]="isFieldInvalid('legalRepFirstName') ? 'legalrepfirstname-error' : null"
@@ -437,9 +442,9 @@
                   }
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">Apellidos</label>
-                  <input formControlName="legalRepLastName" placeholder="Apellidos"
-                    [class.border-red-500]="isFieldInvalid('legalRepLastName')"
+                  <span class="block text-sm font-semibold text-gray-700 mb-2">Apellidos</span>
+                  <input id="legalRepLastName" name="legalRepLastName" formControlName="legalRepLastName"
+                    placeholder="Ej: Gutiérrez Ramos" [class.border-red-500]="isFieldInvalid('legalRepLastName')"
                     [class.ring-red-500/20]="isFieldInvalid('legalRepLastName')"
                     [attr.aria-invalid]="isFieldInvalid('legalRepLastName')"
                     [attr.aria-describedby]="isFieldInvalid('legalRepLastName') ? 'legalreplastname-error' : null"
@@ -467,11 +472,12 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <!-- Distrito / Provincia / Departamento -->
             <div data-dropdown="location">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Distrito / Provincia / Departamento</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2" for="district">Distrito / Provincia /
+                Departamento</label>
               <div class="relative">
-                <input formControlName="district" placeholder="Seleccionar ubicación" readonly
-                  (focus)="openLocationDropdown()" (click)="openLocationDropdown()"
-                  [class.border-red-500]="isFieldInvalid('district')"
+                <input id="district" name="district" readonly [value]="getLocationDisplay()"
+                  placeholder="Ej: MIRAFLORES / LIMA / LIMA" (focus)="openLocationDropdown()"
+                  (click)="openLocationDropdown()" [class.border-red-500]="isFieldInvalid('district')"
                   [class.ring-red-500/20]="isFieldInvalid('district')" [attr.aria-invalid]="isFieldInvalid('district')"
                   [attr.aria-describedby]="isFieldInvalid('district') ? 'district-error' : null"
                   class="w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400 appearance-none bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center]"
@@ -524,16 +530,16 @@
 
             <!-- Dirección -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Dirección</label>
-              <input formControlName="address" placeholder="Av. Ejemplo 123"
-                [class.border-red-500]="isFieldInvalid('address')" [class.ring-red-500/20]="isFieldInvalid('address')"
-                [attr.aria-invalid]="isFieldInvalid('address')"
+              <span class="block text-sm font-semibold text-gray-700 mb-2">Dirección</span>
+              <input id="address" name="address" formControlName="address" placeholder="Av. Ejemplo 456"
+                placeholder="Ej: Av. Los Olivos 123" [class.border-red-500]="isFieldInvalid('address')"
+                [class.ring-red-500/20]="isFieldInvalid('address')" [attr.aria-invalid]="isFieldInvalid('address')"
                 [attr.aria-describedby]="isFieldInvalid('address') ? 'address-error' : null"
                 class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
-                type="text" />
+                type="text" autocomplete="street-address" />
               <small class="text-xs text-gray-600 mt-1 block">
-                Proporciona una dirección completa (mínimo 25 caracteres).
-                Actual: {{ form.get('address')?.value?.length || 0 }}/25
+                Proporciona una dirección completa (mínimo 15 y máximo 150 caracteres).
+                Actual: {{ form.get('address')?.value?.length || 0 }}/15-150
               </small>
               @if (isFieldInvalid('address')) {
               <p id="address-error" class="text-sm text-red-600 mt-1" role="alert">{{ getFieldError('address') }}</p>
@@ -548,19 +554,19 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-3">Correo Electrónico</label>
-              <input formControlName="email" placeholder="Correo electrónico"
-                [class.border-red-500]="isFieldInvalid('email')" [class.ring-red-500/20]="isFieldInvalid('email')"
-                [attr.aria-invalid]="isFieldInvalid('email')"
+              <span class="block text-sm font-semibold text-gray-700 mb-3">Correo Electrónico</span>
+              <input id="email" name="email" formControlName="email" placeholder="Correo electrónico"
+                placeholder="Ej: usuario@email.com" [class.border-red-500]="isFieldInvalid('email')"
+                [class.ring-red-500/20]="isFieldInvalid('email')" [attr.aria-invalid]="isFieldInvalid('email')"
                 [attr.aria-describedby]="isFieldInvalid('email') ? 'email-error' : null"
                 class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
-                type="email" />
+                type="email" autocomplete="email" />
               @if (isFieldInvalid('email')) {
               <p id="email-error" class="text-sm text-red-600 mt-2" role="alert">{{ getFieldError('email') }}</p>
               }
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-3" for="phone-country">Teléfono</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-3" for="phone">Teléfono</label>
               <div class="flex gap-3" data-dropdown="phoneCountry">
                 <div class="relative">
                   <button type="button" (click)="togglePhoneCountryDropdown()"
@@ -590,7 +596,7 @@
 
                     <!-- Lista de países -->
                     <div class="max-h-72 overflow-y-auto">
-                      @for (country of filteredPhoneCountries(); track country.code) {
+                      @for (country of filteredPhoneCountries(); track country.iso + country.code) {
                       <button type="button" (click)="selectPhoneCountry(country.code)"
                         class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
                         [class.bg-blue-50]="selectedPhoneCountry() === country.code">
@@ -612,12 +618,12 @@
                   </div>
                   }
                 </div>
-                <input id="phone" formControlName="phone" placeholder="999 999 999" (input)="onPhoneInput($event)"
+                <input id="phone" formControlName="phone" placeholder="Ej: 987 654 321" (input)="onPhoneInput($event)"
                   [class.border-red-500]="isFieldInvalid('phone')" [class.ring-red-500/20]="isFieldInvalid('phone')"
                   [attr.aria-invalid]="isFieldInvalid('phone')"
                   [attr.aria-describedby]="isFieldInvalid('phone') ? 'phone-error' : null"
                   class="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
-                  type="tel" maxlength="11" inputmode="numeric" />
+                  type="tel" maxlength="11" inputmode="numeric" autocomplete="tel" />
               </div>
               @if (isFieldInvalid('phone')) {
               <p id="phone-error" class="text-sm text-red-600 mt-2" role="alert">{{ getFieldError('phone') }}</p>
@@ -629,7 +635,7 @@
       </section>
 
       <!-- Sección 2: Identificación del bien -->
-      <section class="bg-white border border-gray-200 rounded-lg p-8 shadow-sm" aria-labelledby="good-id-heading">
+      <section class="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" aria-labelledby="good-id-heading">
         <h2 id="good-id-heading" class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-6">
           <span class="material-icons-outlined text-2xl">inventory_2</span>
           Identificación del bien
@@ -642,7 +648,8 @@
               @for (type of consumptionTypes(); track type.id) {
               <label
                 class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 transition-colors duration-200 ease-in-out hover:border-gray-400 hover:bg-gray-50">
-                <input [checked]="$index === 0" formControlName="goodType" [value]="type.id"
+                <input [checked]="$index === 0" id="goodType-{{type.id}}" name="goodType" formControlName="goodType"
+                  [value]="type.id"
                   class="size-5 cursor-pointer border border-gray-300 accent-gray-700 transition-transform hover:scale-110"
                   type="radio" [attr.aria-label]="'Tipo de bien: ' + type.name" />
                 <span class="select-none text-sm font-medium text-gray-800">{{type.name}}</span>
@@ -652,16 +659,18 @@
           </fieldset>
 
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción del Producto o Servicio</label>
-            <textarea formControlName="goodDescription" rows="4" placeholder="Describe el producto o servicio"
+            <span class="block text-sm font-semibold text-gray-700 mb-2">Descripción del Producto o Servicio</span>
+            <textarea id="goodDescription" name="goodDescription" formControlName="goodDescription" rows="4"
+              id="goodDescription" name="goodDescription"
+              placeholder="Describe el producto o servicio. Ej: TV LG 55'' o internet fibra óptica" autocomplete="off"
               [class.border-red-500]="isFieldInvalid('goodDescription')"
               [class.ring-red-500/20]="isFieldInvalid('goodDescription')"
               [attr.aria-invalid]="isFieldInvalid('goodDescription')"
               [attr.aria-describedby]="isFieldInvalid('goodDescription') ? 'gooddesc-error' : null"
               class="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"></textarea>
             <small class="text-xs text-gray-600 mt-1 block">
-              Describe detalladamente el producto o servicio (mínimo 100 caracteres).
-              Actual: {{ form.get('goodDescription')?.value?.length || 0 }}/100
+              Describe detalladamente el producto o servicio (mínimo 50 y máximo 1000 caracteres).
+              Actual: {{ form.get('goodDescription')?.value?.length || 0 }}/50-1000
             </small>
             @if (isFieldInvalid('goodDescription')) {
             <p id="gooddesc-error" class="text-sm text-red-600 mt-1" role="alert">{{ getFieldError('goodDescription') }}
@@ -693,36 +702,62 @@
           <div class="mt-6 space-y-5 fade-in">
             <h3 class="text-base font-bold text-gray-900 mb-6">Tipo de Comprobante</h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-              <label
-                class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 transition-colors duration-200 ease-in-out hover:border-gray-400 hover:bg-gray-50">
-                <input formControlName="receiptType" value="invoice"
-                  class="size-5 cursor-pointer border border-gray-300 accent-gray-700 transition-transform hover:scale-110"
-                  type="radio" aria-label="Tipo de comprobante: Boleta de Venta" />
-                <span class="select-none text-sm font-medium text-gray-800">Boleta de Venta</span>
-              </label>
-              <label
-                class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 transition-colors duration-200 ease-in-out hover:border-gray-400 hover:bg-gray-50">
-                <input formControlName="receiptType" value="bill"
-                  class="size-5 cursor-pointer border border-gray-300 accent-gray-700 transition-transform hover:scale-110"
-                  type="radio" aria-label="Tipo de comprobante: Factura" />
-                <span class="select-none text-sm font-medium text-gray-800">Factura</span>
-              </label>
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-3 mb-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+                <label
+                  class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 w-full transition-colors duration-200 ease-in-out hover:border-gray-400 hover:bg-gray-50">
+                  <input id="receiptType-invoice" name="receiptType" formControlName="receiptType" value="invoice"
+                    class="size-5 cursor-pointer border border-gray-300 accent-gray-700 transition-transform hover:scale-110"
+                    type="radio" aria-label="Tipo de comprobante: Boleta de Venta" />
+                  <span class="select-none text-sm font-medium text-gray-800">Boleta de Venta</span>
+                </label>
+                <label
+                  class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 w-full transition-colors duration-200 ease-in-out hover:border-gray-400 hover:bg-gray-50">
+                  <input id="receiptType-bill" name="receiptType" formControlName="receiptType" value="bill"
+                    class="size-5 cursor-pointer border border-gray-300 accent-gray-700 transition-transform hover:scale-110"
+                    type="radio" aria-label="Tipo de comprobante: Factura" />
+                  <span class="select-none text-sm font-medium text-gray-800">Factura</span>
+                </label>
+                <label
+                  class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 w-full transition-colors duration-200 ease-in-out hover:border-gray-400 hover:bg-gray-50">
+                  <input id="receiptType-fee" name="receiptType" formControlName="receiptType" value="fee"
+                    class="size-5 cursor-pointer border border-gray-300 accent-gray-700 transition-transform hover:scale-110"
+                    type="radio" aria-label="Tipo de comprobante: Recibo por Honorarios" />
+                  <span class="select-none text-sm font-medium text-gray-800">Recibo por Honorarios</span>
+                </label>
+              </div>
             </div>
 
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Comprobante</label>
-              <input formControlName="receiptNumber" placeholder="Número de comprobante"
-                [class.border-red-500]="isFieldInvalid('receiptNumber')"
-                [class.ring-red-500/20]="isFieldInvalid('receiptNumber')"
-                [attr.aria-invalid]="isFieldInvalid('receiptNumber')"
-                [attr.aria-describedby]="isFieldInvalid('receiptNumber') ? 'receiptnumber-error' : null"
-                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
-                type="text" />
-              @if (isFieldInvalid('receiptNumber')) {
-              <p id="receiptnumber-error" class="text-sm text-red-600 mt-1" role="alert">{{
-                getFieldError('receiptNumber') }}</p>
-              }
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+              <div>
+                <span class="block text-sm font-semibold text-gray-700 mb-2">Serie</span>
+                <input id="receiptSeries" name="receiptSeries" formControlName="receiptSeries"
+                  placeholder="Ej: F001, B002, RH01" [class.border-red-500]="isFieldInvalid('receiptSeries')"
+                  [class.ring-red-500/20]="isFieldInvalid('receiptSeries')"
+                  [attr.aria-invalid]="isFieldInvalid('receiptSeries')"
+                  [attr.aria-describedby]="isFieldInvalid('receiptSeries') ? 'receiptseries-error' : null"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
+                  type="text" autocomplete="off" />
+                @if (isFieldInvalid('receiptSeries')) {
+                <p id="receiptseries-error" class="text-sm text-red-600 mt-1" role="alert">{{
+                  getFieldError('receiptSeries') }}</p>
+                }
+              </div>
+              <div>
+                <span class="block text-sm font-semibold text-gray-700 mb-2">Número</span>
+                <input id="receiptNumberComprobante" name="receiptNumber" formControlName="receiptNumber"
+                  placeholder="Ejemplo: 00012345, 001-00004567" placeholder="Ej: 00012345, 001-00004567"
+                  [class.border-red-500]="isFieldInvalid('receiptNumber')"
+                  [class.ring-red-500/20]="isFieldInvalid('receiptNumber')"
+                  [attr.aria-invalid]="isFieldInvalid('receiptNumber')"
+                  [attr.aria-describedby]="isFieldInvalid('receiptNumber') ? 'receiptnumber-error' : null"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
+                  type="text" autocomplete="off" />
+                @if (isFieldInvalid('receiptNumber')) {
+                <p id="receiptnumber-error" class="text-sm text-red-600 mt-1" role="alert">{{
+                  getFieldError('receiptNumber') }}</p>
+                }
+              </div>
             </div>
           </div>
           }
@@ -733,12 +768,13 @@
             <h3 class="text-base font-bold text-gray-900 mb-6">Monto del Reclamo</h3>
 
             <div class="mb-6">
-              <label class="block text-sm font-semibold text-gray-700 mb-3">Moneda</label>
+              <span class="block text-sm font-semibold text-gray-700 mb-3">Moneda</span>
               <div class="flex gap-3">
                 @for (currency of currencies(); track currency.id) {
                 <label
                   class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-3 transition-colors duration-200 ease-in-out hover:border-gray-400 hover:bg-gray-50">
-                  <input formControlName="currency" [value]="currency.id"
+                  <input id="currency-{{currency.id}}" name="currency" formControlName="currency" [value]="currency.id"
+                    autocomplete="off"
                     class="size-5 cursor-pointer border border-gray-300 accent-gray-700 transition-transform hover:scale-110"
                     type="radio" [attr.aria-label]="'Moneda: ' + currency.name" />
                   <span class="select-none text-sm font-medium text-gray-800">{{currency.symbol}}
@@ -749,16 +785,16 @@
             </div>
 
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Monto del Reclamo @if
+              <span class="block text-sm font-semibold text-gray-700 mb-2">Monto del Reclamo @if
                 (form.get('currency')?.value && form.get('currency')?.value !== '') { ({{getCurrencySymbol()}})
-                }</label>
-              <input formControlName="claimAmount" placeholder="0.00"
-                [class.border-red-500]="isFieldInvalid('claimAmount')"
+                }</span>
+              <input id="claimAmount" name="claimAmount" formControlName="claimAmount" placeholder="0.00"
+                placeholder="Ej: 150.00" [class.border-red-500]="isFieldInvalid('claimAmount')"
                 [class.ring-red-500/20]="isFieldInvalid('claimAmount')"
                 [attr.aria-invalid]="isFieldInvalid('claimAmount')"
                 [attr.aria-describedby]="isFieldInvalid('claimAmount') ? 'claimamount-error' : null"
                 class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
-                type="text" />
+                type="text" autocomplete="off" />
               @if (isFieldInvalid('claimAmount')) {
               <p id="claimamount-error" class="text-sm text-red-600 mt-1" role="alert">{{ getFieldError('claimAmount')
                 }}</p>
@@ -770,7 +806,7 @@
       </section>
 
       <!-- Reclamación y pedido -->
-      <section class="bg-white border border-gray-200 rounded-lg p-8 shadow-sm" aria-labelledby="claim-heading">
+      <section class="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" aria-labelledby="claim-heading">
         <h2 id="claim-heading" class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-6">
           <span class="material-icons-outlined text-2xl">description</span>
           Reclamación y pedido
@@ -778,12 +814,13 @@
 
         <div class="space-y-6">
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-gray-700 mb-3">¿Es Reclamo o Queja?</label>
+            <span class="block text-sm font-semibold text-gray-700 mb-3">¿Es Reclamo o Queja?</span>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               @for (type of claimTypes(); track type.id) {
               <label
                 class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-300 p-5 transition-colors duration-200 ease-in-out hover:border-gray-400 hover:bg-gray-50">
-                <input [checked]="$index === 0" formControlName="claimType" [value]="type.id"
+                <input [checked]="$index === 0" id="claimType-{{type.id}}" name="claimType" formControlName="claimType"
+                  [value]="type.id"
                   class="mt-1 size-5 shrink-0 cursor-pointer border border-gray-300 accent-gray-700 transition-transform hover:scale-110"
                   type="radio" [attr.aria-label]="'Tipo de reclamo: ' + type.name" />
                 <div>
@@ -798,16 +835,17 @@
           </div>
 
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción del Reclamo</label>
-            <textarea formControlName="claimDescription" rows="5" placeholder="Describe qué ocurrió y cuándo"
+            <span class="block text-sm font-semibold text-gray-700 mb-2">Descripción del Reclamo</span>
+            <textarea id="claimDescription" name="claimDescription" formControlName="claimDescription" rows="5"
+              placeholder="Explica el problema. Ej: El TV no enciende o el internet no fue instalado" autocomplete="off"
               [class.border-red-500]="isFieldInvalid('claimDescription')"
               [class.ring-red-500/20]="isFieldInvalid('claimDescription')"
               [attr.aria-invalid]="isFieldInvalid('claimDescription')"
               [attr.aria-describedby]="isFieldInvalid('claimDescription') ? 'claimdesc-error' : null"
               class="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"></textarea>
             <small class="text-xs text-gray-600 mt-1 block">
-              Explica qué ocurrió y por qué presentas este reclamo (mínimo 100 caracteres).
-              Actual: {{ form.get('claimDescription')?.value?.length || 0 }}/100
+              Explica qué ocurrió y por qué presentas este reclamo (mínimo 100 y máximo 3000 caracteres).
+              Actual: {{ form.get('claimDescription')?.value?.length || 0 }}/100-3000
             </small>
             @if (isFieldInvalid('claimDescription')) {
             <p id="claimdesc-error" class="text-sm text-red-600 mt-1" role="alert">{{ getFieldError('claimDescription')
@@ -816,15 +854,16 @@
           </div>
 
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Pedido / Solución Esperada</label>
-            <textarea formControlName="request" rows="3" placeholder="¿Qué solución esperas?"
-              [class.border-red-500]="isFieldInvalid('request')" [class.ring-red-500/20]="isFieldInvalid('request')"
-              [attr.aria-invalid]="isFieldInvalid('request')"
+            <span class="block text-sm font-semibold text-gray-700 mb-2">Pedido / Solución Esperada</span>
+            <textarea id="request" name="request" formControlName="request" rows="3"
+              placeholder="Indica la solución que esperas. Ej: Cambio del producto, devolución del dinero o reinstalación del servicio"
+              autocomplete="off" [class.border-red-500]="isFieldInvalid('request')"
+              [class.ring-red-500/20]="isFieldInvalid('request')" [attr.aria-invalid]="isFieldInvalid('request')"
               [attr.aria-describedby]="isFieldInvalid('request') ? 'request-error' : null"
               class="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"></textarea>
             <small class="text-xs text-gray-600 mt-1 block">
-              Indica claramente qué esperas como solución (mínimo 100 caracteres).
-              Actual: {{ form.get('request')?.value?.length || 0 }}/100
+              Indica claramente qué esperas como solución (mínimo 50 y máximo 1000 caracteres).
+              Actual: {{ form.get('request')?.value?.length || 0 }}/50-1000
             </small>
             @if (isFieldInvalid('request')) {
             <p id="request-error" class="text-sm text-red-600 mt-1" role="alert">{{ getFieldError('request') }}</p>
@@ -834,7 +873,7 @@
       </section>
 
       <!-- Sección 4: Archivos adjuntos -->
-      <section class="bg-white border border-gray-200 rounded-lg p-8 shadow-sm" aria-labelledby="attachments-heading">
+      <section class="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" aria-labelledby="attachments-heading">
         <h2 id="attachments-heading" class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-6">
           <span class="material-icons-outlined text-2xl">attach_file</span>
           Archivos adjuntos
@@ -851,8 +890,8 @@
             <p class="text-base font-semibold text-gray-900 mb-1">Arrastra archivos aquí o haz clic para seleccionar</p>
             <p class="text-sm text-gray-500">PDF, DOC, DOCX - Máximo 5 archivos, 150KB cada uno</p>
           </label>
-          <input id="file-input" type="file" multiple accept=".pdf,.doc,.docx" (change)="onFileSelected($event)"
-            class="hidden" aria-label="Seleccionar archivos adjuntos" />
+          <input id="file-input" name="attachments" type="file" multiple accept=".pdf,.doc,.docx"
+            (change)="onFileSelected($event)" class="hidden" aria-label="Seleccionar archivos adjuntos" />
 
           @if (selectedFiles().length > 0) {
           <div class="space-y-3 bg-gray-50 border border-gray-300 rounded-lg p-4">
@@ -888,16 +927,17 @@
       </section>
 
       <!-- Nota informativa -->
-      <aside class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3"
+      <aside class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3"
         aria-label="Aviso de privacidad de datos">
         <span class="material-icons-outlined text-xl text-green-600 shrink-0">verified_user</span>
         <p class="text-sm text-green-800 leading-relaxed">
-          Tus datos solo serán usados para atender tu reclamo y serán tratados con confidencialidad conforme a la ley de protección de datos personales.
+          Tus datos solo serán usados para atender tu reclamo y serán tratados con confidencialidad conforme a la ley de
+          protección de datos personales.
         </p>
       </aside>
 
       <!-- Form Footer -->
-      <footer class="flex flex-col items-center gap-6 pt-4">
+      <footer class="flex flex-col items-center gap-6 pt-4 rounded-xl">
         <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200">
           <input id="confirm" formControlName="confirm"
             class="size-5 cursor-pointer rounded border border-gray-300 accent-gray-700 transition-all duration-200 hover:scale-110 hover:border-gray-400"
@@ -929,8 +969,9 @@
     <!-- Seguimiento de reclamo Real -->
     @if (isDataReady()) {
     @if (activeTab === 'track') {
-    <form [formGroup]="trackForm" (ngSubmit)="onTrackSubmit()" id="track-panel" class="space-y-6 fade-in" novalidate>
-      <section class="bg-white border border-gray-200 rounded-lg p-8 shadow-sm" aria-labelledby="track-heading">
+    <form [formGroup]="trackForm" (ngSubmit)="onTrackSubmit()" id="track-panel" class="space-y-6 fade-in rounded-xl"
+      novalidate>
+      <section class="bg-white border border-gray-200 rounded-xl p-8 shadow-sm" aria-labelledby="track-heading">
         <h2 id="track-heading" class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-2">
           <svg class="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -942,10 +983,10 @@
 
         <div class="space-y-3">
           <div class="relative">
-            <input formControlName="code" placeholder="Ej: REC-2026-000001"
+            <input id="trackCode" name="trackCode" formControlName="code" placeholder="Ej: REC-2026-000001"
               aria-label="Código de seguimiento del reclamo"
               class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
-              type="text" maxlength="16" />
+              type="text" maxlength="16" autocomplete="off" />
           </div>
           @if (trackForm.get('code')?.touched && trackForm.get('code')?.invalid) {
           <p class="text-sm text-red-600" role="alert">
@@ -966,7 +1007,7 @@
 
     <!-- Page Footer Real -->
     @if (isDataReady()) {
-    <footer class="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
+    <footer class="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-6">
       <h3 class="text-base font-semibold text-gray-900 mb-3">Información legal</h3>
       <p class="text-sm text-gray-600 mb-4 leading-relaxed">
         El libro de reclamaciones virtual de <strong class="text-gray-900">{{tenant()?.legal_name}}</strong> es
@@ -995,11 +1036,13 @@
       </ul>
       <hr class="border-t border-gray-200 my-4">
       <p class="text-xs text-gray-500 leading-relaxed">
-        <strong class="text-gray-700">ReclamoFácil</strong> facilita la presentación de reclamos. La respuesta es responsabilidad exclusiva del proveedor.
+        <strong class="text-gray-700">ReclamoFácil</strong> facilita la presentación de reclamos. La respuesta es
+        responsabilidad exclusiva del proveedor.
       </p>
       <div class="mt-4 pt-4 border-t border-gray-100 text-center">
         <p class="text-xs text-gray-400">
-          Powered by <a href="https://reclamofacil.com" target="_blank" rel="noopener noreferrer" class="font-semibold text-gray-500 hover:text-gray-700">ReclamoFácil</a>
+          Powered by <a href="https://reclamofacil.com" target="_blank" rel="noopener noreferrer"
+            class="font-semibold text-gray-500 hover:text-gray-700">ReclamoFácil</a>
         </p>
       </div>
     </footer>
