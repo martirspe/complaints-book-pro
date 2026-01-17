@@ -11,6 +11,7 @@ import { RecaptchaService } from '../../services/recaptcha.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { LocationService } from '../../services/location.service';
 import { PhoneCountryService } from '../../services/phone-country.service';
+import { ComplaintBookService } from '../../services/complaint-book.service';
 
 // --- INTERFACES
 import { DocumentType } from '../../interfaces/document-type.interface';
@@ -19,6 +20,7 @@ import { ClaimType } from '../../interfaces/claim-type.interface';
 import { Currency } from '../../interfaces/currency.interface';
 import { Location } from '../../interfaces/location.interface';
 import { PhoneCountry } from '../../interfaces/phone-country.interface';
+import { ComplaintBook } from '../../interfaces/complaint-book.interface';
 
 // --- COMPONENTS
 import { ComplaintsBookSkeletonComponent } from './complaints-book-skeleton.component';
@@ -126,16 +128,56 @@ export class ComplaintsBookComponent {
   private readonly locationSearchSubject = new Subject<string>();
   private readonly phoneCountrySearchSubject = new Subject<string>();
 
-  constructor(private phoneCountryService: PhoneCountryService) {
+  // --- LIBRO DE RECLAMACIONES ACTIVO
+  public activeComplaintBook = signal<ComplaintBook | null>(null);
+
+  constructor(
+    private phoneCountryService: PhoneCountryService,
+    private complaintBookService: ComplaintBookService
+  ) {
     this.form = this.createForm();
     this.trackForm = this.createTrackForm();
     this.setupLocationSearch();
     this.setupPhoneCountrySearch();
-    this.loadInitialData();
     this.setupValidationListeners();
     this.loadPhoneCountries();
     this.setupPhoneCountryEffect();
+
+    // Detectar y cargar tenant del subdomain
+    const tenantSlug = this.tenantService.detectTenantFromSubdomain();
+    this.tenantService.loadTenant(tenantSlug);
+
+    // Esperar a que el tenant esté listo antes de cargar datos iniciales
+    effect(() => {
+      const tenant = this.tenant();
+      if (tenant) {
+        this.loadInitialData();
+      }
+    }, { allowSignalWrites: true });
   }
+
+  /**
+   * Carga el libro de reclamaciones activo para el tenant y sucursal principal
+   * (ruta pública - no requiere autenticación)
+   */
+  private loadActiveComplaintBook(): void {
+    this.complaintBookService.getActiveComplaintBook()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (book) => {
+          if (book) {
+            this.activeComplaintBook.set(book);
+          }
+        },
+        error: () => {
+          // Fallar silenciosamente si el libro no existe
+          this.activeComplaintBook.set(null);
+        }
+      });
+  }
+
+  // Computed para el código del libro activo
+  complaintBookCode = computed(() => this.activeComplaintBook()?.code || '—');
 
   private loadPhoneCountries(): void {
     this.phoneCountryService.fetchPhoneCountries().subscribe({
@@ -270,6 +312,9 @@ export class ComplaintsBookComponent {
         if (data.claimTypes?.length > 0) {
           this.form.patchValue({ claimType: data.claimTypes[0].id });
         }
+
+        // Cargar libro de reclamaciones solo después de datos iniciales
+        this.loadActiveComplaintBook();
 
         this.isDataReady.set(true);
       },

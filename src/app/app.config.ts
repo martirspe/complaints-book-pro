@@ -8,7 +8,6 @@ import { routes } from './app.routes';
 
 // Services
 import { TenantService } from './services/tenant.service';
-import { AuthService } from './services/auth.service';
 
 // Interceptor (functional)
 import { authInterceptor } from './interceptors/auth.interceptor';
@@ -26,13 +25,10 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       multi: true,
-      deps: [AuthService, TenantService],
-      useFactory: (auth: AuthService, tenant: TenantService) => {
+      deps: [TenantService],
+      useFactory: (tenant: TenantService) => {
         return async () => {
-          // ⬅️ 1. AUTH PRIMERO
-          await auth.initAuth();
-
-          // ⬅️ 2. LUEGO TENANT - Auto-detect from subdomain
+          // ⬅️ Auto-detect tenant from subdomain
           const detectedSlug = tenant.detectTenantFromSubdomain();
           tenant.loadTenant(detectedSlug);
         };

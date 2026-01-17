@@ -95,11 +95,19 @@ export class TenantService {
   }
 
   /**
+   * Alias para loadTenant que recibe el slug del tenant desde la URL
+   */
+  loadTenantBySlug(slug: string): void {
+    this.loadTenant(slug);
+  }
+
+  /**
    * Automatically detect tenant slug from subdomain
    * Examples:
    * - empresa1.reclamofacil.com -> returns "empresa1"
    * - localhost:4200 -> returns "default"
    * - reclamofacil.com -> returns "default"
+   * - default.reclamofacil.com -> returns "default" (pero isMainDomain=false)
    */
   detectTenantFromSubdomain(): string {
     const hostname = window.location.hostname;
@@ -110,7 +118,7 @@ export class TenantService {
       return 'default';
     }
 
-    // Less than 3 parts (e.g., reclamofacil.com) -> use default
+    // Less than 3 parts (e.g., reclamofacil.com) -> use default (main domain)
     if (parts.length < 3) {
       return 'default';
     }
@@ -118,12 +126,34 @@ export class TenantService {
     // Extract subdomain (first part)
     const subdomain = parts[0].toLowerCase();
 
-    // www or api subdomains -> use default
+    // www or api subdomains -> use default (main domain)
     if (subdomain === 'www' || subdomain === 'api') {
       return 'default';
     }
 
     return subdomain;
+  }
+
+  /**
+   * Detecta si el acceso es desde el dominio principal (sin subdomain específico de tenant)
+   */
+  isMainDomain(): boolean {
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+
+    // localhost sin subdomain -> main
+    if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+      return true;
+    }
+
+    // Less than 3 parts (reclamofacil.com) -> main
+    if (parts.length < 3) {
+      return true;
+    }
+
+    // www or api subdomains -> main
+    const subdomain = parts[0].toLowerCase();
+    return subdomain === 'www' || subdomain === 'api';
   }
 
   private readCache(): { slug: string; tenant: Tenant } | null {

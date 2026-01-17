@@ -12,73 +12,59 @@
       <div class="absolute inset-x-0 top-0 h-0.5 bg-gray-700"></div>
 
       <div class="p-8">
-        <!-- Logo and Content Layout -->
-        <div class="flex flex-col md:flex-row gap-6 items-center">
-          <!-- Logo Column -->
+        <div class="flex flex-col md:flex-row gap-4 items-center md:items-start">
           <figure
             class="m-0 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-white md:size-28">
             <img [src]="companyLogoSrc()" (error)="onLogoError($event)" alt="Logo de la empresa"
               class="w-full h-full object-contain p-3" />
           </figure>
 
-          <!-- Content Column -->
           <div class="flex-1 min-w-0 w-full">
-            <!-- Title Section -->
-            <div class="mb-8 text-center md:text-left">
+            <div class="mb-6 text-center md:text-left">
               <h1 class="text-2xl font-bold text-gray-900 tracking-tight leading-tight">Libro de Reclamaciones</h1>
             </div>
 
-            <!-- Primera fila: RUC, Razón Social, ID del Libro -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-sm mb-2"
-              aria-labelledby="company-info-title">
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-labelledby="company-info-title">
               <h2 id="company-info-title" class="sr-only">Información de la Empresa</h2>
-              <!-- RUC -->
-              <div class="flex items-center gap-3">
+
+              <div class="flex items-start gap-3 p-2">
                 <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">badge</span>
                 <div class="min-w-0">
-                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">RUC</span>
+                  <span class="text-xs text-gray-500 uppercase tracking-wide block">RUC</span>
                   <span class="font-semibold text-gray-900 text-sm">{{tenant()?.tax_id}}</span>
                 </div>
               </div>
-              <!-- Razón Social -->
-              <div class="flex items-center gap-3">
-                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0"
-                  aria-hidden="true">apartment</span>
+
+              <div class="flex items-start gap-3 p-2">
+                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">apartment</span>
                 <div class="min-w-0">
-                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">Razón Social</span>
-                  <span class="font-medium text-gray-700 text-sm truncate block">{{tenant()?.legal_name}}</span>
+                  <span class="text-xs text-gray-500 uppercase tracking-wide block">Razón Social</span>
+                  <span class="font-medium text-gray-800 text-sm truncate block">{{tenant()?.legal_name}}</span>
                 </div>
               </div>
-              <!-- ID del Libro -->
-              <div class="flex items-center gap-3">
+
+              <div class="flex items-start gap-3 p-2">
                 <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">book</span>
                 <div class="min-w-0">
-                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">ID del Libro</span>
-                  <span class="font-semibold text-gray-900 text-sm">{{'—'}}</span>
+                  <span class="text-xs text-gray-500 uppercase tracking-wide block">ID del Libro</span>
+                  <span class="font-semibold text-gray-900 text-sm">{{ complaintBookCode() }}</span>
                 </div>
               </div>
-            </section>
 
-            <!-- Segunda fila: Dirección y Sitio Web -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-              <!-- Dirección -->
-              <div class="flex items-center gap-3">
-                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0"
-                  aria-hidden="true">location_on</span>
+              <div class="flex items-start gap-3 p-2">
+                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">location_on</span>
                 <div class="min-w-0">
-                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">Dirección</span>
-                  <span class="text-gray-600 text-sm truncate block max-w-xs md:max-w-md lg:max-w-lg"
-                    [title]="tenant()?.address">{{tenant()?.address}}</span>
+                  <span class="text-xs text-gray-500 uppercase tracking-wide block">Dirección</span>
+                  <span class="text-gray-700 text-sm truncate block" [title]="tenant()?.address">{{tenant()?.address}}</span>
                 </div>
               </div>
-              <!-- Sitio Web -->
-              <div class="flex items-center gap-3">
-                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0"
-                  aria-hidden="true">public</span>
+
+              <div class="flex items-start gap-3 p-2">
+                <span class="material-icons-outlined text-gray-400 text-[20px] shrink-0" aria-hidden="true">public</span>
                 <div class="min-w-0">
-                  <span class="text-xs text-gray-500 uppercase tracking-wide block mb-1">Sitio Web</span>
+                  <span class="text-xs text-gray-500 uppercase tracking-wide block">Sitio Web</span>
                   <a [href]="tenant()?.website" target="_blank" rel="noopener noreferrer"
-                    class="text-gray-700 hover:text-gray-800 font-medium text-sm truncate inline-flex items-center gap-1">
+                    class="text-gray-800 hover:text-gray-900 font-medium text-sm truncate inline-flex items-center gap-1">
                     {{tenant()?.website}}
                   </a>
                 </div>
@@ -151,13 +137,14 @@
           @if (form.get('personType')?.value === 'natural') {
           <div class="space-y-5 fade-in">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div data-dropdown="documentType">
+              <div data-dropdown="documentType" class="relative">
                 <span class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento</span>
                 <!-- Persona Natural: Tipo de Documento -->
                 <button type="button" (click)="toggleDropdown('documentType')"
                   [class.border-red-500]="isFieldInvalid('documentType')"
-                  [class.ring-red-200]="isFieldInvalid('documentType')"
+                  [class.ring-red-500/20]="isFieldInvalid('documentType')"
                   class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
+                  style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;"
                   [attr.aria-invalid]="isFieldInvalid('documentType')"
                   [attr.aria-describedby]="isFieldInvalid('documentType') ? 'doctype-error' : null">
                   {{getDocumentTypeName(form.get('documentType')?.value)}}
@@ -171,9 +158,12 @@
                     @for (type of documentTypes(); track type.id) {
                     <button type="button"
                       (click)="selectDocumentType(type.id, 'documentType', 'documentNumber', 'docNumberHint')"
-                      class="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700"
-                      [class.font-bold]="form.get('documentType')?.value === type.id">
-                      {{type.name}}
+                      class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 text-sm text-gray-700"
+                      [class.bg-blue-50]="form.get('documentType')?.value === type.id">
+                      <span>{{type.name}}</span>
+                      @if (form.get('documentType')?.value === type.id) {
+                      <span class="material-icons-outlined text-xl text-blue-600 shrink-0">check</span>
+                      }
                     </button>
                     }
                   </div>
@@ -246,13 +236,14 @@
               <h3 class="text-base font-bold text-gray-900 mb-6">Datos del padre, madre o tutor</h3>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div data-dropdown="tutorDocumentType">
+                <div data-dropdown="tutorDocumentType" class="relative">
                   <span class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento del Tutor</span>
                   <!-- Tutor: Tipo de Documento -->
                   <button type="button" (click)="toggleDropdown('tutorDocumentType')"
                     [class.border-red-500]="isFieldInvalid('tutorDocumentType')"
-                    [class.ring-red-200]="isFieldInvalid('tutorDocumentType')"
+                    [class.ring-red-500/20]="isFieldInvalid('tutorDocumentType')"
                     class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
+                    style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;"
                     [attr.aria-invalid]="isFieldInvalid('tutorDocumentType')"
                     [attr.aria-describedby]="isFieldInvalid('tutorDocumentType') ? 'tutordoctype-error' : null">
                     {{getDocumentTypeName(form.get('tutorDocumentType')?.value)}}
@@ -266,9 +257,12 @@
                       @for (type of documentTypes(); track type.id) {
                       <button type="button"
                         (click)="selectDocumentType(type.id, 'tutorDocumentType', 'tutorDocumentNumber', 'tutorDocNumberHint')"
-                        class="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700"
-                        [class.font-bold]="form.get('tutorDocumentType')?.value === type.id">
-                        {{type.name}}
+                        class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 text-sm text-gray-700"
+                        [class.bg-blue-50]="form.get('tutorDocumentType')?.value === type.id">
+                        <span>{{type.name}}</span>
+                        @if (form.get('tutorDocumentType')?.value === type.id) {
+                        <span class="material-icons-outlined text-xl text-blue-600 shrink-0">check</span>
+                        }
                       </button>
                       }
                     </div>
@@ -362,7 +356,7 @@
             <div>
               <span class="block text-sm font-semibold text-gray-700 mb-2">Razón Social</span>
               <input id="companyName" name="companyName" formControlName="companyName" placeholder="Razón social"
-                placeholder="Ej: Inversiones SAC" [class.border-red-500]="isFieldInvalid('companyName')"
+                placeholder="Ej: Inversiones S.A.C" [class.border-red-500]="isFieldInvalid('companyName')"
                 [class.ring-red-200]="isFieldInvalid('companyName')" [attr.aria-invalid]="isFieldInvalid('companyName')"
                 [attr.aria-describedby]="isFieldInvalid('companyName') ? 'companyname-error' : null"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all"
@@ -378,13 +372,14 @@
               <h3 class="text-base font-bold text-gray-900 mb-4">Datos del representante legal</h3>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div data-dropdown="legalRepDocumentType">
+                <div data-dropdown="legalRepDocumentType" class="relative">
                   <span class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Documento</span>
                   <!-- Legal Rep: Tipo de Documento -->
                   <button type="button" (click)="toggleDropdown('legalRepDocumentType')"
                     [class.border-red-500]="isFieldInvalid('legalRepDocumentType')"
-                    [class.ring-red-200]="isFieldInvalid('legalRepDocumentType')"
+                    [class.ring-red-500/20]="isFieldInvalid('legalRepDocumentType')"
                     class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
+                    style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;"
                     [attr.aria-invalid]="isFieldInvalid('legalRepDocumentType')"
                     [attr.aria-describedby]="isFieldInvalid('legalRepDocumentType') ? 'legalrepdoctype-error' : null">
                     {{getDocumentTypeName(form.get('legalRepDocumentType')?.value)}}
@@ -398,9 +393,12 @@
                       @for (type of documentTypes(); track type.id) {
                       <button type="button"
                         (click)="selectDocumentType(type.id, 'legalRepDocumentType', 'legalRepDocumentNumber', 'docNumberHint')"
-                        class="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700"
-                        [class.font-bold]="form.get('legalRepDocumentType')?.value === type.id">
-                        {{type.name}}
+                        class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 text-sm text-gray-700"
+                        [class.bg-blue-50]="form.get('legalRepDocumentType')?.value === type.id">
+                        <span>{{type.name}}</span>
+                        @if (form.get('legalRepDocumentType')?.value === type.id) {
+                        <span class="material-icons-outlined text-xl text-blue-600 shrink-0">check</span>
+                        }
                       </button>
                       }
                     </div>
@@ -480,17 +478,17 @@
                   (click)="openLocationDropdown()" [class.border-red-500]="isFieldInvalid('district')"
                   [class.ring-red-500/20]="isFieldInvalid('district')" [attr.aria-invalid]="isFieldInvalid('district')"
                   [attr.aria-describedby]="isFieldInvalid('district') ? 'district-error' : null"
-                  class="w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400 appearance-none bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center]"
+                  class="w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-sm text-gray-700 transition-all placeholder:text-gray-400 hover:border-gray-300 appearance-none bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center]"
                   style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;"
                   type="text" />
 
                 @if (locationDropdownOpen()) {
                 <div
-                  class="absolute z-20 mt-2 w-full bg-[#f7f8fa] border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+                  class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
                   <div class="px-3 py-2 bg-white border-b border-gray-200 flex items-center gap-2">
                     <span class="material-icons-outlined text-xl text-gray-500">search</span>
-                    <input type="text" [value]="locationSearchTerm()" (input)="onLocationSearch($event)"
-                      placeholder="Buscar distrito..."
+                    <input id="locationSearch" name="locationSearch" type="text" [value]="locationSearchTerm()"
+                      (input)="onLocationSearch($event)" placeholder="Buscar distrito..."
                       class="flex-1 border-0 bg-transparent px-2 py-2 text-sm text-gray-800 placeholder:text-gray-400" />
                     @if (locationSearchTerm()) {
                     <button type="button" (click)="onClearLocationSearch()"
@@ -510,9 +508,19 @@
                     @if (searchResults().length > 0) {
                     @for (item of searchResults(); track item.id) {
                     <button type="button" (click)="onDistrictSelect(item)"
-                      class="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors">
-                      <div class="text-sm font-semibold text-gray-900 uppercase tracking-tight">{{item.district}}</div>
-                      <div class="text-xs text-gray-500 uppercase">{{item.province}} / {{item.department}}</div>
+                      class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      [class.bg-blue-50]="getLocationDisplay() === (item.district + ' / ' + item.province + ' / ' + item.department)">
+                      <div>
+                        <div class="text-sm font-semibold text-gray-900 uppercase tracking-tight"
+                          [class.text-blue-600]="getLocationDisplay() === (item.district + ' / ' + item.province + ' / ' + item.department)">
+                          {{item.district}}</div>
+                        <div class="text-xs text-gray-500 uppercase"
+                          [class.text-blue-500]="getLocationDisplay() === (item.district + ' / ' + item.province + ' / ' + item.department)">
+                          {{item.province}} / {{item.department}}</div>
+                      </div>
+                      @if (getLocationDisplay() === (item.district + ' / ' + item.province + ' / ' + item.department)) {
+                      <span class="material-icons-outlined text-xl text-blue-600 shrink-0">check</span>
+                      }
                     </button>
                     }
                     }
@@ -567,63 +575,66 @@
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-3" for="phone">Teléfono</label>
-              <div class="flex gap-3" data-dropdown="phoneCountry">
-                <div class="relative">
+              <div class="relative" data-dropdown="phoneCountry">
+                <div class="flex gap-3">
                   <button type="button" (click)="togglePhoneCountryDropdown()"
-                    class="appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-left text-sm text-gray-900 transition-shadow hover:border-gray-400"
-                    style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;">
+                    [class.border-red-500]="isFieldInvalid('phone')" [class.ring-red-500/20]="isFieldInvalid('phone')"
+                    class="w-24 px-4 py-3 pr-10 border border-gray-300 rounded-lg text-gray-700 text-sm hover:border-gray-300 transition-all appearance-none bg-white bg-no-repeat bg-size-[20px] bg-position-[right_0.75rem_center] text-left"
+                    style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%239CA3AF%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25rem;"
+                    [attr.aria-invalid]="isFieldInvalid('phone')"
+                    [attr.aria-describedby]="isFieldInvalid('phone') ? 'phone-error' : null">
                     {{selectedPhoneCountry()}}
                   </button>
+                  <input id="phone" formControlName="phone" placeholder="Ej: 987 654 321" (input)="onPhoneInput($event)"
+                    [class.border-red-500]="isFieldInvalid('phone')" [class.ring-red-500/20]="isFieldInvalid('phone')"
+                    [attr.aria-invalid]="isFieldInvalid('phone')"
+                    [attr.aria-describedby]="isFieldInvalid('phone') ? 'phone-error' : null"
+                    class="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
+                    type="tel" maxlength="11" inputmode="numeric" autocomplete="tel" />
+                </div>
 
-                  @if (phoneCountryDropdownOpen()) {
-                  <div
-                    class="absolute z-20 mt-2 w-76 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-                    <!-- Barra de búsqueda -->
-                    <div class="px-3 py-2 bg-white border-b border-gray-200">
-                      <div class="flex items-center gap-2">
-                        <span class="material-icons-outlined text-xl text-gray-500">search</span>
-                        <input type="text" [value]="phoneCountrySearchTerm()" (input)="onPhoneCountrySearch($event)"
-                          placeholder="Buscar país..."
-                          class="flex-1 border-0 bg-transparent px-0 py-2 text-sm text-gray-700 placeholder:text-gray-400" />
-                        @if (phoneCountrySearchTerm()) {
-                        <button type="button" (click)="onClearPhoneCountrySearch()"
-                          class="text-gray-400 hover:text-gray-600 shrink-0">
-                          <span class="material-icons-outlined text-lg">close</span>
-                        </button>
-                        }
-                      </div>
-                    </div>
-
-                    <!-- Lista de países -->
-                    <div class="max-h-72 overflow-y-auto">
-                      @for (country of filteredPhoneCountries(); track country.iso + country.code) {
-                      <button type="button" (click)="selectPhoneCountry(country.code)"
-                        class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-                        [class.bg-blue-50]="selectedPhoneCountry() === country.code">
-                        <div
-                          class="flex items-center gap-2 text-sm font-semibold text-gray-900 uppercase tracking-tight"
-                          [class.text-blue-600]="selectedPhoneCountry() === country.code">
-                          <span class="w-8">{{country.iso}}</span>
-                          <span class="w-14">{{country.code}}</span>
-                          <span>{{country.name}}</span>
-                        </div>
-                        @if (selectedPhoneCountry() === country.code) {
-                        <span class="material-icons-outlined text-xl text-blue-600 shrink-0">check</span>
-                        }
+                @if (phoneCountryDropdownOpen()) {
+                <div
+                  class="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+                  <!-- Barra de búsqueda -->
+                  <div class="px-3 py-2 bg-white border-b border-gray-200">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons-outlined text-xl text-gray-500">search</span>
+                      <input id="phoneCountrySearch" name="phoneCountrySearch" type="text"
+                        [value]="phoneCountrySearchTerm()" (input)="onPhoneCountrySearch($event)"
+                        placeholder="Buscar país..."
+                        class="flex-1 border-0 bg-transparent px-0 py-2 text-sm text-gray-700 placeholder:text-gray-400" />
+                      @if (phoneCountrySearchTerm()) {
+                      <button type="button" (click)="onClearPhoneCountrySearch()"
+                        class="text-gray-400 hover:text-gray-600 shrink-0">
+                        <span class="material-icons-outlined text-lg">close</span>
                       </button>
-                      } @empty {
-                      <div class="px-4 py-3 text-sm text-gray-500 text-center">No se encontraron países</div>
                       }
                     </div>
                   </div>
-                  }
+
+                  <!-- Lista de países -->
+                  <div class="max-h-72 overflow-y-auto">
+                    @for (country of filteredPhoneCountries(); track country.iso + country.code) {
+                    <button type="button" (click)="selectPhoneCountry(country.code)"
+                      class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      [class.bg-blue-50]="selectedPhoneCountry() === country.code">
+                      <div class="flex items-center gap-2 text-sm text-gray-900 uppercase tracking-tight"
+                        [class.text-blue-600]="selectedPhoneCountry() === country.code">
+                        <span class="w-8">{{country.iso}}</span>
+                        <span class="w-14">{{country.code}}</span>
+                        <span>{{country.name}}</span>
+                      </div>
+                      @if (selectedPhoneCountry() === country.code) {
+                      <span class="material-icons-outlined text-xl text-blue-600 shrink-0">check</span>
+                      }
+                    </button>
+                    } @empty {
+                    <div class="px-4 py-3 text-sm text-gray-500 text-center">No se encontraron países</div>
+                    }
+                  </div>
                 </div>
-                <input id="phone" formControlName="phone" placeholder="Ej: 987 654 321" (input)="onPhoneInput($event)"
-                  [class.border-red-500]="isFieldInvalid('phone')" [class.ring-red-500/20]="isFieldInvalid('phone')"
-                  [attr.aria-invalid]="isFieldInvalid('phone')"
-                  [attr.aria-describedby]="isFieldInvalid('phone') ? 'phone-error' : null"
-                  class="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 transition-shadow placeholder:text-gray-400 hover:border-gray-400"
-                  type="tel" maxlength="11" inputmode="numeric" autocomplete="tel" />
+                }
               </div>
               @if (isFieldInvalid('phone')) {
               <p id="phone-error" class="text-sm text-red-600 mt-2" role="alert">{{ getFieldError('phone') }}</p>
